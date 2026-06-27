@@ -128,6 +128,7 @@
     width: 100%;
     padding: 22px 16px 24px;
     box-sizing: border-box;
+    align-self: flex-start;
   }
 
   .section-head {
@@ -839,6 +840,150 @@
     padding: 4px;
   }
 
+  /* ─── MENU BUTTON & DROPDOWN ─── */
+  .menu-btn {
+    position: absolute;
+    right: 14px; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 8px;
+    width: 34px; height: 34px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .menu-btn:hover { background: rgba(255,255,255,0.3); }
+
+  .menu-dropdown {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 200;
+    background: rgba(10,20,30,0.4);
+  }
+  .menu-dropdown.open { display: block; }
+  .menu-dropdown-inner {
+    position: absolute;
+    top: 0; right: 0;
+    width: 220px;
+    height: 100%;
+    background: var(--white);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    padding-bottom: 30px;
+  }
+  .menu-heading {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding: 18px 20px 10px;
+    border-bottom: 1px solid var(--lake-light);
+  }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 20px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.12s;
+  }
+  .menu-item:hover { background: var(--sand); }
+  .menu-item.active { color: var(--lake); font-weight: 600; }
+  .menu-item-icon { font-size: 1rem; }
+
+  /* ─── ITEM EDITOR MODAL ─── */
+  .edit-modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,30,0.45);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .edit-modal-overlay.open { display: flex; }
+  .edit-modal-sheet {
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px 18px 36px;
+    position: relative;
+    animation: slideUp 0.25s ease;
+  }
+  .edit-modal-handle {
+    width: 36px; height: 4px; background: #ddd;
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .edit-modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--ink); margin-bottom: 16px;
+  }
+  .edit-field { margin-bottom: 12px; }
+  .edit-label {
+    font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 5px; display: block;
+  }
+  .edit-input {
+    width: 100%; font-family: inherit; font-size: 0.88rem;
+    color: var(--ink); background: var(--sand);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px; padding: 9px 12px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .edit-input:focus { border-color: var(--lake); }
+  .edit-textarea {
+    width: 100%; min-height: 80px; font-family: inherit;
+    font-size: 0.88rem; color: var(--ink);
+    background: var(--sand); border: 1.5px solid var(--lake-light);
+    border-radius: 10px; padding: 9px 12px;
+    outline: none; resize: vertical;
+    transition: border-color 0.15s; line-height: 1.5;
+  }
+  .edit-textarea:focus { border-color: var(--lake); }
+  .edit-save-btn {
+    width: 100%; background: var(--lake); color: #fff;
+    border: none; border-radius: 10px; padding: 12px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 4px;
+    transition: background 0.15s;
+  }
+  .edit-save-btn:hover { background: var(--lake-mid); }
+  .edit-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; font-size: 1.4rem;
+    color: var(--muted); cursor: pointer; padding: 4px;
+  }
+
+  /* ─── TRASH SECTION ─── */
+  .trash-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--white); border-radius: 10px;
+    padding: 11px 14px; margin-bottom: 8px;
+    border-left: 3px solid #e5e7eb;
+  }
+  .trash-item-info { flex: 1; min-width: 0; }
+  .trash-item-name { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+  .trash-item-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .trash-restore-btn {
+    flex-shrink: 0; background: var(--green); color: var(--green-ink);
+    border: none; border-radius: 8px; padding: 5px 10px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .trash-restore-btn:hover { background: #a7f3d0; }
+  .trash-empty { font-size: 0.82rem; color: var(--muted); font-style: italic; padding: 8px 2px; }
+
   /* ─── FOOTER ─── */
   footer {
     text-align: center;
@@ -854,7 +999,14 @@
 <header>
   <span class="header-title">🦝 Annecy 🦝</span>
   <div class="header-dates">July 9–16, 2026</div>
+  <button class="menu-btn" id="menu-btn" aria-label="All sections">☰</button>
 </header>
+
+<div id="menu-dropdown" class="menu-dropdown">
+  <div class="menu-dropdown-inner">
+    <div class="menu-heading">Sections</div>
+  </div>
+</div>
 
 <div id="loading-overlay">
   <div class="loading-spinner"></div>
@@ -875,6 +1027,7 @@
   <a href="#activities">🎯 Do</a>
   <a href="#tips">💡 Tips</a>
   <a href="#pack">🎒 Pack</a>
+  <a href="#trash">🗑 Removed</a>
 </nav>
 
 <main>
@@ -1559,6 +1712,16 @@
     </div>
   </section>
 
+  <!-- ── RECENTLY REMOVED ── -->
+  <section id="trash">
+    <div class="section-head">
+      <span class="section-icon">🗑</span>
+      <h2>Recently Removed</h2>
+    </div>
+    <div class="info-box">Items removed from any section are kept here for 30 days. Tap to restore.</div>
+    <div id="trash-list"></div>
+  </section>
+
 </div><!-- end slides-track -->
 </div><!-- end slides-viewport -->
 </main>
@@ -1584,9 +1747,31 @@
   </div>
 </div>
 
+<!-- ── ITEM EDITOR MODAL ── -->
+<div class="edit-modal-overlay" id="edit-modal">
+  <div class="edit-modal-sheet">
+    <button class="edit-close" id="edit-modal-close">×</button>
+    <div class="edit-modal-handle"></div>
+    <div class="edit-modal-title">Edit item</div>
+    <div class="edit-field">
+      <label class="edit-label">Name</label>
+      <input class="edit-input" id="edit-name" type="text" maxlength="80" placeholder="Item name">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Notes</label>
+      <textarea class="edit-textarea" id="edit-notes" placeholder="Add notes, details, tips…"></textarea>
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Google Maps link (optional)</label>
+      <input class="edit-input" id="edit-map" type="url" placeholder="https://maps.google.com/?q=…">
+    </div>
+    <button class="edit-save-btn" id="edit-save-btn">Save</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCt87vFA29sfRz73Zq7keQX-Z-8JqX-GqI",
@@ -1596,65 +1781,91 @@ const firebaseConfig = {
   messagingSenderId: "203127956357",
   appId: "1:203127956357:web:bbfe4a1a1e81e2c0165aec"
 };
-
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-// ── helpers ──────────────────────────────────────────────────────
-async function fbGet(docId) {
-  try { const s = await getDoc(doc(db,'guide',docId)); return s.exists() ? s.data().value : null; } catch { return null; }
-}
-async function fbSet(docId, value) {
-  try { await setDoc(doc(db,'guide',docId), { value }); } catch(e) { console.warn('fbSet',e); }
-}
-function fbListen(docId, cb) {
-  onSnapshot(doc(db,'guide',docId), snap => { if(snap.exists()) cb(snap.data().value); });
-}
+async function fbGet(id){ try{ const s=await getDoc(doc(db,'guide',id)); return s.exists()?s.data().value:null; }catch{ return null; } }
+async function fbSet(id,v){ try{ await setDoc(doc(db,'guide',id),{value:v}); }catch(e){ console.warn(e); } }
+function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()) cb(s.data().value); }); }
 
 // ── ACCORDION ────────────────────────────────────────────────────
-function initAccordionCard(card) {
-  const top = card.querySelector('.card-top');
-  if (!top || top.dataset.accordionInit) return;
-  top.dataset.accordionInit = '1';
-  const titleEl = top.querySelector('.card-title');
-  if (titleEl && !titleEl.closest('.card-title-wrap')) {
-    const wrap = document.createElement('span'); wrap.className = 'card-title-wrap';
-    const dot  = document.createElement('span'); dot.className  = 'note-dot';
-    titleEl.parentNode.insertBefore(wrap, titleEl);
-    wrap.appendChild(titleEl); wrap.appendChild(dot);
+function initAccordionCard(card){
+  const top=card.querySelector('.card-top');
+  if(!top||top.dataset.ai) return; top.dataset.ai='1';
+  const titleEl=top.querySelector('.card-title');
+  if(titleEl&&!titleEl.closest('.card-title-wrap')){
+    const wrap=document.createElement('span'); wrap.className='card-title-wrap';
+    const dot=document.createElement('span'); dot.className='note-dot';
+    titleEl.parentNode.insertBefore(wrap,titleEl); wrap.appendChild(titleEl); wrap.appendChild(dot);
   }
-  const oldActions = top.querySelector('.card-actions');
-  if (oldActions) top.removeChild(oldActions);
-  if (!top.querySelector('.card-chevron')) {
-    const ch = document.createElement('span'); ch.className = 'card-chevron';
-    ch.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
-    top.appendChild(ch);
+  const acts=top.querySelector('.card-actions');
+  if(acts) top.removeChild(acts);
+  if(!top.querySelector('.card-chevron')){
+    const ch=document.createElement('span'); ch.className='card-chevron';
+    ch.innerHTML=`<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`; top.appendChild(ch);
   }
-  const body = document.createElement('div'); body.className = 'card-body';
-  const inner= document.createElement('div'); inner.className= 'card-body-inner';
-  body.appendChild(inner);
-  const sibs = []; let s = top.nextSibling; while(s){sibs.push(s);s=s.nextSibling;}
+  const body=document.createElement('div'); body.className='card-body';
+  const inner=document.createElement('div'); inner.className='card-body-inner'; body.appendChild(inner);
+  const sibs=[]; let s=top.nextSibling; while(s){sibs.push(s);s=s.nextSibling;}
   sibs.forEach(x=>inner.appendChild(x));
-  if (oldActions) inner.insertBefore(oldActions, inner.firstChild);
+  if(acts) inner.insertBefore(acts,inner.firstChild);
   card.appendChild(body);
-  top.addEventListener('click', e => { if(!e.target.closest('a,button')) card.classList.toggle('open'); });
+  top.addEventListener('click',e=>{ if(!e.target.closest('a,button')) card.classList.toggle('open'); });
 }
 
-// ── SWIPE NAV ────────────────────────────────────────────────────
+// ── MENU DROPDOWN ────────────────────────────────────────────────
+const NAV_SECTIONS = [
+  {id:'days',icon:'📅',label:'Days'},
+  {id:'fete',icon:'🇫🇷',label:'14 Juillet'},
+  {id:'sights',icon:'🏛',label:'Sights'},
+  {id:'hiking',icon:'🥾',label:'Hiking'},
+  {id:'beaches',icon:'🏖',label:'Beaches'},
+  {id:'boats',icon:'⛵',label:'Boats'},
+  {id:'food',icon:'🍽',label:'Eat & Drink'},
+  {id:'grocery',icon:'🛒',label:'Shop'},
+  {id:'market',icon:'🧺',label:'Market'},
+  {id:'activities',icon:'🎯',label:'Activities'},
+  {id:'tips',icon:'💡',label:'Tips'},
+  {id:'pack',icon:'🎒',label:'Pack'},
+  {id:'trash',icon:'🗑',label:'Recently Removed'},
+];
+
 (function(){
-  const track = document.getElementById('slides-track');
-  const navLinks = Array.from(document.querySelectorAll('nav a'));
-  const sections = Array.from(document.querySelectorAll('#slides-track > section'));
-  let cur=0, tx0=0, ty0=0, tdx=0, dragging=false, locked=false;
-  function goTo(i,anim=true){
-    i=Math.max(0,Math.min(sections.length-1,i)); cur=i;
+  const btn=document.getElementById('menu-btn');
+  const dropdown=document.getElementById('menu-dropdown');
+  const inner=dropdown.querySelector('.menu-dropdown-inner');
+  NAV_SECTIONS.forEach((sec,i)=>{
+    const el=document.createElement('div'); el.className='menu-item'; el.dataset.idx=i;
+    el.innerHTML=`<span class="menu-item-icon">${sec.icon}</span><span>${sec.label}</span>`;
+    el.addEventListener('click',()=>{ goTo(i); closeMenuDropdown(); });
+    inner.appendChild(el);
+  });
+  btn.addEventListener('click',e=>{ e.stopPropagation(); dropdown.classList.toggle('open'); });
+  dropdown.addEventListener('click',e=>{ if(e.target===dropdown) closeMenuDropdown(); });
+  function closeMenuDropdown(){ dropdown.classList.remove('open'); }
+  window._closeMenuDropdown=closeMenuDropdown;
+  window._updateMenuActive=function(i){
+    inner.querySelectorAll('.menu-item').forEach((el,j)=>el.classList.toggle('active',j===i));
+  };
+})();
+
+// ── SWIPE NAV ────────────────────────────────────────────────────
+let _currentSlide=0;
+(function(){
+  const track=document.getElementById('slides-track');
+  const navLinks=Array.from(document.querySelectorAll('nav a'));
+  const sections=Array.from(document.querySelectorAll('#slides-track > section'));
+  let cur=0,tx0=0,ty0=0,tdx=0,dragging=false,locked=false;
+  window.goTo=function(i,anim=true){
+    i=Math.max(0,Math.min(sections.length-1,i)); cur=i; _currentSlide=i;
     if(!anim){track.style.transition='none';}
     track.style.transform=`translateX(-${i*100}%)`;
     if(!anim) requestAnimationFrame(()=>{track.style.transition='';});
     navLinks.forEach((a,j)=>a.classList.toggle('active',j===i));
     navLinks[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  }
-  navLinks.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();goTo(i);}));
+    if(window._updateMenuActive) window._updateMenuActive(i);
+  };
+  navLinks.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();window.goTo(i);}));
   const vp=document.querySelector('.slides-viewport');
   vp.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx0=e.touches[0].clientX;ty0=e.touches[0].clientY;tdx=0;dragging=false;locked=false;},{passive:true});
   vp.addEventListener('touchmove',e=>{
@@ -1668,76 +1879,126 @@ function initAccordionCard(card) {
   vp.addEventListener('touchend',()=>{
     if(!dragging)return;
     const th=vp.offsetWidth*0.2;
-    if(tdx<-th)goTo(cur+1); else if(tdx>th)goTo(cur-1); else goTo(cur);
+    if(tdx<-th)window.goTo(cur+1); else if(tdx>th)window.goTo(cur-1); else window.goTo(cur);
     dragging=false;
   });
   let md=false,mx0=0,mdx=0;
   vp.addEventListener('mousedown',e=>{md=true;mx0=e.clientX;mdx=0;track.style.transition='none';});
   window.addEventListener('mousemove',e=>{if(!md)return;mdx=e.clientX-mx0;track.style.transform=`translateX(calc(${-cur*100}% + ${mdx}px))`;});
-  window.addEventListener('mouseup',()=>{if(!md)return;md=false;const th=vp.offsetWidth*0.2;if(mdx<-th)goTo(cur+1);else if(mdx>th)goTo(cur-1);else goTo(cur);});
-  goTo(0,false);
+  window.addEventListener('mouseup',()=>{if(!md)return;md=false;const th=vp.offsetWidth*0.2;if(mdx<-th)window.goTo(cur+1);else if(mdx>th)window.goTo(cur-1);else window.goTo(cur);});
+  window.goTo(0,false);
 })();
 
-// ── TRIP DAYS ────────────────────────────────────────────────────
-const TRIP_DAYS = [
-  { date:'2026-07-09', name:'Thu, 9 Jul — Arrival Day' },
-  { date:'2026-07-10', name:'Fri, 10 Jul — Market Day 🧺' },
-  { date:'2026-07-11', name:'Sat, 11 Jul' },
-  { date:'2026-07-12', name:'Sun, 12 Jul — Market Day 🧺' },
-  { date:'2026-07-13', name:'Mon, 13 Jul' },
-  { date:'2026-07-14', name:'Tue, 14 Jul — 🇫🇷 Bastille Day' },
-  { date:'2026-07-15', name:'Wed, 15 Jul — Market Day 🧺' },
-  { date:'2026-07-16', name:'Thu, 16 Jul — Departure Day' },
-];
-
-let _dayPlans = {};
-async function loadDayPlans() {
-  const v = await fbGet('dayPlans');
-  _dayPlans = v || {};
+// ── TRASH / RECENTLY REMOVED ─────────────────────────────────────
+const THIRTY_DAYS = 30*24*60*60*1000;
+let _trash=[];
+async function loadTrash(){ const v=await fbGet('trash'); _trash=(v||[]).filter(i=>Date.now()-i.removedAt<THIRTY_DAYS); }
+async function saveTrash(){ await fbSet('trash',_trash); }
+async function addToTrash(item, section){
+  _trash.unshift({...item, section, removedAt:Date.now()});
+  _trash=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
+  await saveTrash(); buildTrashUI();
 }
-async function saveDayPlans() { await fbSet('dayPlans', _dayPlans); }
+async function restoreFromTrash(idx){
+  const item=_trash[idx];
+  if(!item) return;
+  _trash.splice(idx,1);
+  await saveTrash();
+  // restore to appropriate list
+  if(item.section==='food'){ _foodItems.push({name:item.name,cat:item.cat||'✨ Other',desc:item.desc||'',tag:item.tag||'',tagClass:item.tagClass||'',mapQ:'',mapUrl:item.mapUrl||''}); await saveFood(); buildFoodUI(); }
+  else if(item.section==='grocery'){ _groceryItems.push({emoji:item.emoji||'🛒',name:item.name,desc:item.desc||'',mapUrl:item.mapUrl||''}); await saveGrocery(); buildGroceryUI(); }
+  else if(item.section==='pack'){ _packItems.push({label:item.name,cat:item.cat||'🎒 Essentials',checked:false}); await savePack(); buildPackUI(); }
+  buildTrashUI();
+}
+function buildTrashUI(){
+  const container=document.getElementById('trash-list'); container.innerHTML='';
+  const active=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
+  if(!active.length){ container.innerHTML='<div class="trash-empty">No recently removed items.</div>'; return; }
+  active.forEach((item,idx)=>{
+    const daysLeft=Math.ceil((THIRTY_DAYS-(Date.now()-item.removedAt))/(24*60*60*1000));
+    const row=document.createElement('div'); row.className='trash-item';
+    row.innerHTML=`<div class="trash-item-info">
+      <div class="trash-item-name">${item.emoji?item.emoji+' ':''} ${item.name}</div>
+      <div class="trash-item-meta">${item.section} · expires in ${daysLeft}d</div>
+    </div>
+    <button class="trash-restore-btn">Restore</button>`;
+    row.querySelector('.trash-restore-btn').addEventListener('click',()=>restoreFromTrash(idx));
+    container.appendChild(row);
+  });
+}
 
-function getGuideItems() {
+// ── ITEM EDITOR MODAL ────────────────────────────────────────────
+let _editCallback=null;
+function openEditModal({name='',notes='',mapUrl=''},onSave){
+  _editCallback=onSave;
+  document.getElementById('edit-name').value=name;
+  document.getElementById('edit-notes').value=notes;
+  document.getElementById('edit-map').value=mapUrl;
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('edit-name').focus(),100);
+}
+function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); _editCallback=null; }
+document.getElementById('edit-modal-close').addEventListener('click',closeEditModal);
+document.getElementById('edit-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('edit-modal')) closeEditModal(); });
+document.getElementById('edit-save-btn').addEventListener('click',()=>{
+  if(!_editCallback) return;
+  _editCallback({
+    name: document.getElementById('edit-name').value.trim(),
+    notes: document.getElementById('edit-notes').value.trim(),
+    mapUrl: document.getElementById('edit-map').value.trim(),
+  });
+  closeEditModal();
+});
+
+// ── TRIP DAYS ────────────────────────────────────────────────────
+const TRIP_DAYS=[
+  {date:'2026-07-09',name:'Thu, 9 Jul — Arrival Day'},
+  {date:'2026-07-10',name:'Fri, 10 Jul — Market Day 🧺'},
+  {date:'2026-07-11',name:'Sat, 11 Jul'},
+  {date:'2026-07-12',name:'Sun, 12 Jul — Market Day 🧺'},
+  {date:'2026-07-13',name:'Mon, 13 Jul'},
+  {date:'2026-07-14',name:'Tue, 14 Jul — 🇫🇷 Bastille Day'},
+  {date:'2026-07-15',name:'Wed, 15 Jul — Market Day 🧺'},
+  {date:'2026-07-16',name:'Thu, 16 Jul — Departure Day'},
+];
+let _dayPlans={};
+async function loadDayPlans(){ const v=await fbGet('dayPlans'); _dayPlans=v||{}; }
+async function saveDayPlans(){ await fbSet('dayPlans',_dayPlans); }
+function getGuideItems(){
   const items=[],seen=new Set();
-  document.querySelectorAll('section:not(#days):not(#pack) .card-title').forEach(el=>{
+  document.querySelectorAll('section:not(#days):not(#pack):not(#trash) .card-title').forEach(el=>{
     const sec=el.closest('section'),icon=sec?.querySelector('.section-icon')?.textContent?.trim()||'',name=el.textContent.trim();
     if(!name||seen.has(name))return; seen.add(name); items.push({name,icon});
   });
   return items;
 }
-
 let _activeDay=null;
-
-function buildDaysUI() {
-  const container=document.getElementById('days-list');
-  container.innerHTML='';
+function buildDaysUI(){
+  const container=document.getElementById('days-list'); container.innerHTML='';
   const today=new Date().toISOString().slice(0,10);
   TRIP_DAYS.forEach(day=>{
     const items=_dayPlans[day.date]||[];
-    const isFete=day.date==='2026-07-14', isToday=day.date===today;
-    const card=document.createElement('div');
-    card.className='day-card'+(isFete?' is-fete':'')+(isToday?' is-today':'');
+    const isFete=day.date==='2026-07-14',isToday=day.date===today;
+    const card=document.createElement('div'); card.className='day-card'+(isFete?' is-fete':'')+( isToday?' is-today':'');
     card.dataset.date=day.date;
     const mn=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    card.innerHTML=`
-      <div class="day-header">
-        <div class="day-date-badge"><span class="d-num">${day.date.slice(8)}</span><span class="d-mon">${mn[+day.date.slice(5,7)]}</span></div>
-        <div class="day-header-info">
-          <div class="day-name">${day.name}</div>
-          <div class="day-count ${items.length?'has-items':''}">${items.length?items.length+' item'+(items.length>1?'s':'')+' planned':'Nothing planned yet'}</div>
-        </div>
-        <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    card.innerHTML=`<div class="day-header">
+      <div class="day-date-badge"><span class="d-num">${day.date.slice(8)}</span><span class="d-mon">${mn[+day.date.slice(5,7)]}</span></div>
+      <div class="day-header-info">
+        <div class="day-name">${day.name}</div>
+        <div class="day-count ${items.length?'has-items':''}">${items.length?items.length+' item'+(items.length>1?'s':'')+' planned':'Nothing planned yet'}</div>
       </div>
-      <div class="day-body"><div class="day-body-inner"><div class="day-items-list"></div>
-        <button class="day-add-btn"><span class="day-add-btn-icon">＋</span> Add activity or note</button>
-      </div></div>`;
+      <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="day-body"><div class="day-body-inner"><div class="day-items-list"></div>
+      <button class="day-add-btn"><span>＋</span> Add activity or note</button>
+    </div></div>`;
     card.querySelector('.day-header').addEventListener('click',e=>{ if(!e.target.closest('.day-add-btn')) card.classList.toggle('open'); });
-    card.querySelector('.day-add-btn').addEventListener('click',()=>openModal(day.date,day.name));
+    card.querySelector('.day-add-btn').addEventListener('click',()=>openDayModal(day.date,day.name));
     renderDayItems(card,day.date,items);
     container.appendChild(card);
   });
 }
-
 function renderDayItems(card,date,items){
   const list=card.querySelector('.day-items-list'); list.innerHTML='';
   if(!items.length){ list.innerHTML='<div class="day-empty">Tap + to start planning this day.</div>'; return; }
@@ -1748,7 +2009,6 @@ function renderDayItems(card,date,items){
     list.appendChild(row);
   });
 }
-
 async function removeDayItem(date,idx){
   const items=_dayPlans[date]||[]; items.splice(idx,1); _dayPlans[date]=items;
   await saveDayPlans(); buildDaysUI();
@@ -1760,9 +2020,9 @@ async function addDayItem(date,item){
   buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
 }
 
-// ── MODAL ────────────────────────────────────────────────────────
+// ── DAY MODAL ────────────────────────────────────────────────────
 let _guideItems=[];
-function openModal(date,dayName){
+function openDayModal(date,dayName){
   _activeDay=date; _guideItems=getGuideItems();
   document.getElementById('modal-day-label').textContent=dayName;
   document.getElementById('modal-custom-input').value='';
@@ -1771,10 +2031,8 @@ function openModal(date,dayName){
   document.getElementById('day-modal').classList.add('open');
   setTimeout(()=>document.getElementById('modal-search').focus(),100);
 }
-function closeModal(){ document.getElementById('day-modal').classList.remove('open'); _activeDay=null; }
-function handleModalOverlayClick(e){ if(e.target===document.getElementById('day-modal')) closeModal(); }
-window.handleModalOverlayClick=handleModalOverlayClick;
-window.closeModal=closeModal;
+window.closeModal=function(){ document.getElementById('day-modal').classList.remove('open'); _activeDay=null; };
+window.handleModalOverlayClick=function(e){ if(e.target===document.getElementById('day-modal')) window.closeModal(); };
 function renderModalList(q){
   const existing=(_dayPlans[_activeDay]||[]).map(i=>i.name);
   const list=document.getElementById('modal-list');
@@ -1782,10 +2040,9 @@ function renderModalList(q){
   list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div style="padding:14px 8px;font-size:0.82rem;color:var(--muted);">No matches.</div>';return;}
   filtered.forEach(item=>{
-    const el=document.createElement('div');
-    el.className='modal-item'+(existing.includes(item.name)?' already-added':'');
+    const el=document.createElement('div'); el.className='modal-item'+(existing.includes(item.name)?' already-added':'');
     el.innerHTML=`<span class="modal-item-icon">${item.icon}</span><div class="modal-item-text"><div class="modal-item-name">${item.name}</div></div>`;
-    el.addEventListener('click',()=>{ addDayItem(_activeDay,{name:item.name,icon:item.icon}); closeModal(); });
+    el.addEventListener('click',()=>{ addDayItem(_activeDay,{name:item.name,icon:item.icon}); window.closeModal(); });
     list.appendChild(el);
   });
 }
@@ -1793,10 +2050,10 @@ document.getElementById('modal-search').addEventListener('input',function(){ ren
 async function addCustomItemToDay(){
   const input=document.getElementById('modal-custom-input'),name=input.value.trim();
   if(!name||!_activeDay) return;
-  await addDayItem(_activeDay,{name,icon:'📌'}); input.value=''; closeModal();
+  await addDayItem(_activeDay,{name,icon:'📌'}); input.value=''; window.closeModal();
 }
 document.getElementById('modal-custom-add-btn').addEventListener('click',addCustomItemToDay);
-document.getElementById('modal-custom-input').addEventListener('keydown',e=>{ if(e.key==='Enter') addCustomItemToDay(); });
+document.getElementById('modal-custom-input').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomItemToDay();});
 
 // ── PACK ─────────────────────────────────────────────────────────
 const DEFAULT_PACK=[
@@ -1827,9 +2084,15 @@ function buildPackUI(){
       cb.addEventListener('change',async()=>{ _packItems[idx].checked=cb.checked; await savePack(); el.classList.toggle('checked',cb.checked); updatePackProgress(); });
       const lbl2=document.createElement('span'); lbl2.className='pack-label'; lbl2.textContent=item.label;
       lbl2.addEventListener('click',()=>cb.click());
+      const editBtn=document.createElement('button'); editBtn.className='pack-delete'; editBtn.textContent='✎'; editBtn.style.color='var(--lake)'; editBtn.title='Edit';
+      editBtn.addEventListener('click',e=>{ e.stopPropagation();
+        openEditModal({name:item.label,notes:item.notes||'',mapUrl:item.mapUrl||''},({name,notes,mapUrl})=>{
+          if(name){ _packItems[idx].label=name; _packItems[idx].notes=notes; _packItems[idx].mapUrl=mapUrl; savePack(); buildPackUI(); }
+        });
+      });
       const del=document.createElement('button'); del.className='pack-delete'; del.innerHTML='×';
-      del.addEventListener('click',async e=>{ e.stopPropagation(); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
-      el.appendChild(cb); el.appendChild(lbl2); el.appendChild(del); grid.appendChild(el);
+      del.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({name:item.label,cat:item.cat,notes:item.notes||'',mapUrl:item.mapUrl||''},'pack'); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
+      el.appendChild(cb); el.appendChild(lbl2); el.appendChild(editBtn); el.appendChild(del); grid.appendChild(el);
     });
     group.appendChild(grid); container.appendChild(group);
   });
@@ -1854,13 +2117,13 @@ document.getElementById('pack-input').addEventListener('keydown',e=>{if(e.key===
 // ── FOOD ─────────────────────────────────────────────────────────
 const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
 const DEFAULT_FOOD=[
-  {name:'Le Freti',cat:'🍽 Savoyard',desc:'One of the most beloved restaurants in the old town. Fondue, raclette, and tartiflette in a charming timber interior. Book ahead in summer.',tag:'€€',tagClass:'tag-price',mapQ:'Le+Freti+Annecy+France'},
-  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace, relaxed atmosphere. Local fish from the lake (perch, char), Savoyard meat dishes. Popular with locals.',tag:'€€',tagClass:'tag-price',mapQ:'La+Cuisine+des+Amis+Annecy'},
-  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Good for lunch after a morning at the beach. Moules-frites, steak, and local wine.',tag:'€€',tagClass:'tag-price',mapQ:'Brasserie+des+Europeens+Annecy'},
-  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Seasonal ice cream in unexpected Alpine flavours — génépi liqueur, mountain honey, wild blueberry. Best queue in town.',tag:'Must Try',tagClass:'tag-must',mapQ:'Le+Glacier+des+Alpes+Annecy'},
-  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough bakery on the canal. Arrive early — the best loaves go fast. Perfect for a picnic on the lake.',tag:'Must Try',tagClass:'tag-must',mapQ:'Boulangerie+Aristide+Annecy'},
-  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Properly aged reblochon, beaufort, and tomme de Savoie. The best cheesemonger in Annecy — buy here before a picnic or a boat trip.',tag:"Don't Miss",tagClass:'tag-must',mapQ:'Pierre+Gay+Fromagerie+Annecy'},
-  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, fresh-baked goods — eat cheaply and well straight from the stalls. Runs until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapQ:'March%C3%A9+Annecy+Old+Town'},
+  {name:'Le Freti',cat:'🍽 Savoyard',desc:'One of the most beloved restaurants in the old town. Fondue, raclette, and tartiflette in a charming timber interior. Book ahead in summer.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Le+Freti+Annecy+France'},
+  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace, relaxed atmosphere. Local fish from the lake (perch, char), Savoyard meat dishes. Popular with locals.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy'},
+  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Good for lunch after a morning at the beach. Moules-frites, steak, and local wine.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Brasserie+des+Europeens+Annecy'},
+  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Seasonal ice cream in unexpected Alpine flavours — génépi liqueur, mountain honey, wild blueberry. Best queue in town.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Le+Glacier+des+Alpes+Annecy'},
+  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough bakery on the canal. Arrive early — the best loaves go fast. Perfect for a picnic on the lake.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Boulangerie+Aristide+Annecy'},
+  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Properly aged reblochon, beaufort, and tomme de Savoie. The best cheesemonger in Annecy.',tag:"Don't Miss",tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Pierre+Gay+Fromagerie+Annecy'},
+  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, fresh-baked goods. Runs until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapUrl:'https://maps.google.com/?q=March%C3%A9+Annecy+Old+Town'},
 ];
 let _foodItems=[];
 async function loadFood(){ const v=await fbGet('foodItems'); _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); }
@@ -1874,16 +2137,26 @@ function buildFoodUI(){
     map[cat].forEach(item=>{
       const idx=_foodItems.indexOf(item);
       const card=document.createElement('div'); card.className='card food';
-      const href=item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`;
+      const href=item.mapUrl||(item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`);
       card.innerHTML=`
         <div class="card-top"><span class="card-title">${item.name}</span>
-          <div class="card-actions"><a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-          <button class="pack-delete" title="Remove">×</button></div></div>
+          <div class="card-actions">
+            <a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>
+            <button class="note-btn" onclick="toggleNote(this)">📝</button>
+            <button class="food-edit-btn pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+            <button class="pack-delete" title="Remove">×</button>
+          </div>
+        </div>
         ${item.tag?`<div class="tags"><span class="tag ${item.tagClass||'tag-price'}">${item.tag}</span></div>`:''}
         ${item.desc?`<p>${item.desc}</p>`:''}
+        ${item.notes?`<p style="font-style:italic;color:var(--muted);margin-top:6px;font-size:0.8rem;">📝 ${item.notes}</p>`:''}
         <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
-      card.querySelector('.pack-delete').addEventListener('click',async e=>{ e.stopPropagation(); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
+      card.querySelector('.food-edit-btn').addEventListener('click',e=>{ e.stopPropagation();
+        openEditModal({name:item.name,notes:item.notes||item.desc||'',mapUrl:item.mapUrl||''},({name,notes,mapUrl})=>{
+          if(name){ _foodItems[idx].name=name; _foodItems[idx].notes=notes; if(mapUrl) _foodItems[idx].mapUrl=mapUrl; saveFood(); buildFoodUI(); }
+        });
+      });
+      card.querySelector('.pack-delete:last-child').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item},'food'); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
       container.appendChild(card); initAccordionCard(card); initNoteCard(card);
     });
   });
@@ -1891,23 +2164,23 @@ function buildFoodUI(){
 async function addFoodItem(){
   const input=document.getElementById('food-input'),sel=document.getElementById('food-cat-select'),name=input.value.trim();
   if(!name){input.focus();return;}
-  _foodItems.push({name,cat:sel.value,desc:'',tag:'',tagClass:'',mapQ:''}); await saveFood(); input.value=''; buildFoodUI(); input.focus();
+  _foodItems.push({name,cat:sel.value,desc:'',tag:'',tagClass:'',mapUrl:'',notes:''}); await saveFood(); input.value=''; buildFoodUI(); input.focus();
 }
 document.getElementById('food-add-btn').addEventListener('click',addFoodItem);
 document.getElementById('food-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFoodItem();});
 
 // ── GROCERY ──────────────────────────────────────────────────────
 const DEFAULT_GROCERY=[
-  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty, mildly pungent. Buy vacuum-packed for travel. Essential for tartiflette.'},
-  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese with fruity depth — the "Prince of Gruyères."'},
-  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, distinctive grey rind. Very affordable. Great melted or plain.'},
-  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Apremont pairs perfectly with cheese and lake fish.'},
-  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur, traditional digestif of Savoie. Small bottles travel well.'},
-  {emoji:'🍯',name:'Miel de Savoie (Mountain Honey)',desc:'Floral, complex honey. Acacia and wildflower varieties. Sold in small jars at the market.'},
-  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages. Buy at the market or any boucherie.'},
-  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style with Beaufort and cream.'},
-  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates — génépi ganache, salted butter caramel, mountain berry.'},
-  {emoji:'🧂',name:'Sel de l\'Alpe / Herbes de Savoie',desc:'Local spice and herb blends. Small bags make compact souvenirs.'},
+  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty, mildly pungent. Buy vacuum-packed. Essential for tartiflette.',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese, fruity depth — the "Prince of Gruyères."',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, distinctive grey rind. Very affordable.',notes:'',mapUrl:''},
+  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Pairs perfectly with cheese and lake fish.',notes:'',mapUrl:''},
+  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur, traditional digestif of Savoie. Small bottles travel well.',notes:'',mapUrl:''},
+  {emoji:'🍯',name:'Miel de Savoie (Mountain Honey)',desc:'Floral, complex honey. Sold in small jars at the market.',notes:'',mapUrl:''},
+  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages. Buy at the market or any boucherie.',notes:'',mapUrl:''},
+  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style with Beaufort and cream.',notes:'',mapUrl:''},
+  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates — génépi ganache, salted butter caramel, mountain berry.',notes:'',mapUrl:''},
+  {emoji:'🧂',name:"Sel de l'Alpe / Herbes de Savoie",desc:'Local spice and herb blends. Small bags make compact souvenirs.',notes:'',mapUrl:''},
 ];
 let _groceryItems=[];
 async function loadGrocery(){ const v=await fbGet('groceryItems'); _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); }
@@ -1916,18 +2189,33 @@ function buildGroceryUI(){
   const container=document.getElementById('grocery-list'); container.innerHTML='';
   _groceryItems.forEach((item,idx)=>{
     const row=document.createElement('div'); row.className='grocery-item';
+    const mapPart=item.mapUrl?`<a href="${item.mapUrl}" target="_blank" class="map-link" style="margin-top:4px;display:inline-flex">${MAP_SVG} Map</a>`:'';
+    const notesPart=item.notes?`<div class="grocery-desc" style="font-style:italic;margin-top:2px;">📝 ${item.notes}</div>`:'';
     row.innerHTML=`<span class="grocery-emoji">${item.emoji||'🛒'}</span>
-      <div style="flex:1;min-width:0"><div class="grocery-name">${item.name}</div>${item.desc?`<div class="grocery-desc">${item.desc}</div>`:''}</div>
-      <button class="pack-delete" style="flex-shrink:0" title="Remove">×</button>`;
-    row.querySelector('.pack-delete').addEventListener('click',async e=>{ e.stopPropagation(); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
+      <div style="flex:1;min-width:0">
+        <div class="grocery-name">${item.name}</div>
+        ${item.desc?`<div class="grocery-desc">${item.desc}</div>`:''}
+        ${notesPart}${mapPart}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+        <button class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+        <button class="pack-delete" title="Remove">×</button>
+      </div>`;
+    const [editBtn,delBtn]=row.querySelectorAll('.pack-delete');
+    editBtn.addEventListener('click',async e=>{ e.stopPropagation();
+      openEditModal({name:item.name,notes:item.notes||'',mapUrl:item.mapUrl||''},({name,notes,mapUrl})=>{
+        if(name){ _groceryItems[idx].name=name; _groceryItems[idx].notes=notes; _groceryItems[idx].mapUrl=mapUrl; saveGrocery(); buildGroceryUI(); }
+      });
+    });
+    delBtn.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item,name:item.name},'grocery'); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
     container.appendChild(row);
   });
 }
 async function addGroceryItem(){
-  const input=document.getElementById('grocery-input'),emojiInput=document.getElementById('grocery-emoji-input');
-  const name=input.value.trim(); if(!name){input.focus();return;}
-  _groceryItems.push({emoji:emojiInput.value.trim()||'🛒',name,desc:''});
-  await saveGrocery(); input.value=''; emojiInput.value=''; buildGroceryUI(); input.focus();
+  const input=document.getElementById('grocery-input'),ei=document.getElementById('grocery-emoji-input'),name=input.value.trim();
+  if(!name){input.focus();return;}
+  _groceryItems.push({emoji:ei.value.trim()||'🛒',name,desc:'',notes:'',mapUrl:''});
+  await saveGrocery(); input.value=''; ei.value=''; buildGroceryUI(); input.focus();
 }
 document.getElementById('grocery-add-btn').addEventListener('click',addGroceryItem);
 document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
@@ -1936,7 +2224,6 @@ document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key
 let _notes={};
 async function loadNotesFb(){ const v=await fbGet('notes'); _notes=v||{}; }
 async function saveNotesFb(){ await fbSet('notes',_notes); }
-
 window.toggleNote=function(btn){
   const card=btn.closest('.card');
   if(card&&!card.classList.contains('open')) card.classList.add('open');
@@ -1945,14 +2232,13 @@ window.toggleNote=function(btn){
   noteDiv.classList.toggle('open');
   if(noteDiv.classList.contains('open')) noteDiv.querySelector('textarea')?.focus();
 };
-
 function initNoteCard(card){
   const titleEl=card.querySelector('.card-title');
   const key=titleEl?'note_'+titleEl.textContent.trim():null; if(!key) return;
   const ta=card.querySelector('textarea'); if(!ta) return;
   const dot=card.querySelector('.note-dot');
   if(_notes[key]){ ta.value=_notes[key]; card.querySelector('.note-btn')?.classList.add('has-note'); dot?.classList.add('visible'); }
-  let saveTimer;
+  let timer;
   ta.addEventListener('input',()=>{
     _notes[key]=ta.value;
     const has=ta.value.trim().length>0;
@@ -1960,39 +2246,27 @@ function initNoteCard(card){
     dot?.classList.toggle('visible',has);
     const saved=card.querySelector('.note-saved');
     if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1500);}
-    clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveNotesFb(),800);
+    clearTimeout(timer); timer=setTimeout(()=>saveNotesFb(),800);
   });
 }
-
-function initAllNotes(){
-  document.querySelectorAll('.card').forEach(card=>initNoteCard(card));
-}
+function initAllNotes(){ document.querySelectorAll('.card').forEach(card=>initNoteCard(card)); }
 
 // ── REAL-TIME LISTENERS ──────────────────────────────────────────
-fbListen('dayPlans',  v=>{ _dayPlans=v||{};   buildDaysUI(); });
-fbListen('packItems', v=>{ _packItems=v||DEFAULT_PACK.map(i=>({...i,checked:false})); buildPackUI(); });
-fbListen('foodItems', v=>{ _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); buildFoodUI(); });
-fbListen('groceryItems', v=>{ _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); buildGroceryUI(); });
-fbListen('notes', v=>{ _notes=v||{}; initAllNotes(); });
+fbListen('dayPlans',v=>{ _dayPlans=v||{}; buildDaysUI(); });
+fbListen('packItems',v=>{ if(v){_packItems=v; buildPackUI();} });
+fbListen('foodItems',v=>{ if(v){_foodItems=v; buildFoodUI();} });
+fbListen('groceryItems',v=>{ if(v){_groceryItems=v; buildGroceryUI();} });
+fbListen('trash',v=>{ if(v){_trash=v; buildTrashUI();} });
+fbListen('notes',v=>{ if(v){_notes=v; initAllNotes();} });
 
 // ── INIT ─────────────────────────────────────────────────────────
 async function init(){
-  try {
-    await Promise.all([loadDayPlans(), loadPack(), loadFood(), loadGrocery(), loadNotesFb()]);
-  } catch(e) {
-    console.warn('Firebase load error, using defaults', e);
-  }
-  // init static HTML cards (sights, hiking, beaches, etc.)
+  try{ await Promise.all([loadDayPlans(),loadPack(),loadFood(),loadGrocery(),loadNotesFb(),loadTrash()]); }
+  catch(e){ console.warn('Firebase load error, using defaults',e); }
   document.querySelectorAll('.card').forEach(initAccordionCard);
-  buildDaysUI();
-  buildPackUI();
-  buildFoodUI();
-  buildGroceryUI();
-  initAllNotes();
-  // dismiss loading screen
-  const overlay = document.getElementById('loading-overlay');
-  overlay.classList.add('done');
-  setTimeout(() => overlay.remove(), 500);
+  buildDaysUI(); buildPackUI(); buildFoodUI(); buildGroceryUI(); buildTrashUI(); initAllNotes();
+  const overlay=document.getElementById('loading-overlay');
+  overlay.classList.add('done'); setTimeout(()=>overlay.remove(),500);
 }
 init();
 </script>
