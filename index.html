@@ -94,6 +94,23 @@
   }
   nav a.active { color: var(--lake); border-bottom-color: var(--lake); }
 
+  /* ─── LOADING ─── */
+  #loading-overlay {
+    position: fixed; inset: 0; background: var(--lake);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999; color: #fff; gap: 14px;
+    transition: opacity 0.4s;
+  }
+  #loading-overlay.done { opacity: 0; pointer-events: none; }
+  .loading-title { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; }
+  .loading-sub { font-size: 0.82rem; color: var(--lake-light); }
+  .loading-spinner {
+    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   /* ─── SWIPE LAYOUT ─── */
   .slides-viewport {
     overflow: hidden;
@@ -109,8 +126,7 @@
   section {
     flex: 0 0 100%;
     width: 100%;
-    padding: 22px 16px 72px;
-    min-height: calc(100dvh - 96px);
+    padding: 22px 16px 24px;
     box-sizing: border-box;
   }
 
@@ -836,9 +852,15 @@
 <body>
 
 <header>
-  <span class="header-title">Annecy</span>
+  <span class="header-title">🦝 Annecy 🦝</span>
   <div class="header-dates">July 9–16, 2026</div>
 </header>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-title">🦝 Annecy 🦝</div>
+  <div class="loading-sub">Loading your guide…</div>
+</div>
 
 <nav>
   <a href="#days">📅 Days</a>
@@ -1327,124 +1349,18 @@
       <span class="section-icon">🍽</span>
       <h2>Where to Eat &amp; Drink</h2>
     </div>
-
-    <p class="sublabel">Savoyard classics</p>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Le Freti</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Le+Freti+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-price">€€</span></div>
-      <p>One of the most beloved restaurants in the old town. Fondue, raclette, and tartiflette in a charming timber interior. Book ahead in summer.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">La Cuisine des Amis</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-price">€€</span></div>
-      <p>Canal-side terrace, relaxed atmosphere. Local fish from the lake (perch, char), Savoyard meat dishes. Popular with locals.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Brasserie des Européens</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Brasserie+des+Europeens+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-price">€€</span></div>
-      <p>Classic French brasserie on the lakefront. Good for lunch after a morning at the beach. Moules-frites, steak, and local wine.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <p class="sublabel">Cafés &amp; sweet stops</p>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Le Glacier des Alpes</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Le+Glacier+des+Alpes+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-must">Must Try</span></div>
-      <p>Seasonal ice cream in unexpected Alpine flavours — génépi liqueur, mountain honey, wild blueberry. Best queue in town.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Boulangerie Aristide</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Boulangerie+Aristide+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-must">Must Try</span></div>
-      <p>Excellent sourdough bakery on the canal. Arrive early — the best loaves go fast. Perfect for a picnic on the lake.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <p class="sublabel">Cheese &amp; provisions</p>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Pierre Gay — Fromagerie</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Pierre+Gay+Fromagerie+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-must">Don't Miss</span></div>
-      <p>Properly aged reblochon, beaufort, and tomme de Savoie. The best cheesemonger in Annecy — buy here before a picnic on the lake or a boat trip.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <p class="sublabel">Market street food</p>
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Old Town Market (Tue / Fri / Sun)</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=March%C3%A9+Annecy+Old+Town" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free entry</span></div>
-      <p>Potato pancakes, diot sausages, fresh-baked goods — eat cheaply and well straight from the stalls. Runs until 1:30pm.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    <div id="food-list"></div>
+    <div class="pack-add-row" style="margin-top:14px;">
+      <input class="pack-add-input" id="food-input" type="text" placeholder="Add a place…" maxlength="60">
+      <select class="pack-cat-select" id="food-cat-select">
+        <option value="🍽 Savoyard">🍽 Savoyard</option>
+        <option value="☕ Café &amp; Sweets">☕ Café &amp; Sweets</option>
+        <option value="🧀 Provisions">🧀 Provisions</option>
+        <option value="🥖 Bakery">🥖 Bakery</option>
+        <option value="🍺 Bar">🍺 Bar</option>
+        <option value="✨ Other">✨ Other</option>
+      </select>
+      <button class="pack-add-btn" id="food-add-btn" aria-label="Add place">+</button>
     </div>
   </section>
 
@@ -1454,61 +1370,15 @@
       <span class="section-icon">🛒</span>
       <h2>Savoyard Specialties to Buy</h2>
     </div>
-
-    <div class="info-box">These are found in any supermarché (Carrefour, Casino, Leclerc) or better at a local épicerie or the market. Great to bring home as gifts — or eat on the spot.</div>
-
-    <div class="card food">
-      <div class="card-top">
-        <span class="card-title">Grocery Picks</span>
-        <button class="note-btn" onclick="toggleNote(this)">📝</button>
-      </div>
-      <div style="margin-top:10px;">
-        <div class="grocery-item">
-          <span class="grocery-emoji">🧀</span>
-          <div><div class="grocery-name">Reblochon de Savoie AOP</div><div class="grocery-desc">The king of local cheeses. Creamy, nutty, mildly pungent. Buy a whole round vacuum-packed for travel. Essential for tartiflette.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🧀</span>
-          <div><div class="grocery-name">Beaufort AOP</div><div class="grocery-desc">A firm mountain cheese with a fruity depth — sometimes called the "Prince of Gruyères." Excellent for slicing and snacking.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🧀</span>
-          <div><div class="grocery-name">Tomme de Savoie</div><div class="grocery-desc">Mild semi-firm cheese with a distinctive grey rind. Widely available and very affordable. Great melted or eaten plain.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🍷</span>
-          <div><div class="grocery-name">Vin de Savoie (Apremont, Chignin)</div><div class="grocery-desc">Light Alpine white wines from grapes grown near the lake. Apremont pairs perfectly with cheese and lake fish. Very reasonably priced locally.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🫙</span>
-          <div><div class="grocery-name">Génépi</div><div class="grocery-desc">Herbal Alpine liqueur made from artemisia plants. Traditional digestif of Savoie. Small bottles travel well. Also available as syrup for non-drinkers.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🍯</span>
-          <div><div class="grocery-name">Miel de Savoie (Mountain Honey)</div><div class="grocery-desc">Floral, complex, and wildly different from supermarket honey. Acacia and wildflower varieties are the most common. Sold in small jars at the market.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🥩</span>
-          <div><div class="grocery-name">Diots de Savoie</div><div class="grocery-desc">Traditional Savoyard pork sausages, smoked or fresh. Often served with polenta or in white wine. Buy at the market or any boucherie.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🌰</span>
-          <div><div class="grocery-name">Crozets de Savoie</div><div class="grocery-desc">Tiny buckwheat or wheat pasta squares. A Savoyard staple — cook gratin-style with Beaufort and cream. Lightweight to pack and take home.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🍫</span>
-          <div><div class="grocery-name">Chocolat des Alpes</div><div class="grocery-desc">Several Savoie-based chocolatiers produce alpine herb chocolates — look for génépi ganache, salted butter caramel, and mountain berry varieties.</div></div>
-        </div>
-        <div class="grocery-item">
-          <span class="grocery-emoji">🧂</span>
-          <div><div class="grocery-name">Sel de l'Alpe / Herbes de Savoie</div><div class="grocery-desc">Local spice and herb blends for seasoning cheeses and meats. Small bags make ideal and very compact souvenirs.</div></div>
-        </div>
-      </div>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    <div class="info-box">Found in any supermarché or at the market. Great to bring home as gifts — or eat on the spot.</div>
+    <div id="grocery-list"></div>
+    <div class="pack-add-row" style="margin-top:12px;">
+      <input class="pack-add-input" id="grocery-input" type="text" placeholder="Add a specialty…" maxlength="60">
+      <input class="pack-add-input" id="grocery-emoji-input" type="text" placeholder="🛒" maxlength="4" style="max-width:54px;text-align:center;">
+      <button class="pack-add-btn" id="grocery-add-btn" aria-label="Add">+</button>
     </div>
-
-    <div class="tip">
-      <strong>📦 Taking cheese home?</strong> Vacuum-pack it at the shop (most fromageries offer this). Keep in your checked bag if flying. Reblochon and Beaufort travel well for 2–3 days unrefrigerated if vacuum-packed.
+    <div class="tip" style="margin-top:12px;">
+      <strong>📦 Taking cheese home?</strong> Vacuum-pack it at the shop. Reblochon and Beaufort travel well for 2–3 days unrefrigerated if vacuum-packed.
     </div>
   </section>
 
@@ -1714,579 +1584,417 @@
   </div>
 </div>
 
-<script>
-  // ─── ACCORDION ───────────────────────────────────────────────
-  // Restructure every .card: wrap title in .card-title-wrap, add chevron,
-  // move everything after .card-top into a .card-body div.
-  function initAccordions() {
-    document.querySelectorAll('.card').forEach(card => {
-      const top = card.querySelector('.card-top');
-      if (!top) return;
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-      // Wrap the title text in a .card-title-wrap (adds note-dot slot)
-      const titleEl = top.querySelector('.card-title');
-      if (titleEl) {
-        const wrap = document.createElement('span');
-        wrap.className = 'card-title-wrap';
-        const dot = document.createElement('span');
-        dot.className = 'note-dot';
-        titleEl.parentNode.insertBefore(wrap, titleEl);
-        wrap.appendChild(titleEl);
-        wrap.appendChild(dot);
-      }
+const firebaseConfig = {
+  apiKey: "AIzaSyCt87vFA29sfRz73Zq7keQX-Z-8JqX-GqI",
+  authDomain: "vacation-planner-1b81b.firebaseapp.com",
+  projectId: "vacation-planner-1b81b",
+  storageBucket: "vacation-planner-1b81b.firebasestorage.app",
+  messagingSenderId: "203127956357",
+  appId: "1:203127956357:web:bbfe4a1a1e81e2c0165aec"
+};
 
-      // Remove old .card-actions from top (we'll re-add inside body)
-      const oldActions = top.querySelector('.card-actions');
-      if (oldActions) top.removeChild(oldActions);
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
-      // Add chevron to top
-      const chevron = document.createElement('span');
-      chevron.className = 'card-chevron';
-      chevron.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
-      top.appendChild(chevron);
+// ── helpers ──────────────────────────────────────────────────────
+async function fbGet(docId) {
+  try { const s = await getDoc(doc(db,'guide',docId)); return s.exists() ? s.data().value : null; } catch { return null; }
+}
+async function fbSet(docId, value) {
+  try { await setDoc(doc(db,'guide',docId), { value }); } catch(e) { console.warn('fbSet',e); }
+}
+function fbListen(docId, cb) {
+  onSnapshot(doc(db,'guide',docId), snap => { if(snap.exists()) cb(snap.data().value); });
+}
 
-      // Collect all sibling nodes after .card-top into a body div
-      const body = document.createElement('div');
-      body.className = 'card-body';
-      const inner = document.createElement('div');
-      inner.className = 'card-body-inner';
-      body.appendChild(inner);
-
-      // Move all subsequent siblings into inner
-      const siblings = [];
-      let sib = top.nextSibling;
-      while (sib) { siblings.push(sib); sib = sib.nextSibling; }
-      siblings.forEach(s => inner.appendChild(s));
-
-      // Re-add actions inside body if they existed
-      if (oldActions) inner.insertBefore(oldActions, inner.firstChild);
-
-      card.appendChild(body);
-
-      // Click handler on top row only
-      top.addEventListener('click', (e) => {
-        // don't toggle if clicking a link/button inside the row
-        if (e.target.closest('a, button')) return;
-        card.classList.toggle('open');
-      });
-    });
+// ── ACCORDION ────────────────────────────────────────────────────
+function initAccordionCard(card) {
+  const top = card.querySelector('.card-top');
+  if (!top || top.dataset.accordionInit) return;
+  top.dataset.accordionInit = '1';
+  const titleEl = top.querySelector('.card-title');
+  if (titleEl && !titleEl.closest('.card-title-wrap')) {
+    const wrap = document.createElement('span'); wrap.className = 'card-title-wrap';
+    const dot  = document.createElement('span'); dot.className  = 'note-dot';
+    titleEl.parentNode.insertBefore(wrap, titleEl);
+    wrap.appendChild(titleEl); wrap.appendChild(dot);
   }
-
-  initAccordions();
-
-  // ─── SWIPE / TAB NAVIGATION ──────────────────────────────────
-  (function() {
-    const track = document.getElementById('slides-track');
-    const navLinks = Array.from(document.querySelectorAll('nav a'));
-    const sections = Array.from(document.querySelectorAll('#slides-track > section'));
-    let currentIdx = 0;
-    let touchStartX = 0, touchStartY = 0, touchDeltaX = 0, dragging = false, locked = false;
-
-    function goTo(idx, animate = true) {
-      idx = Math.max(0, Math.min(sections.length - 1, idx));
-      currentIdx = idx;
-      if (!animate) track.style.transition = 'none';
-      track.style.transform = `translateX(-${idx * 100}%)`;
-      if (!animate) requestAnimationFrame(() => { track.style.transition = ''; });
-
-      navLinks.forEach((a, i) => a.classList.toggle('active', i === idx));
-
-      // Scroll active tab into view in nav
-      const activeLink = navLinks[idx];
-      if (activeLink) {
-        activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
-    }
-
-    // Tab clicks
-    navLinks.forEach((a, i) => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        goTo(i);
-      });
-    });
-
-    // Touch swipe on the viewport
-    const vp = document.querySelector('.slides-viewport');
-
-    vp.addEventListener('touchstart', e => {
-      if (e.touches.length !== 1) return;
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-      touchDeltaX = 0;
-      dragging = false;
-      locked = false;
-    }, { passive: true });
-
-    vp.addEventListener('touchmove', e => {
-      if (e.touches.length !== 1) return;
-      const dx = e.touches[0].clientX - touchStartX;
-      const dy = e.touches[0].clientY - touchStartY;
-
-      if (!locked) {
-        if (Math.abs(dy) > Math.abs(dx) + 4) { locked = true; dragging = false; return; }
-        if (Math.abs(dx) > 6) { locked = true; dragging = true; }
-      }
-      if (!dragging) return;
-
-      touchDeltaX = dx;
-      const base = -currentIdx * 100;
-      const offset = (touchDeltaX / vp.offsetWidth) * 100;
-      track.style.transition = 'none';
-      track.style.transform = `translateX(calc(${base}% + ${touchDeltaX}px))`;
-    }, { passive: true });
-
-    vp.addEventListener('touchend', () => {
-      if (!dragging) return;
-      const threshold = vp.offsetWidth * 0.2;
-      if (touchDeltaX < -threshold) goTo(currentIdx + 1);
-      else if (touchDeltaX > threshold) goTo(currentIdx - 1);
-      else goTo(currentIdx);
-      dragging = false;
-    });
-
-    // Mouse drag (desktop)
-    let mouseDown = false, mouseStartX = 0, mouseDeltaX = 0;
-    vp.addEventListener('mousedown', e => {
-      mouseDown = true; mouseStartX = e.clientX; mouseDeltaX = 0;
-      track.style.transition = 'none';
-    });
-    window.addEventListener('mousemove', e => {
-      if (!mouseDown) return;
-      mouseDeltaX = e.clientX - mouseStartX;
-      const base = -currentIdx * 100;
-      track.style.transform = `translateX(calc(${base}% + ${mouseDeltaX}px))`;
-    });
-    window.addEventListener('mouseup', () => {
-      if (!mouseDown) return;
-      mouseDown = false;
-      const threshold = vp.offsetWidth * 0.2;
-      if (mouseDeltaX < -threshold) goTo(currentIdx + 1);
-      else if (mouseDeltaX > threshold) goTo(currentIdx - 1);
-      else goTo(currentIdx);
-    });
-
-    goTo(0, false);
-  })();
-  const TRIP_DAYS = [
-    { date: '2026-07-09', label: 'Thursday',  name: 'Thu, 9 Jul — Arrival Day' },
-    { date: '2026-07-10', label: 'Friday',     name: 'Fri, 10 Jul — Market Day 🧺' },
-    { date: '2026-07-11', label: 'Saturday',   name: 'Sat, 11 Jul' },
-    { date: '2026-07-12', label: 'Sunday',     name: 'Sun, 12 Jul — Market Day 🧺' },
-    { date: '2026-07-13', label: 'Monday',     name: 'Mon, 13 Jul' },
-    { date: '2026-07-14', label: 'Tuesday',    name: 'Tue, 14 Jul — 🇫🇷 Bastille Day' },
-    { date: '2026-07-15', label: 'Wednesday',  name: 'Wed, 15 Jul — Market Day 🧺' },
-    { date: '2026-07-16', label: 'Thursday',   name: 'Thu, 16 Jul — Departure Day' },
-  ];
-
-  const DAYS_KEY = 'annecy-days-v1';
-
-  function loadDayPlans() {
-    try { return JSON.parse(localStorage.getItem(DAYS_KEY)) || {}; } catch { return {}; }
+  const oldActions = top.querySelector('.card-actions');
+  if (oldActions) top.removeChild(oldActions);
+  if (!top.querySelector('.card-chevron')) {
+    const ch = document.createElement('span'); ch.className = 'card-chevron';
+    ch.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
+    top.appendChild(ch);
   }
-  function saveDayPlans(plans) {
-    try { localStorage.setItem(DAYS_KEY, JSON.stringify(plans)); } catch {}
+  const body = document.createElement('div'); body.className = 'card-body';
+  const inner= document.createElement('div'); inner.className= 'card-body-inner';
+  body.appendChild(inner);
+  const sibs = []; let s = top.nextSibling; while(s){sibs.push(s);s=s.nextSibling;}
+  sibs.forEach(x=>inner.appendChild(x));
+  if (oldActions) inner.insertBefore(oldActions, inner.firstChild);
+  card.appendChild(body);
+  top.addEventListener('click', e => { if(!e.target.closest('a,button')) card.classList.toggle('open'); });
+}
+
+// ── SWIPE NAV ────────────────────────────────────────────────────
+(function(){
+  const track = document.getElementById('slides-track');
+  const navLinks = Array.from(document.querySelectorAll('nav a'));
+  const sections = Array.from(document.querySelectorAll('#slides-track > section'));
+  let cur=0, tx0=0, ty0=0, tdx=0, dragging=false, locked=false;
+  function goTo(i,anim=true){
+    i=Math.max(0,Math.min(sections.length-1,i)); cur=i;
+    if(!anim){track.style.transition='none';}
+    track.style.transform=`translateX(-${i*100}%)`;
+    if(!anim) requestAnimationFrame(()=>{track.style.transition='';});
+    navLinks.forEach((a,j)=>a.classList.toggle('active',j===i));
+    navLinks[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   }
+  navLinks.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();goTo(i);}));
+  const vp=document.querySelector('.slides-viewport');
+  vp.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx0=e.touches[0].clientX;ty0=e.touches[0].clientY;tdx=0;dragging=false;locked=false;},{passive:true});
+  vp.addEventListener('touchmove',e=>{
+    if(e.touches.length!==1)return;
+    const dx=e.touches[0].clientX-tx0,dy=e.touches[0].clientY-ty0;
+    if(!locked){if(Math.abs(dy)>Math.abs(dx)+4){locked=true;dragging=false;return;}if(Math.abs(dx)>6){locked=true;dragging=true;}}
+    if(!dragging)return; tdx=dx;
+    track.style.transition='none';
+    track.style.transform=`translateX(calc(${-cur*100}% + ${dx}px))`;
+  },{passive:true});
+  vp.addEventListener('touchend',()=>{
+    if(!dragging)return;
+    const th=vp.offsetWidth*0.2;
+    if(tdx<-th)goTo(cur+1); else if(tdx>th)goTo(cur-1); else goTo(cur);
+    dragging=false;
+  });
+  let md=false,mx0=0,mdx=0;
+  vp.addEventListener('mousedown',e=>{md=true;mx0=e.clientX;mdx=0;track.style.transition='none';});
+  window.addEventListener('mousemove',e=>{if(!md)return;mdx=e.clientX-mx0;track.style.transform=`translateX(calc(${-cur*100}% + ${mdx}px))`;});
+  window.addEventListener('mouseup',()=>{if(!md)return;md=false;const th=vp.offsetWidth*0.2;if(mdx<-th)goTo(cur+1);else if(mdx>th)goTo(cur-1);else goTo(cur);});
+  goTo(0,false);
+})();
 
-  // Collect all named items from the guide for the picker
-  function getGuideItems() {
-    const items = [];
-    const seen = new Set();
-    // Walk every .card-title inside #days ~ sections (not the days section itself)
-    document.querySelectorAll('section:not(#days):not(#pack) .card-title').forEach(el => {
-      const section = el.closest('section');
-      const secIcon = section?.querySelector('.section-icon')?.textContent?.trim() || '';
-      const name = el.textContent.trim();
-      if (!name || seen.has(name)) return;
-      seen.add(name);
-      items.push({ name, icon: secIcon });
-    });
-    return items;
-  }
+// ── TRIP DAYS ────────────────────────────────────────────────────
+const TRIP_DAYS = [
+  { date:'2026-07-09', name:'Thu, 9 Jul — Arrival Day' },
+  { date:'2026-07-10', name:'Fri, 10 Jul — Market Day 🧺' },
+  { date:'2026-07-11', name:'Sat, 11 Jul' },
+  { date:'2026-07-12', name:'Sun, 12 Jul — Market Day 🧺' },
+  { date:'2026-07-13', name:'Mon, 13 Jul' },
+  { date:'2026-07-14', name:'Tue, 14 Jul — 🇫🇷 Bastille Day' },
+  { date:'2026-07-15', name:'Wed, 15 Jul — Market Day 🧺' },
+  { date:'2026-07-16', name:'Thu, 16 Jul — Departure Day' },
+];
 
-  let _activeDay = null; // date string of currently open modal
+let _dayPlans = {};
+async function loadDayPlans() {
+  const v = await fbGet('dayPlans');
+  _dayPlans = v || {};
+}
+async function saveDayPlans() { await fbSet('dayPlans', _dayPlans); }
 
-  function buildDaysUI() {
-    const plans = loadDayPlans();
-    const container = document.getElementById('days-list');
-    container.innerHTML = '';
-    const today = new Date().toISOString().slice(0, 10);
+function getGuideItems() {
+  const items=[],seen=new Set();
+  document.querySelectorAll('section:not(#days):not(#pack) .card-title').forEach(el=>{
+    const sec=el.closest('section'),icon=sec?.querySelector('.section-icon')?.textContent?.trim()||'',name=el.textContent.trim();
+    if(!name||seen.has(name))return; seen.add(name); items.push({name,icon});
+  });
+  return items;
+}
 
-    TRIP_DAYS.forEach(day => {
-      const items = plans[day.date] || [];
-      const isFete = day.date === '2025-07-14';
-      const isToday = day.date === today;
+let _activeDay=null;
 
-      const card = document.createElement('div');
-      card.className = 'day-card' + (isFete ? ' is-fete' : '') + (isToday ? ' is-today' : '');
-      card.dataset.date = day.date;
-
-      const dayNum = day.date.slice(8);
-      const monNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const monNum = parseInt(day.date.slice(5,7));
-
-      card.innerHTML = `
-        <div class="day-header">
-          <div class="day-date-badge">
-            <span class="d-num">${dayNum}</span>
-            <span class="d-mon">${monNames[monNum]}</span>
-          </div>
-          <div class="day-header-info">
-            <div class="day-name">${day.name}</div>
-            <div class="day-count ${items.length ? 'has-items' : ''}">${items.length ? items.length + ' item' + (items.length > 1 ? 's' : '') + ' planned' : 'Nothing planned yet'}</div>
-          </div>
-          <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+function buildDaysUI() {
+  const container=document.getElementById('days-list');
+  container.innerHTML='';
+  const today=new Date().toISOString().slice(0,10);
+  TRIP_DAYS.forEach(day=>{
+    const items=_dayPlans[day.date]||[];
+    const isFete=day.date==='2026-07-14', isToday=day.date===today;
+    const card=document.createElement('div');
+    card.className='day-card'+(isFete?' is-fete':'')+(isToday?' is-today':'');
+    card.dataset.date=day.date;
+    const mn=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    card.innerHTML=`
+      <div class="day-header">
+        <div class="day-date-badge"><span class="d-num">${day.date.slice(8)}</span><span class="d-mon">${mn[+day.date.slice(5,7)]}</span></div>
+        <div class="day-header-info">
+          <div class="day-name">${day.name}</div>
+          <div class="day-count ${items.length?'has-items':''}">${items.length?items.length+' item'+(items.length>1?'s':'')+' planned':'Nothing planned yet'}</div>
         </div>
-        <div class="day-body">
-          <div class="day-body-inner">
-            <div class="day-items-list"></div>
-            <button class="day-add-btn">
-              <span class="day-add-btn-icon">＋</span> Add activity or note
-            </button>
-          </div>
-        </div>`;
-
-      // Toggle open/close
-      card.querySelector('.day-header').addEventListener('click', (e) => {
-        if (e.target.closest('.day-add-btn')) return;
-        card.classList.toggle('open');
-      });
-
-      // Add button
-      card.querySelector('.day-add-btn').addEventListener('click', () => {
-        openModal(day.date, day.name);
-      });
-
-      // Render items
-      renderDayItems(card, day.date, items);
-
-      container.appendChild(card);
-    });
-  }
-
-  function renderDayItems(card, date, items) {
-    const list = card.querySelector('.day-items-list');
-    list.innerHTML = '';
-    if (!items.length) {
-      const empty = document.createElement('div');
-      empty.className = 'day-empty';
-      empty.textContent = 'Tap + to start planning this day.';
-      list.appendChild(empty);
-      return;
-    }
-    items.forEach((item, idx) => {
-      const row = document.createElement('div');
-      row.className = 'day-item';
-      row.innerHTML = `<span class="day-item-icon">${item.icon || '📌'}</span><span class="day-item-label">${item.name}</span><button class="day-item-remove" aria-label="Remove">×</button>`;
-      row.querySelector('.day-item-remove').addEventListener('click', () => removeDayItem(date, idx));
-      list.appendChild(row);
-    });
-  }
-
-  function removeDayItem(date, idx) {
-    const plans = loadDayPlans();
-    const items = plans[date] || [];
-    items.splice(idx, 1);
-    plans[date] = items;
-    saveDayPlans(plans);
-    buildDaysUI();
-    // re-open the card that was open
-    const card = document.querySelector(`.day-card[data-date="${date}"]`);
-    if (card) card.classList.add('open');
-  }
-
-  function addDayItem(date, item) {
-    const plans = loadDayPlans();
-    if (!plans[date]) plans[date] = [];
-    // avoid duplicates
-    if (!plans[date].find(i => i.name === item.name)) {
-      plans[date].push(item);
-      saveDayPlans(plans);
-    }
-    buildDaysUI();
-    const card = document.querySelector(`.day-card[data-date="${date}"]`);
-    if (card) card.classList.add('open');
-  }
-
-  // ─── MODAL ───────────────────────────────────────────────────
-  let _guideItems = [];
-
-  function openModal(date, dayName) {
-    _activeDay = date;
-    _guideItems = getGuideItems();
-    document.getElementById('modal-day-label').textContent = dayName;
-    document.getElementById('modal-custom-input').value = '';
-    document.getElementById('modal-search').value = '';
-    renderModalList('');
-    document.getElementById('day-modal').classList.add('open');
-    setTimeout(() => document.getElementById('modal-search').focus(), 100);
-  }
-
-  function closeModal() {
-    document.getElementById('day-modal').classList.remove('open');
-    _activeDay = null;
-  }
-
-  function handleModalOverlayClick(e) {
-    if (e.target === document.getElementById('day-modal')) closeModal();
-  }
-
-  function renderModalList(query) {
-    const plans = loadDayPlans();
-    const existing = (plans[_activeDay] || []).map(i => i.name);
-    const list = document.getElementById('modal-list');
-    const q = query.toLowerCase();
-    const filtered = _guideItems.filter(i => !q || i.name.toLowerCase().includes(q));
-    list.innerHTML = '';
-    if (!filtered.length) {
-      list.innerHTML = '<div style="padding:14px 8px;font-size:0.82rem;color:var(--muted);">No matching items found.</div>';
-      return;
-    }
-    filtered.forEach(item => {
-      const el = document.createElement('div');
-      el.className = 'modal-item' + (existing.includes(item.name) ? ' already-added' : '');
-      el.innerHTML = `<span class="modal-item-icon">${item.icon}</span><div class="modal-item-text"><div class="modal-item-name">${item.name}</div></div>`;
-      el.addEventListener('click', () => {
-        addDayItem(_activeDay, { name: item.name, icon: item.icon });
-        closeModal();
-      });
-      list.appendChild(el);
-    });
-  }
-
-  document.getElementById('modal-search').addEventListener('input', function() {
-    renderModalList(this.value);
+        <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+      </div>
+      <div class="day-body"><div class="day-body-inner"><div class="day-items-list"></div>
+        <button class="day-add-btn"><span class="day-add-btn-icon">＋</span> Add activity or note</button>
+      </div></div>`;
+    card.querySelector('.day-header').addEventListener('click',e=>{ if(!e.target.closest('.day-add-btn')) card.classList.toggle('open'); });
+    card.querySelector('.day-add-btn').addEventListener('click',()=>openModal(day.date,day.name));
+    renderDayItems(card,day.date,items);
+    container.appendChild(card);
   });
+}
 
-  function addCustomItemToDay() {
-    const input = document.getElementById('modal-custom-input');
-    const name = input.value.trim();
-    if (!name || !_activeDay) return;
-    addDayItem(_activeDay, { name, icon: '📌' });
-    input.value = '';
-    closeModal();
-  }
-
-  document.getElementById('modal-custom-add-btn').addEventListener('click', addCustomItemToDay);
-  document.getElementById('modal-custom-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addCustomItemToDay();
+function renderDayItems(card,date,items){
+  const list=card.querySelector('.day-items-list'); list.innerHTML='';
+  if(!items.length){ list.innerHTML='<div class="day-empty">Tap + to start planning this day.</div>'; return; }
+  items.forEach((item,idx)=>{
+    const row=document.createElement('div'); row.className='day-item';
+    row.innerHTML=`<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label">${item.name}</span><button class="day-item-remove">×</button>`;
+    row.querySelector('.day-item-remove').addEventListener('click',()=>removeDayItem(date,idx));
+    list.appendChild(row);
   });
+}
 
+async function removeDayItem(date,idx){
+  const items=_dayPlans[date]||[]; items.splice(idx,1); _dayPlans[date]=items;
+  await saveDayPlans(); buildDaysUI();
+  document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+}
+async function addDayItem(date,item){
+  if(!_dayPlans[date]) _dayPlans[date]=[];
+  if(!_dayPlans[date].find(i=>i.name===item.name)){ _dayPlans[date].push(item); await saveDayPlans(); }
+  buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+}
+
+// ── MODAL ────────────────────────────────────────────────────────
+let _guideItems=[];
+function openModal(date,dayName){
+  _activeDay=date; _guideItems=getGuideItems();
+  document.getElementById('modal-day-label').textContent=dayName;
+  document.getElementById('modal-custom-input').value='';
+  document.getElementById('modal-search').value='';
+  renderModalList('');
+  document.getElementById('day-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-search').focus(),100);
+}
+function closeModal(){ document.getElementById('day-modal').classList.remove('open'); _activeDay=null; }
+function handleModalOverlayClick(e){ if(e.target===document.getElementById('day-modal')) closeModal(); }
+window.handleModalOverlayClick=handleModalOverlayClick;
+window.closeModal=closeModal;
+function renderModalList(q){
+  const existing=(_dayPlans[_activeDay]||[]).map(i=>i.name);
+  const list=document.getElementById('modal-list');
+  const filtered=_guideItems.filter(i=>!q||i.name.toLowerCase().includes(q.toLowerCase()));
+  list.innerHTML='';
+  if(!filtered.length){list.innerHTML='<div style="padding:14px 8px;font-size:0.82rem;color:var(--muted);">No matches.</div>';return;}
+  filtered.forEach(item=>{
+    const el=document.createElement('div');
+    el.className='modal-item'+(existing.includes(item.name)?' already-added':'');
+    el.innerHTML=`<span class="modal-item-icon">${item.icon}</span><div class="modal-item-text"><div class="modal-item-name">${item.name}</div></div>`;
+    el.addEventListener('click',()=>{ addDayItem(_activeDay,{name:item.name,icon:item.icon}); closeModal(); });
+    list.appendChild(el);
+  });
+}
+document.getElementById('modal-search').addEventListener('input',function(){ renderModalList(this.value); });
+async function addCustomItemToDay(){
+  const input=document.getElementById('modal-custom-input'),name=input.value.trim();
+  if(!name||!_activeDay) return;
+  await addDayItem(_activeDay,{name,icon:'📌'}); input.value=''; closeModal();
+}
+document.getElementById('modal-custom-add-btn').addEventListener('click',addCustomItemToDay);
+document.getElementById('modal-custom-input').addEventListener('keydown',e=>{ if(e.key==='Enter') addCustomItemToDay(); });
+
+// ── PACK ─────────────────────────────────────────────────────────
+const DEFAULT_PACK=[
+  {label:"Hiking boots",cat:"👟 Footwear"},{label:"Sandals / flip-flops",cat:"👟 Footwear"},{label:"Light trainers",cat:"👟 Footwear"},
+  {label:"Swimsuit ×2",cat:"👙 Beach"},{label:"Beach towel",cat:"👙 Beach"},{label:"Waterproof dry bag",cat:"👙 Beach"},
+  {label:"Sunscreen SPF 50+",cat:"☀️ Sun"},{label:"Sunglasses",cat:"☀️ Sun"},{label:"Sun hat / cap",cat:"☀️ Sun"},
+  {label:"Light rain jacket",cat:"🏔 Mountain"},{label:"Trekking poles",cat:"🏔 Mountain"},{label:"Hiking socks ×3",cat:"🏔 Mountain"},{label:"Headlamp",cat:"🏔 Mountain"},
+  {label:"Reusable water bottle",cat:"🎒 Essentials"},{label:"Snacks / trail mix",cat:"🎒 Essentials"},{label:"Small backpack (daypack)",cat:"🎒 Essentials"},{label:"Portable charger",cat:"🎒 Essentials"},{label:"EU power adaptor",cat:"🎒 Essentials"},
+  {label:"Travel insurance docs",cat:"📋 Docs"},{label:"Passport / ID",cat:"📋 Docs"},{label:"Euros (cash)",cat:"📋 Docs"},
+  {label:"Blister plasters",cat:"💊 Health"},{label:"Ibuprofen / paracetamol",cat:"💊 Health"},{label:"Insect repellent",cat:"💊 Health"},
+  {label:"Light dinner outfit",cat:"👗 Clothes"},{label:"T-shirts ×4",cat:"👗 Clothes"},{label:"Shorts / light trousers",cat:"👗 Clothes"},
+  {label:"Picnic blanket",cat:"🧺 Picnic"},{label:"Reusable bag / tote",cat:"🧺 Picnic"},
+];
+let _packItems=[];
+async function loadPack(){ const v=await fbGet('packItems'); _packItems=v||(DEFAULT_PACK.map(i=>({...i,checked:false}))); }
+async function savePack(){ await fbSet('packItems',_packItems); }
+function getCats(items){ const s=new Set(),c=[]; items.forEach(i=>{if(!s.has(i.cat)){s.add(i.cat);c.push(i.cat);}}); return c; }
+function buildPackUI(){
+  const container=document.getElementById('pack-list'); container.innerHTML='';
+  getCats(_packItems).forEach(cat=>{
+    const group=document.createElement('div'); group.className='pack-category';
+    const lbl=document.createElement('div'); lbl.className='pack-cat-label'; lbl.textContent=cat; group.appendChild(lbl);
+    const grid=document.createElement('div'); grid.className='pack-grid';
+    _packItems.filter(it=>it.cat===cat).forEach(item=>{
+      const idx=_packItems.indexOf(item);
+      const el=document.createElement('div'); el.className='pack-item'+(item.checked?' checked':'');
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!item.checked;
+      cb.addEventListener('change',async()=>{ _packItems[idx].checked=cb.checked; await savePack(); el.classList.toggle('checked',cb.checked); updatePackProgress(); });
+      const lbl2=document.createElement('span'); lbl2.className='pack-label'; lbl2.textContent=item.label;
+      lbl2.addEventListener('click',()=>cb.click());
+      const del=document.createElement('button'); del.className='pack-delete'; del.innerHTML='×';
+      del.addEventListener('click',async e=>{ e.stopPropagation(); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
+      el.appendChild(cb); el.appendChild(lbl2); el.appendChild(del); grid.appendChild(el);
+    });
+    group.appendChild(grid); container.appendChild(group);
+  });
+  updatePackProgress();
+  const sel=document.getElementById('pack-cat-select'); const cur=sel.value; sel.innerHTML='';
+  getCats(_packItems).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+  if(cur&&[...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
+function updatePackProgress(){
+  const total=_packItems.length,done=_packItems.filter(i=>i.checked).length;
+  document.getElementById('pack-count').textContent=`${done} / ${total} packed`;
+  document.getElementById('pack-bar').style.width=total?`${(done/total)*100}%`:'0%';
+}
+async function addPackItem(){
+  const input=document.getElementById('pack-input'),sel=document.getElementById('pack-cat-select'),label=input.value.trim();
+  if(!label){input.focus();return;}
+  _packItems.push({label,cat:sel.value,checked:false}); await savePack(); input.value=''; buildPackUI(); input.focus();
+}
+document.getElementById('pack-add-btn').addEventListener('click',addPackItem);
+document.getElementById('pack-input').addEventListener('keydown',e=>{if(e.key==='Enter')addPackItem();});
+
+// ── FOOD ─────────────────────────────────────────────────────────
+const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+const DEFAULT_FOOD=[
+  {name:'Le Freti',cat:'🍽 Savoyard',desc:'One of the most beloved restaurants in the old town. Fondue, raclette, and tartiflette in a charming timber interior. Book ahead in summer.',tag:'€€',tagClass:'tag-price',mapQ:'Le+Freti+Annecy+France'},
+  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace, relaxed atmosphere. Local fish from the lake (perch, char), Savoyard meat dishes. Popular with locals.',tag:'€€',tagClass:'tag-price',mapQ:'La+Cuisine+des+Amis+Annecy'},
+  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Good for lunch after a morning at the beach. Moules-frites, steak, and local wine.',tag:'€€',tagClass:'tag-price',mapQ:'Brasserie+des+Europeens+Annecy'},
+  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Seasonal ice cream in unexpected Alpine flavours — génépi liqueur, mountain honey, wild blueberry. Best queue in town.',tag:'Must Try',tagClass:'tag-must',mapQ:'Le+Glacier+des+Alpes+Annecy'},
+  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough bakery on the canal. Arrive early — the best loaves go fast. Perfect for a picnic on the lake.',tag:'Must Try',tagClass:'tag-must',mapQ:'Boulangerie+Aristide+Annecy'},
+  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Properly aged reblochon, beaufort, and tomme de Savoie. The best cheesemonger in Annecy — buy here before a picnic or a boat trip.',tag:"Don't Miss",tagClass:'tag-must',mapQ:'Pierre+Gay+Fromagerie+Annecy'},
+  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, fresh-baked goods — eat cheaply and well straight from the stalls. Runs until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapQ:'March%C3%A9+Annecy+Old+Town'},
+];
+let _foodItems=[];
+async function loadFood(){ const v=await fbGet('foodItems'); _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); }
+async function saveFood(){ await fbSet('foodItems',_foodItems); }
+function buildFoodUI(){
+  const container=document.getElementById('food-list'); container.innerHTML='';
+  const cats=[],map={};
+  _foodItems.forEach(item=>{ if(!map[item.cat]){map[item.cat]=[];cats.push(item.cat);} map[item.cat].push(item); });
+  cats.forEach(cat=>{
+    const lbl=document.createElement('p'); lbl.className='sublabel'; lbl.textContent=cat; container.appendChild(lbl);
+    map[cat].forEach(item=>{
+      const idx=_foodItems.indexOf(item);
+      const card=document.createElement('div'); card.className='card food';
+      const href=item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`;
+      card.innerHTML=`
+        <div class="card-top"><span class="card-title">${item.name}</span>
+          <div class="card-actions"><a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+          <button class="pack-delete" title="Remove">×</button></div></div>
+        ${item.tag?`<div class="tags"><span class="tag ${item.tagClass||'tag-price'}">${item.tag}</span></div>`:''}
+        ${item.desc?`<p>${item.desc}</p>`:''}
+        <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
+      card.querySelector('.pack-delete').addEventListener('click',async e=>{ e.stopPropagation(); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
+      container.appendChild(card); initAccordionCard(card); initNoteCard(card);
+    });
+  });
+}
+async function addFoodItem(){
+  const input=document.getElementById('food-input'),sel=document.getElementById('food-cat-select'),name=input.value.trim();
+  if(!name){input.focus();return;}
+  _foodItems.push({name,cat:sel.value,desc:'',tag:'',tagClass:'',mapQ:''}); await saveFood(); input.value=''; buildFoodUI(); input.focus();
+}
+document.getElementById('food-add-btn').addEventListener('click',addFoodItem);
+document.getElementById('food-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFoodItem();});
+
+// ── GROCERY ──────────────────────────────────────────────────────
+const DEFAULT_GROCERY=[
+  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty, mildly pungent. Buy vacuum-packed for travel. Essential for tartiflette.'},
+  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese with fruity depth — the "Prince of Gruyères."'},
+  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, distinctive grey rind. Very affordable. Great melted or plain.'},
+  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Apremont pairs perfectly with cheese and lake fish.'},
+  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur, traditional digestif of Savoie. Small bottles travel well.'},
+  {emoji:'🍯',name:'Miel de Savoie (Mountain Honey)',desc:'Floral, complex honey. Acacia and wildflower varieties. Sold in small jars at the market.'},
+  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages. Buy at the market or any boucherie.'},
+  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style with Beaufort and cream.'},
+  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates — génépi ganache, salted butter caramel, mountain berry.'},
+  {emoji:'🧂',name:'Sel de l\'Alpe / Herbes de Savoie',desc:'Local spice and herb blends. Small bags make compact souvenirs.'},
+];
+let _groceryItems=[];
+async function loadGrocery(){ const v=await fbGet('groceryItems'); _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); }
+async function saveGrocery(){ await fbSet('groceryItems',_groceryItems); }
+function buildGroceryUI(){
+  const container=document.getElementById('grocery-list'); container.innerHTML='';
+  _groceryItems.forEach((item,idx)=>{
+    const row=document.createElement('div'); row.className='grocery-item';
+    row.innerHTML=`<span class="grocery-emoji">${item.emoji||'🛒'}</span>
+      <div style="flex:1;min-width:0"><div class="grocery-name">${item.name}</div>${item.desc?`<div class="grocery-desc">${item.desc}</div>`:''}</div>
+      <button class="pack-delete" style="flex-shrink:0" title="Remove">×</button>`;
+    row.querySelector('.pack-delete').addEventListener('click',async e=>{ e.stopPropagation(); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
+    container.appendChild(row);
+  });
+}
+async function addGroceryItem(){
+  const input=document.getElementById('grocery-input'),emojiInput=document.getElementById('grocery-emoji-input');
+  const name=input.value.trim(); if(!name){input.focus();return;}
+  _groceryItems.push({emoji:emojiInput.value.trim()||'🛒',name,desc:''});
+  await saveGrocery(); input.value=''; emojiInput.value=''; buildGroceryUI(); input.focus();
+}
+document.getElementById('grocery-add-btn').addEventListener('click',addGroceryItem);
+document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
+
+// ── NOTES ────────────────────────────────────────────────────────
+let _notes={};
+async function loadNotesFb(){ const v=await fbGet('notes'); _notes=v||{}; }
+async function saveNotesFb(){ await fbSet('notes',_notes); }
+
+window.toggleNote=function(btn){
+  const card=btn.closest('.card');
+  if(card&&!card.classList.contains('open')) card.classList.add('open');
+  const noteDiv=btn.closest('.card-body-inner,.card')?.querySelector('.card-note');
+  if(!noteDiv) return;
+  noteDiv.classList.toggle('open');
+  if(noteDiv.classList.contains('open')) noteDiv.querySelector('textarea')?.focus();
+};
+
+function initNoteCard(card){
+  const titleEl=card.querySelector('.card-title');
+  const key=titleEl?'note_'+titleEl.textContent.trim():null; if(!key) return;
+  const ta=card.querySelector('textarea'); if(!ta) return;
+  const dot=card.querySelector('.note-dot');
+  if(_notes[key]){ ta.value=_notes[key]; card.querySelector('.note-btn')?.classList.add('has-note'); dot?.classList.add('visible'); }
+  let saveTimer;
+  ta.addEventListener('input',()=>{
+    _notes[key]=ta.value;
+    const has=ta.value.trim().length>0;
+    card.querySelector('.note-btn')?.classList.toggle('has-note',has);
+    dot?.classList.toggle('visible',has);
+    const saved=card.querySelector('.note-saved');
+    if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1500);}
+    clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveNotesFb(),800);
+  });
+}
+
+function initAllNotes(){
+  document.querySelectorAll('.card').forEach(card=>initNoteCard(card));
+}
+
+// ── REAL-TIME LISTENERS ──────────────────────────────────────────
+fbListen('dayPlans',  v=>{ _dayPlans=v||{};   buildDaysUI(); });
+fbListen('packItems', v=>{ _packItems=v||DEFAULT_PACK.map(i=>({...i,checked:false})); buildPackUI(); });
+fbListen('foodItems', v=>{ _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); buildFoodUI(); });
+fbListen('groceryItems', v=>{ _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); buildGroceryUI(); });
+fbListen('notes', v=>{ _notes=v||{}; initAllNotes(); });
+
+// ── INIT ─────────────────────────────────────────────────────────
+async function init(){
+  try {
+    await Promise.all([loadDayPlans(), loadPack(), loadFood(), loadGrocery(), loadNotesFb()]);
+  } catch(e) {
+    console.warn('Firebase load error, using defaults', e);
+  }
+  // init static HTML cards (sights, hiking, beaches, etc.)
+  document.querySelectorAll('.card').forEach(initAccordionCard);
   buildDaysUI();
-  const DEFAULT_PACK = [
-    { label: "Hiking boots",           cat: "👟 Footwear" },
-    { label: "Sandals / flip-flops",   cat: "👟 Footwear" },
-    { label: "Light trainers",         cat: "👟 Footwear" },
-    { label: "Swimsuit ×2",            cat: "👙 Beach" },
-    { label: "Beach towel",            cat: "👙 Beach" },
-    { label: "Waterproof dry bag",     cat: "👙 Beach" },
-    { label: "Sunscreen SPF 50+",      cat: "☀️ Sun" },
-    { label: "Sunglasses",             cat: "☀️ Sun" },
-    { label: "Sun hat / cap",          cat: "☀️ Sun" },
-    { label: "Light rain jacket",      cat: "🏔 Mountain" },
-    { label: "Trekking poles",         cat: "🏔 Mountain" },
-    { label: "Hiking socks ×3",        cat: "🏔 Mountain" },
-    { label: "Headlamp",               cat: "🏔 Mountain" },
-    { label: "Reusable water bottle",  cat: "🎒 Essentials" },
-    { label: "Snacks / trail mix",     cat: "🎒 Essentials" },
-    { label: "Small backpack (daypack)", cat: "🎒 Essentials" },
-    { label: "Portable charger",       cat: "🎒 Essentials" },
-    { label: "EU power adaptor",       cat: "🎒 Essentials" },
-    { label: "Travel insurance docs",  cat: "📋 Docs" },
-    { label: "Passport / ID",          cat: "📋 Docs" },
-    { label: "Euros (cash)",           cat: "📋 Docs" },
-    { label: "Blister plasters",       cat: "💊 Health" },
-    { label: "Ibuprofen / paracetamol", cat: "💊 Health" },
-    { label: "Insect repellent",       cat: "💊 Health" },
-    { label: "Light dinner outfit",    cat: "👗 Clothes" },
-    { label: "T-shirts ×4",            cat: "👗 Clothes" },
-    { label: "Shorts / light trousers", cat: "👗 Clothes" },
-    { label: "Picnic blanket",         cat: "🧺 Picnic" },
-    { label: "Reusable bag / tote",    cat: "🧺 Picnic" },
-  ];
-
-  const PACK_KEY = 'annecy-pack-v2';
-
-  function loadPack() {
-    try {
-      const stored = JSON.parse(localStorage.getItem(PACK_KEY));
-      return stored && stored.items ? stored : null;
-    } catch { return null; }
-  }
-
-  function savePack(items) {
-    try { localStorage.setItem(PACK_KEY, JSON.stringify({ items })); } catch {}
-  }
-
-  function getItems() {
-    const stored = loadPack();
-    return stored ? stored.items : DEFAULT_PACK.map(i => ({ ...i, checked: false }));
-  }
-
-  // All unique categories
-  function getCategories(items) {
-    const seen = new Set();
-    const cats = [];
-    items.forEach(i => { if (!seen.has(i.cat)) { seen.add(i.cat); cats.push(i.cat); } });
-    return cats;
-  }
-
-  function buildPackUI() {
-    const items = getItems();
-    const container = document.getElementById('pack-list');
-    container.innerHTML = '';
-
-    const cats = getCategories(items);
-
-    cats.forEach(cat => {
-      const catItems = items.filter(it => it.cat === cat);
-      if (!catItems.length) return;
-
-      const group = document.createElement('div');
-      group.className = 'pack-category';
-
-      const catLabel = document.createElement('div');
-      catLabel.className = 'pack-cat-label';
-      catLabel.textContent = cat;
-      group.appendChild(catLabel);
-
-      const grid = document.createElement('div');
-      grid.className = 'pack-grid';
-
-      catItems.forEach(item => {
-        const idx = items.indexOf(item);
-        const el = document.createElement('div');
-        el.className = 'pack-item' + (item.checked ? ' checked' : '');
-
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.checked = !!item.checked;
-        cb.addEventListener('change', () => {
-          items[idx].checked = cb.checked;
-          savePack(items);
-          el.classList.toggle('checked', cb.checked);
-          updatePackProgress(items);
-        });
-
-        const lbl = document.createElement('span');
-        lbl.className = 'pack-label';
-        lbl.textContent = item.label;
-        lbl.addEventListener('click', () => { cb.click(); });
-
-        const del = document.createElement('button');
-        del.className = 'pack-delete';
-        del.innerHTML = '×';
-        del.setAttribute('aria-label', 'Remove item');
-        del.addEventListener('click', (e) => {
-          e.stopPropagation();
-          items.splice(idx, 1);
-          savePack(items);
-          buildPackUI();
-        });
-
-        el.appendChild(cb);
-        el.appendChild(lbl);
-        el.appendChild(del);
-        grid.appendChild(el);
-      });
-
-      group.appendChild(grid);
-      container.appendChild(group);
-    });
-
-    updatePackProgress(items);
-    populateCatSelect(items);
-  }
-
-  function updatePackProgress(items) {
-    const total = items.length;
-    const done = items.filter(i => i.checked).length;
-    document.getElementById('pack-count').textContent = `${done} / ${total} packed`;
-    document.getElementById('pack-bar').style.width = total ? `${(done / total) * 100}%` : '0%';
-  }
-
-  function populateCatSelect(items) {
-    const sel = document.getElementById('pack-cat-select');
-    const current = sel.value;
-    sel.innerHTML = '';
-    getCategories(items).forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat;
-      sel.appendChild(opt);
-    });
-    // keep selection if still valid
-    if (current && [...sel.options].some(o => o.value === current)) sel.value = current;
-  }
-
-  function addPackItem() {
-    const input = document.getElementById('pack-input');
-    const sel = document.getElementById('pack-cat-select');
-    const label = input.value.trim();
-    if (!label) { input.focus(); return; }
-    const items = getItems();
-    items.push({ label, cat: sel.value, checked: false });
-    savePack(items);
-    input.value = '';
-    buildPackUI();
-    input.focus();
-  }
-
-  document.getElementById('pack-add-btn').addEventListener('click', addPackItem);
-  document.getElementById('pack-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addPackItem();
-  });
-
   buildPackUI();
-
-  // ─── NOTES ───────────────────────────────────────────────────
-  const NOTES_KEY = 'annecy-notes-v1';
-
-  function loadNotes() {
-    try { return JSON.parse(localStorage.getItem(NOTES_KEY)) || {}; } catch { return {}; }
-  }
-  function saveNote(id, text) {
-    const notes = loadNotes();
-    notes[id] = text;
-    try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch {}
-  }
-
-  function toggleNote(btn) {
-    // make sure the card is open first
-    const card = btn.closest('.card');
-    if (card && !card.classList.contains('open')) card.classList.add('open');
-    const noteDiv = btn.closest('.card-body-inner, .card')?.querySelector('.card-note');
-    if (!noteDiv) return;
-    noteDiv.classList.toggle('open');
-    if (noteDiv.classList.contains('open')) noteDiv.querySelector('textarea')?.focus();
-  }
-
-  // Restore saved notes and wire up autosave
-  function initNotes() {
-    const notes = loadNotes();
-    document.querySelectorAll('.card').forEach((card, i) => {
-      const ta = card.querySelector('textarea');
-      if (!ta) return;
-      const dot = card.querySelector('.note-dot');
-      if (notes[i]) {
-        ta.value = notes[i];
-        const btn = card.querySelector('.note-btn');
-        if (btn) btn.classList.add('has-note');
-        if (dot) dot.classList.add('visible');
-      }
-      ta.addEventListener('input', () => {
-        saveNote(i, ta.value);
-        const hasText = ta.value.trim().length > 0;
-        const btn = card.querySelector('.note-btn');
-        if (btn) btn.classList.toggle('has-note', hasText);
-        if (dot) dot.classList.toggle('visible', hasText);
-        const saved = card.querySelector('.note-saved');
-        if (saved) { saved.classList.add('show'); setTimeout(() => saved.classList.remove('show'), 1500); }
-      });
-    });
-  }
-
-  initNotes();
+  buildFoodUI();
+  buildGroceryUI();
+  initAllNotes();
+  // dismiss loading screen
+  const overlay = document.getElementById('loading-overlay');
+  overlay.classList.add('done');
+  setTimeout(() => overlay.remove(), 500);
+}
+init();
 </script>
 </body>
 </html>
