@@ -984,6 +984,53 @@
   .trash-restore-btn:hover { background: #a7f3d0; }
   .trash-empty { font-size: 0.82rem; color: var(--muted); font-style: italic; padding: 8px 2px; }
 
+
+  /* ─── ICON PICKER ─── */
+  .icon-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin-top: 6px;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+  .icon-opt {
+    font-size: 1.3rem;
+    text-align: center;
+    padding: 5px 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.12s, background 0.12s;
+    user-select: none;
+  }
+  .icon-opt:hover { background: var(--lake-light); }
+  .icon-opt.selected { border-color: var(--lake); background: var(--lake-light); }
+  .icon-preview {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 6px;
+    min-height: 36px;
+  }
+
+  /* ─── DRAG & DROP ─── */
+  .drag-handle {
+    cursor: grab;
+    color: #ccc;
+    font-size: 1rem;
+    padding: 0 4px;
+    flex-shrink: 0;
+    user-select: none;
+    touch-action: none;
+  }
+  .drag-handle:active { cursor: grabbing; }
+  .sortable-ghost {
+    opacity: 0.35;
+    background: var(--lake-light) !important;
+    border-radius: 10px;
+  }
+  .sortable-chosen { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
   /* ─── FOOTER ─── */
   footer {
     text-align: center;
@@ -993,6 +1040,7 @@
     border-top: 1px solid #E5E7EB;
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -1794,8 +1842,17 @@
     <div class="edit-modal-handle"></div>
     <div class="edit-modal-title">Edit item</div>
     <div class="edit-field">
+      <label class="edit-label">Icon</label>
+      <div class="icon-preview" id="edit-icon-preview">📌</div>
+      <div class="icon-picker-grid" id="edit-icon-grid"></div>
+    </div>
+    <div class="edit-field">
       <label class="edit-label">Name</label>
       <input class="edit-input" id="edit-name" type="text" maxlength="80" placeholder="Item name">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Description</label>
+      <input class="edit-input" id="edit-desc" type="text" maxlength="160" placeholder="Short description (optional)">
     </div>
     <div class="edit-field">
       <label class="edit-label">Notes</label>
@@ -1824,11 +1881,36 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
+// ── WRITE LOCK ──────────────────────────────────────────────────
+const _writeLock = {};
+function lockWrite(key,ms=2000){ _writeLock[key]=Date.now()+ms; }
+function isLocked(key){ return _writeLock[key]&&Date.now()<_writeLock[key]; }
 async function fbGet(id){ try{ const s=await getDoc(doc(db,'guide',id)); return s.exists()?s.data().value:null; }catch{ return null; } }
-async function fbSet(id,v){ try{ await setDoc(doc(db,'guide',id),{value:v}); }catch(e){ console.warn(e); } }
-function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()) cb(s.data().value); }); }
+async function fbSet(id,v){ lockWrite(id); try{ await setDoc(doc(db,'guide',id),{value:v}); }catch(e){ console.warn(e); } }
+function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()&&!isLocked(id)) cb(s.data().value); }); }
 
-// ── ACCORDION ────────────────────────────────────────────────────
+// ── ICON PICKER ─────────────────────────────────────────────────
+const ICONS = ['📌','🍽','🥾','🏖','⛵','🏛','🇫🇷','🎯','💡','🛒','🧺','🎒','🗺','📍','⭐','❤️','🔥','✅','🎵','🍷','🍕','☕','🍦','🥐','🏔','🌊','🚴','🚶','🎪','🎭','🛍','💈','🏰','⛪','🌸','🌿','🎿','🛶','🎣','🏊','🚣','🌅','🌄','🗻','🦅','🐾','🦝','📸','🎬','📖','💬'];
+let _selectedIcon = '📌';
+
+function buildIconGrid(){
+  const grid = document.getElementById('edit-icon-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  ICONS.forEach(ic => {
+    const el = document.createElement('div');
+    el.className = 'icon-opt' + (ic === _selectedIcon ? ' selected' : '');
+    el.textContent = ic;
+    el.addEventListener('click', () => {
+      _selectedIcon = ic;
+      document.getElementById('edit-icon-preview').textContent = ic;
+      grid.querySelectorAll('.icon-opt').forEach(o => o.classList.toggle('selected', o.textContent === ic));
+    });
+    grid.appendChild(el);
+  });
+}
+
+// ── ACCORDION ───────────────────────────────────────────────────
 function initAccordionCard(card){
   const top=card.querySelector('.card-top');
   if(!top||top.dataset.ai) return; top.dataset.ai='1';
@@ -1853,23 +1935,29 @@ function initAccordionCard(card){
   top.addEventListener('click',e=>{ if(!e.target.closest('a,button')) card.classList.toggle('open'); });
 }
 
-// ── MENU DROPDOWN ────────────────────────────────────────────────
-const NAV_SECTIONS = [
-  {id:'days',icon:'📅',label:'Days'},
-  {id:'fete',icon:'🇫🇷',label:'14 Juillet'},
-  {id:'sights',icon:'🏛',label:'Sights'},
-  {id:'hiking',icon:'🥾',label:'Hiking'},
-  {id:'beaches',icon:'🏖',label:'Beaches'},
-  {id:'boats',icon:'⛵',label:'Boats'},
-  {id:'food',icon:'🍽',label:'Eat & Drink'},
-  {id:'grocery',icon:'🛒',label:'Shop'},
-  {id:'market',icon:'🧺',label:'Market'},
-  {id:'activities',icon:'🎯',label:'Activities'},
-  {id:'tips',icon:'💡',label:'Tips'},
-  {id:'pack',icon:'🎒',label:'Pack'},
+// ── DRAG & DROP helper ──────────────────────────────────────────
+function makeSortable(el, onEnd){
+  if(!el||!window.Sortable) return;
+  Sortable.create(el,{
+    handle:'.drag-handle',
+    animation:150,
+    ghostClass:'sortable-ghost',
+    chosenClass:'sortable-chosen',
+    onEnd
+  });
+}
+function dragHandle(){ return '<span class="drag-handle" title="Drag to reorder">⠿</span>'; }
+
+// ── MENU DROPDOWN ───────────────────────────────────────────────
+const NAV_SECTIONS=[
+  {id:'days',icon:'📅',label:'Days'},{id:'fete',icon:'🇫🇷',label:'14 Juillet'},
+  {id:'sights',icon:'🏛',label:'Sights'},{id:'hiking',icon:'🥾',label:'Hiking'},
+  {id:'beaches',icon:'🏖',label:'Beaches'},{id:'boats',icon:'⛵',label:'Boats'},
+  {id:'food',icon:'🍽',label:'Eat & Drink'},{id:'grocery',icon:'🛒',label:'Shop'},
+  {id:'market',icon:'🧺',label:'Market'},{id:'activities',icon:'🎯',label:'Activities'},
+  {id:'tips',icon:'💡',label:'Tips'},{id:'pack',icon:'🎒',label:'Pack'},
   {id:'trash',icon:'🗑',label:'Recently Removed'},
 ];
-
 (function(){
   const btn=document.getElementById('menu-btn');
   const dropdown=document.getElementById('menu-dropdown');
@@ -1884,12 +1972,10 @@ const NAV_SECTIONS = [
   dropdown.addEventListener('click',e=>{ if(e.target===dropdown) closeMenuDropdown(); });
   function closeMenuDropdown(){ dropdown.classList.remove('open'); }
   window._closeMenuDropdown=closeMenuDropdown;
-  window._updateMenuActive=function(i){
-    inner.querySelectorAll('.menu-item').forEach((el,j)=>el.classList.toggle('active',j===i));
-  };
+  window._updateMenuActive=function(i){ inner.querySelectorAll('.menu-item').forEach((el,j)=>el.classList.toggle('active',j===i)); };
 })();
 
-// ── SWIPE NAV ────────────────────────────────────────────────────
+// ── SWIPE NAV ───────────────────────────────────────────────────
 let _currentSlide=0;
 (function(){
   const track=document.getElementById('slides-track');
@@ -1898,7 +1984,7 @@ let _currentSlide=0;
   let cur=0,tx0=0,ty0=0,tdx=0,dragging=false,locked=false;
   window.goTo=function(i,anim=true){
     i=Math.max(0,Math.min(sections.length-1,i)); cur=i; _currentSlide=i;
-    if(!anim){track.style.transition='none';}
+    if(!anim) track.style.transition='none';
     track.style.transform=`translateX(-${i*100}%)`;
     if(!anim) requestAnimationFrame(()=>{track.style.transition='';});
     navLinks.forEach((a,j)=>a.classList.toggle('active',j===i));
@@ -1929,63 +2015,57 @@ let _currentSlide=0;
   window.goTo(0,false);
 })();
 
-// ── TRASH / RECENTLY REMOVED ─────────────────────────────────────
-const THIRTY_DAYS = 30*24*60*60*1000;
+// ── TRASH ───────────────────────────────────────────────────────
+const THIRTY_DAYS=30*24*60*60*1000;
 let _trash=[];
 async function loadTrash(){ const v=await fbGet('trash'); _trash=(v||[]).filter(i=>Date.now()-i.removedAt<THIRTY_DAYS); }
 async function saveTrash(){ await fbSet('trash',_trash); }
-async function addToTrash(item, section){
-  _trash.unshift({...item, section, removedAt:Date.now()});
+async function addToTrash(item,section){
+  _trash.unshift({...item,section,removedAt:Date.now()});
   _trash=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
   await saveTrash(); buildTrashUI();
 }
 async function restoreFromTrash(idx){
-  const item=_trash[idx];
-  if(!item) return;
-  _trash.splice(idx,1);
-  await saveTrash();
-  if(item.section==='food'){ _foodItems.push({name:item.name,cat:item.cat||'✨ Other',desc:item.desc||'',tag:item.tag||'',tagClass:item.tagClass||'',mapQ:'',mapUrl:item.mapUrl||''}); await saveFood(); buildFoodUI(); }
-  else if(item.section==='grocery'){ _groceryItems.push({emoji:item.emoji||'🛒',name:item.name,desc:item.desc||'',mapUrl:item.mapUrl||''}); await saveGrocery(); buildGroceryUI(); }
-  else if(item.section==='pack'){ _packItems.push({label:item.name,cat:item.cat||'🎒 Essentials',checked:false}); await savePack(); buildPackUI(); }
-  else if(item.section==='days' && item.date){ await addDayItem(item.date,{name:item.name,icon:item.icon||'📌'}); }
-  else if(SECTION_META[item.section]){
-    if(!_sectionItems[item.section]) _sectionItems[item.section]=[];
-    _sectionItems[item.section].push({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''});
-    await saveSectionItems(); buildSectionCustomUI(item.section);
-  }
+  const item=_trash[idx]; if(!item) return;
+  _trash.splice(idx,1); await saveTrash();
+  if(item.section==='food'){ _foodItems.push({name:item.name,cat:item.cat||'✨ Other',desc:item.desc||'',tag:item.tag||'',tagClass:item.tagClass||'',mapUrl:item.mapUrl||'',notes:item.notes||'',icon:item.icon||'🍽'}); await saveFood(); buildFoodUI(); }
+  else if(item.section==='grocery'){ _groceryItems.push({emoji:item.emoji||item.icon||'🛒',name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''}); await saveGrocery(); buildGroceryUI(); }
+  else if(item.section==='pack'){ _packItems.push({label:item.name,cat:item.cat||'🎒 Essentials',checked:false,icon:item.icon||'📌'}); await savePack(); buildPackUI(); }
+  else if(item.section==='days'&&item.date){ await addDayItem(item.date,{name:item.name,icon:item.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''}); }
+  else if(SECTION_META[item.section]){ if(!_sectionItems[item.section])_sectionItems[item.section]=[]; _sectionItems[item.section].push({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'}); await saveSectionItems(); buildSectionCustomUI(item.section); }
   buildTrashUI();
 }
-
 function buildTrashUI(){
   const container=document.getElementById('trash-list'); container.innerHTML='';
   const active=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
   if(!active.length){ container.innerHTML='<div class="trash-empty">No recently removed items.</div>'; return; }
   active.forEach((item,idx)=>{
     const daysLeft=Math.ceil((THIRTY_DAYS-(Date.now()-item.removedAt))/(24*60*60*1000));
-    // Build a readable source label
-    let sourceLabel = item.section;
-    if(item.section==='days' && item.date){
-      const d=TRIP_DAYS.find(t=>t.date===item.date);
-      sourceLabel = d ? d.name : item.date;
-    } else if(SECTION_META[item.section]){
-      sourceLabel = SECTION_META[item.section].label;
-    }
+    let lbl=item.section;
+    if(item.section==='days'&&item.date){ const d=TRIP_DAYS.find(t=>t.date===item.date); lbl=d?d.name:item.date; }
+    else if(SECTION_META[item.section]) lbl=SECTION_META[item.section].label;
+    else if(item.section==='food') lbl='Eat & Drink';
+    else if(item.section==='grocery') lbl='Shop';
+    else if(item.section==='pack') lbl='Pack';
     const row=document.createElement('div'); row.className='trash-item';
     row.innerHTML=`<div class="trash-item-info">
-      <div class="trash-item-name">${item.icon?item.icon+' ':''}${item.emoji?item.emoji+' ':''}${item.name}</div>
-      <div class="trash-item-meta">${sourceLabel} · expires in ${daysLeft}d</div>
-    </div>
-    <button class="trash-restore-btn">Restore</button>`;
+      <div class="trash-item-name">${item.icon||item.emoji||''} ${item.name}</div>
+      <div class="trash-item-meta">${lbl} · expires in ${daysLeft}d</div>
+    </div><button class="trash-restore-btn">Restore</button>`;
     row.querySelector('.trash-restore-btn').addEventListener('click',()=>restoreFromTrash(idx));
     container.appendChild(row);
   });
 }
 
-// ── ITEM EDITOR MODAL ────────────────────────────────────────────
+// ── EDIT MODAL ──────────────────────────────────────────────────
 let _editCallback=null;
-function openEditModal({name='',notes='',mapUrl=''},onSave){
+function openEditModal({name='',desc='',notes='',mapUrl='',icon='📌'},onSave){
   _editCallback=onSave;
+  _selectedIcon=icon||'📌';
+  document.getElementById('edit-icon-preview').textContent=_selectedIcon;
+  buildIconGrid();
   document.getElementById('edit-name').value=name;
+  document.getElementById('edit-desc').value=desc;
   document.getElementById('edit-notes').value=notes;
   document.getElementById('edit-map').value=mapUrl;
   document.getElementById('edit-modal').classList.add('open');
@@ -1997,14 +2077,16 @@ document.getElementById('edit-modal').addEventListener('click',e=>{ if(e.target=
 document.getElementById('edit-save-btn').addEventListener('click',()=>{
   if(!_editCallback) return;
   _editCallback({
+    icon: _selectedIcon,
     name: document.getElementById('edit-name').value.trim(),
+    desc: document.getElementById('edit-desc').value.trim(),
     notes: document.getElementById('edit-notes').value.trim(),
     mapUrl: document.getElementById('edit-map').value.trim(),
   });
   closeEditModal();
 });
 
-// ── TRIP DAYS ────────────────────────────────────────────────────
+// ── TRIP DAYS ───────────────────────────────────────────────────
 const TRIP_DAYS=[
   {date:'2026-07-09',name:'Thu, 9 Jul — Arrival Day'},
   {date:'2026-07-10',name:'Fri, 10 Jul — Market Day 🧺'},
@@ -2018,6 +2100,7 @@ const TRIP_DAYS=[
 let _dayPlans={};
 async function loadDayPlans(){ const v=await fbGet('dayPlans'); _dayPlans=v||{}; }
 async function saveDayPlans(){ await fbSet('dayPlans',_dayPlans); }
+
 function getGuideItems(){
   const items=[],seen=new Set();
   document.querySelectorAll('section:not(#days):not(#pack):not(#trash) .card-title').forEach(el=>{
@@ -2027,13 +2110,14 @@ function getGuideItems(){
   return items;
 }
 let _activeDay=null;
+
 function buildDaysUI(){
   const container=document.getElementById('days-list'); container.innerHTML='';
   const today=new Date().toISOString().slice(0,10);
   TRIP_DAYS.forEach(day=>{
     const items=_dayPlans[day.date]||[];
     const isFete=day.date==='2026-07-14',isToday=day.date===today;
-    const card=document.createElement('div'); card.className='day-card'+(isFete?' is-fete':'')+( isToday?' is-today':'');
+    const card=document.createElement('div'); card.className='day-card'+(isFete?' is-fete':'')+(isToday?' is-today':'');
     card.dataset.date=day.date;
     const mn=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     card.innerHTML=`<div class="day-header">
@@ -2044,7 +2128,8 @@ function buildDaysUI(){
       </div>
       <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
     </div>
-    <div class="day-body"><div class="day-body-inner"><div class="day-items-list"></div>
+    <div class="day-body"><div class="day-body-inner">
+      <div class="day-items-list"></div>
       <button class="day-add-btn"><span>＋</span> Add activity or note</button>
     </div></div>`;
     card.querySelector('.day-header').addEventListener('click',e=>{ if(!e.target.closest('.day-add-btn')) card.classList.toggle('open'); });
@@ -2053,24 +2138,49 @@ function buildDaysUI(){
     container.appendChild(card);
   });
 }
+
 function renderDayItems(card,date,items){
   const list=card.querySelector('.day-items-list'); list.innerHTML='';
   if(!items.length){ list.innerHTML='<div class="day-empty">Tap + to start planning this day.</div>'; return; }
   items.forEach((item,idx)=>{
     const row=document.createElement('div'); row.className='day-item';
-    row.innerHTML=`<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label">${item.name}</span><button class="day-item-remove">×</button>`;
-    row.querySelector('.day-item-remove').addEventListener('click',()=>removeDayItem(date,idx));
+    row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;';
+    const href=item.mapUrl||'';
+    const mapBtn=href?`<a href="${href}" target="_blank" class="map-link" style="font-size:0.65rem;padding:3px 7px">${MAP_SVG} Map</a>`:'';
+    const topRow=document.createElement('div');
+    topRow.style.cssText='display:flex;align-items:center;gap:6px;width:100%';
+    topRow.innerHTML=`${dragHandle()}<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label" style="flex:1;font-weight:600">${item.name}</span>${mapBtn}<button class="day-item-edit" style="flex-shrink:0;background:none;border:none;color:var(--lake);font-size:0.9rem;cursor:pointer;padding:2px 4px" title="Edit">✎</button><button class="day-item-remove" style="flex-shrink:0">×</button>`;
+    row.appendChild(topRow);
+    if(item.desc){ const d=document.createElement('div'); d.style.cssText='font-size:0.78rem;color:#555;padding-left:26px;line-height:1.4'; d.textContent=item.desc; row.appendChild(d); }
+    if(item.notes){ const n=document.createElement('div'); n.style.cssText='font-size:0.75rem;color:var(--muted);font-style:italic;padding-left:26px'; n.textContent='📝 '+item.notes; row.appendChild(n); }
+    topRow.querySelector('.day-item-remove').addEventListener('click',()=>removeDayItem(date,idx));
+    topRow.querySelector('.day-item-edit').addEventListener('click',()=>{
+      openEditModal({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'},async({icon,name,desc,notes,mapUrl})=>{
+        if(!name) return;
+        _dayPlans[date][idx]={..._dayPlans[date][idx],icon,name,desc,notes,mapUrl};
+        await saveDayPlans(); buildDaysUI();
+        document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+      });
+    });
     list.appendChild(row);
+  });
+  // sortable
+  makeSortable(list, async()=>{
+    const newOrder=[...list.querySelectorAll('.day-item')].map((_,i)=>items[i]);
+    // rebuild from DOM order
+    const reordered=[...list.children].map(row=>{
+      const label=row.querySelector('.day-item-label');
+      return _dayPlans[date].find(it=>it.name===label?.textContent)||{};
+    }).filter(x=>x.name);
+    _dayPlans[date]=reordered;
+    await saveDayPlans();
   });
 }
 async function removeDayItem(date,idx){
-  const items=_dayPlans[date]||[];
-  const removed=items[idx];
-  items.splice(idx,1); _dayPlans[date]=items;
-  await saveDayPlans();
-  if(removed) await addToTrash({name:removed.name,icon:removed.icon||'📌',date},'days');
-  buildDaysUI();
-  document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+  const items=_dayPlans[date]||[]; const removed=items[idx];
+  items.splice(idx,1); _dayPlans[date]=items; await saveDayPlans();
+  if(removed) await addToTrash({...removed,name:removed.name,icon:removed.icon||'📌',date},'days');
+  buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
 }
 async function addDayItem(date,item){
   if(!_dayPlans[date]) _dayPlans[date]=[];
@@ -2078,7 +2188,7 @@ async function addDayItem(date,item){
   buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
 }
 
-// ── DAY MODAL ────────────────────────────────────────────────────
+// ── DAY MODAL ───────────────────────────────────────────────────
 let _guideItems=[];
 function openDayModal(date,dayName){
   _activeDay=date; _guideItems=getGuideItems();
@@ -2108,12 +2218,16 @@ document.getElementById('modal-search').addEventListener('input',function(){ ren
 async function addCustomItemToDay(){
   const input=document.getElementById('modal-custom-input'),name=input.value.trim();
   if(!name||!_activeDay) return;
-  await addDayItem(_activeDay,{name,icon:'📌'}); input.value=''; window.closeModal();
+  window.closeModal(); input.value='';
+  openEditModal({name,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
+    if(!n) return;
+    await addDayItem(_activeDay,{name:n,icon,desc,notes,mapUrl});
+  });
 }
 document.getElementById('modal-custom-add-btn').addEventListener('click',addCustomItemToDay);
 document.getElementById('modal-custom-input').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomItemToDay();});
 
-// ── PACK ─────────────────────────────────────────────────────────
+// ── PACK ────────────────────────────────────────────────────────
 const DEFAULT_PACK=[
   {label:"Hiking boots",cat:"👟 Footwear"},{label:"Sandals / flip-flops",cat:"👟 Footwear"},{label:"Light trainers",cat:"👟 Footwear"},
   {label:"Swimsuit ×2",cat:"👙 Beach"},{label:"Beach towel",cat:"👙 Beach"},{label:"Waterproof dry bag",cat:"👙 Beach"},
@@ -2126,7 +2240,7 @@ const DEFAULT_PACK=[
   {label:"Picnic blanket",cat:"🧺 Picnic"},{label:"Reusable bag / tote",cat:"🧺 Picnic"},
 ];
 let _packItems=[];
-async function loadPack(){ const v=await fbGet('packItems'); _packItems=v||(DEFAULT_PACK.map(i=>({...i,checked:false}))); }
+async function loadPack(){ const v=await fbGet('packItems'); _packItems=v||DEFAULT_PACK.map(i=>({...i,checked:false})); }
 async function savePack(){ await fbSet('packItems',_packItems); }
 function getCats(items){ const s=new Set(),c=[]; items.forEach(i=>{if(!s.has(i.cat)){s.add(i.cat);c.push(i.cat);}}); return c; }
 function buildPackUI(){
@@ -2135,24 +2249,33 @@ function buildPackUI(){
     const group=document.createElement('div'); group.className='pack-category';
     const lbl=document.createElement('div'); lbl.className='pack-cat-label'; lbl.textContent=cat; group.appendChild(lbl);
     const grid=document.createElement('div'); grid.className='pack-grid';
-    _packItems.filter(it=>it.cat===cat).forEach(item=>{
+    const catItems=_packItems.filter(it=>it.cat===cat);
+    catItems.forEach(item=>{
       const idx=_packItems.indexOf(item);
       const el=document.createElement('div'); el.className='pack-item'+(item.checked?' checked':'');
       const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!item.checked;
       cb.addEventListener('change',async()=>{ _packItems[idx].checked=cb.checked; await savePack(); el.classList.toggle('checked',cb.checked); updatePackProgress(); });
-      const lbl2=document.createElement('span'); lbl2.className='pack-label'; lbl2.textContent=item.label;
+      const lbl2=document.createElement('span'); lbl2.className='pack-label';
+      lbl2.textContent=(item.icon?item.icon+' ':'')+item.label;
       lbl2.addEventListener('click',()=>cb.click());
-      const editBtn=document.createElement('button'); editBtn.className='pack-delete'; editBtn.textContent='✎'; editBtn.style.color='var(--lake)'; editBtn.title='Edit';
+      const editBtn=document.createElement('button'); editBtn.className='pack-delete'; editBtn.innerHTML=dragHandle()+'✎'; editBtn.style.color='var(--lake)'; editBtn.title='Edit';
       editBtn.addEventListener('click',e=>{ e.stopPropagation();
-        openEditModal({name:item.label,notes:item.notes||'',mapUrl:item.mapUrl||''},({name,notes,mapUrl})=>{
-          if(name){ _packItems[idx].label=name; _packItems[idx].notes=notes; _packItems[idx].mapUrl=mapUrl; savePack(); buildPackUI(); }
+        openEditModal({name:item.label,icon:item.icon||'📌',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,notes,mapUrl})=>{
+          if(name){ _packItems[idx]={..._packItems[idx],label:name,icon,notes,mapUrl}; savePack(); buildPackUI(); }
         });
       });
       const del=document.createElement('button'); del.className='pack-delete'; del.innerHTML='×';
-      del.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({name:item.label,cat:item.cat,notes:item.notes||'',mapUrl:item.mapUrl||''},'pack'); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
+      del.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({name:item.label,icon:item.icon||'📌',cat:item.cat,notes:item.notes||'',mapUrl:item.mapUrl||''},'pack'); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
       el.appendChild(cb); el.appendChild(lbl2); el.appendChild(editBtn); el.appendChild(del); grid.appendChild(el);
     });
     group.appendChild(grid); container.appendChild(group);
+    makeSortable(grid,async()=>{
+      const els=[...grid.querySelectorAll('.pack-item')];
+      const reordered=els.map(el=>{ const t=el.querySelector('.pack-label')?.textContent||''; return _packItems.find(it=>(it.icon?it.icon+' ':'')+it.label===t)||null; }).filter(Boolean);
+      const rest=_packItems.filter(it=>it.cat!==cat);
+      _packItems=[...rest,...reordered];
+      await savePack();
+    });
   });
   updatePackProgress();
   const sel=document.getElementById('pack-cat-select'); const cur=sel.value; sel.innerHTML='';
@@ -2167,21 +2290,26 @@ function updatePackProgress(){
 async function addPackItem(){
   const input=document.getElementById('pack-input'),sel=document.getElementById('pack-cat-select'),label=input.value.trim();
   if(!label){input.focus();return;}
-  _packItems.push({label,cat:sel.value,checked:false}); await savePack(); input.value=''; buildPackUI(); input.focus();
+  input.value='';
+  openEditModal({name:label,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name,notes,mapUrl})=>{
+    if(!name) return;
+    _packItems.push({label:name,cat:sel.value,checked:false,icon,notes,mapUrl}); await savePack(); buildPackUI();
+  });
+  input.focus();
 }
 document.getElementById('pack-add-btn').addEventListener('click',addPackItem);
 document.getElementById('pack-input').addEventListener('keydown',e=>{if(e.key==='Enter')addPackItem();});
 
-// ── FOOD ─────────────────────────────────────────────────────────
+// ── FOOD ────────────────────────────────────────────────────────
 const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
 const DEFAULT_FOOD=[
-  {name:'Le Freti',cat:'🍽 Savoyard',desc:'One of the most beloved restaurants in the old town. Fondue, raclette, and tartiflette in a charming timber interior. Book ahead in summer.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Le+Freti+Annecy+France'},
-  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace, relaxed atmosphere. Local fish from the lake (perch, char), Savoyard meat dishes. Popular with locals.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy'},
-  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Good for lunch after a morning at the beach. Moules-frites, steak, and local wine.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Brasserie+des+Europeens+Annecy'},
-  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Seasonal ice cream in unexpected Alpine flavours — génépi liqueur, mountain honey, wild blueberry. Best queue in town.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Le+Glacier+des+Alpes+Annecy'},
-  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough bakery on the canal. Arrive early — the best loaves go fast. Perfect for a picnic on the lake.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Boulangerie+Aristide+Annecy'},
-  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Properly aged reblochon, beaufort, and tomme de Savoie. The best cheesemonger in Annecy.',tag:"Don't Miss",tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Pierre+Gay+Fromagerie+Annecy'},
-  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, fresh-baked goods. Runs until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapUrl:'https://maps.google.com/?q=March%C3%A9+Annecy+Old+Town'},
+  {name:'Le Freti',cat:'🍽 Savoyard',desc:'Fondue, raclette, and tartiflette in a charming timber interior. Book ahead.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Le+Freti+Annecy+France',icon:'🍽'},
+  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace. Local fish (perch, char), Savoyard meat dishes.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy',icon:'🍽'},
+  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Moules-frites, steak, local wine.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Brasserie+des+Europeens+Annecy',icon:'🍽'},
+  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Alpine ice cream — génépi, mountain honey, wild blueberry.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Le+Glacier+des+Alpes+Annecy',icon:'🍦'},
+  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough on the canal. Arrive early.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Boulangerie+Aristide+Annecy',icon:'🥐'},
+  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Aged reblochon, beaufort, tomme de Savoie. Best cheesemonger in Annecy.',tag:"Don't Miss",tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Pierre+Gay+Fromagerie+Annecy',icon:'🧀'},
+  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, baked goods. Until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapUrl:'https://maps.google.com/?q=March%C3%A9+Annecy+Old+Town',icon:'🧺'},
 ];
 let _foodItems=[];
 async function loadFood(){ const v=await fbGet('foodItems'); _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); }
@@ -2192,53 +2320,69 @@ function buildFoodUI(){
   _foodItems.forEach(item=>{ if(!map[item.cat]){map[item.cat]=[];cats.push(item.cat);} map[item.cat].push(item); });
   cats.forEach(cat=>{
     const lbl=document.createElement('p'); lbl.className='sublabel'; lbl.textContent=cat; container.appendChild(lbl);
+    const catContainer=document.createElement('div'); catContainer.dataset.cat=cat; container.appendChild(catContainer);
     map[cat].forEach(item=>{
       const idx=_foodItems.indexOf(item);
       const card=document.createElement('div'); card.className='card food';
       const href=item.mapUrl||(item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`);
       card.innerHTML=`
-        <div class="card-top"><span class="card-title">${item.name}</span>
+        <div class="card-top">
+          <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||'🍽'}</span>
+          <span class="card-title">${item.name}</span>
           <div class="card-actions">
+            ${dragHandle()}
             <a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>
             <button class="note-btn" onclick="toggleNote(this)">📝</button>
-            <button class="food-edit-btn pack-delete" style="color:var(--lake)" title="Edit">✎</button>
-            <button class="pack-delete" title="Remove">×</button>
+            <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+            <button data-action="del" class="pack-delete" title="Remove">×</button>
           </div>
         </div>
         ${item.tag?`<div class="tags"><span class="tag ${item.tagClass||'tag-price'}">${item.tag}</span></div>`:''}
         ${item.desc?`<p>${item.desc}</p>`:''}
         ${item.notes?`<p style="font-style:italic;color:var(--muted);margin-top:6px;font-size:0.8rem;">📝 ${item.notes}</p>`:''}
         <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
-      card.querySelector('.food-edit-btn').addEventListener('click',e=>{ e.stopPropagation();
-        openEditModal({name:item.name,notes:item.notes||item.desc||'',mapUrl:item.mapUrl||''},({name,notes,mapUrl})=>{
-          if(name){ _foodItems[idx].name=name; _foodItems[idx].notes=notes; if(mapUrl) _foodItems[idx].mapUrl=mapUrl; saveFood(); buildFoodUI(); }
+      card.querySelector('[data-action="edit"]').addEventListener('click',e=>{ e.stopPropagation();
+        openEditModal({name:item.name,icon:item.icon||'🍽',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
+          if(name){ _foodItems[idx]={..._foodItems[idx],icon,name,desc,notes,mapUrl}; saveFood(); buildFoodUI(); }
         });
       });
-      card.querySelector('.pack-delete:last-child').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item},'food'); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
-      container.appendChild(card); initAccordionCard(card); initNoteCard(card);
+      card.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item},'food'); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
+      catContainer.appendChild(card); initAccordionCard(card); initNoteCard(card);
+    });
+    makeSortable(catContainer,async()=>{
+      const titles=[...catContainer.querySelectorAll('.card-title')].map(el=>el.textContent);
+      const reordered=titles.map(t=>_foodItems.find(it=>it.name===t)).filter(Boolean);
+      const rest=_foodItems.filter(it=>it.cat!==cat);
+      _foodItems=[...rest,...reordered];
+      await saveFood();
     });
   });
 }
 async function addFoodItem(){
   const input=document.getElementById('food-input'),sel=document.getElementById('food-cat-select'),name=input.value.trim();
   if(!name){input.focus();return;}
-  _foodItems.push({name,cat:sel.value,desc:'',tag:'',tagClass:'',mapUrl:'',notes:''}); await saveFood(); input.value=''; buildFoodUI(); input.focus();
+  input.value='';
+  openEditModal({name,icon:'🍽',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
+    if(!n) return;
+    _foodItems.push({name:n,cat:sel.value,desc,tag:'',tagClass:'',mapUrl,notes,icon}); await saveFood(); buildFoodUI();
+  });
+  input.focus();
 }
 document.getElementById('food-add-btn').addEventListener('click',addFoodItem);
 document.getElementById('food-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFoodItem();});
 
-// ── GROCERY ──────────────────────────────────────────────────────
+// ── GROCERY ─────────────────────────────────────────────────────
 const DEFAULT_GROCERY=[
-  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty, mildly pungent. Buy vacuum-packed. Essential for tartiflette.',notes:'',mapUrl:''},
-  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese, fruity depth — the "Prince of Gruyères."',notes:'',mapUrl:''},
-  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, distinctive grey rind. Very affordable.',notes:'',mapUrl:''},
-  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Pairs perfectly with cheese and lake fish.',notes:'',mapUrl:''},
-  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur, traditional digestif of Savoie. Small bottles travel well.',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty. Buy vacuum-packed. Essential for tartiflette.',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese — the "Prince of Gruyères."',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, grey rind. Very affordable.',notes:'',mapUrl:''},
+  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Pairs with cheese and fish.',notes:'',mapUrl:''},
+  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur. Small bottles travel well.',notes:'',mapUrl:''},
   {emoji:'🍯',name:'Miel de Savoie (Mountain Honey)',desc:'Floral, complex honey. Sold in small jars at the market.',notes:'',mapUrl:''},
-  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages. Buy at the market or any boucherie.',notes:'',mapUrl:''},
-  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style with Beaufort and cream.',notes:'',mapUrl:''},
-  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates — génépi ganache, salted butter caramel, mountain berry.',notes:'',mapUrl:''},
-  {emoji:'🧂',name:"Sel de l'Alpe / Herbes de Savoie",desc:'Local spice and herb blends. Small bags make compact souvenirs.',notes:'',mapUrl:''},
+  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages.',notes:'',mapUrl:''},
+  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style.',notes:'',mapUrl:''},
+  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates.',notes:'',mapUrl:''},
+  {emoji:'🧂',name:"Sel de l'Alpe / Herbes de Savoie",desc:'Local spice blends. Compact souvenirs.',notes:'',mapUrl:''},
 ];
 let _groceryItems=[];
 async function loadGrocery(){ const v=await fbGet('groceryItems'); _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); }
@@ -2249,36 +2393,116 @@ function buildGroceryUI(){
     const row=document.createElement('div'); row.className='grocery-item';
     const mapPart=item.mapUrl?`<a href="${item.mapUrl}" target="_blank" class="map-link" style="margin-top:4px;display:inline-flex">${MAP_SVG} Map</a>`:'';
     const notesPart=item.notes?`<div class="grocery-desc" style="font-style:italic;margin-top:2px;">📝 ${item.notes}</div>`:'';
-    row.innerHTML=`<span class="grocery-emoji">${item.emoji||'🛒'}</span>
+    row.innerHTML=`${dragHandle()}<span class="grocery-emoji">${item.emoji||'🛒'}</span>
       <div style="flex:1;min-width:0">
         <div class="grocery-name">${item.name}</div>
         ${item.desc?`<div class="grocery-desc">${item.desc}</div>`:''}
         ${notesPart}${mapPart}
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-        <button class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
-        <button class="pack-delete" title="Remove">×</button>
+        <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+        <button data-action="del" class="pack-delete" title="Remove">×</button>
       </div>`;
-    const [editBtn,delBtn]=row.querySelectorAll('.pack-delete');
-    editBtn.addEventListener('click',async e=>{ e.stopPropagation();
-      openEditModal({name:item.name,notes:item.notes||'',mapUrl:item.mapUrl||''},({name,notes,mapUrl})=>{
-        if(name){ _groceryItems[idx].name=name; _groceryItems[idx].notes=notes; _groceryItems[idx].mapUrl=mapUrl; saveGrocery(); buildGroceryUI(); }
+    row.querySelector('[data-action="edit"]').addEventListener('click',async e=>{ e.stopPropagation();
+      openEditModal({name:item.name,icon:item.emoji||'🛒',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
+        if(name){ _groceryItems[idx]={..._groceryItems[idx],emoji:icon,name,desc,notes,mapUrl}; saveGrocery(); buildGroceryUI(); }
       });
     });
-    delBtn.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item,name:item.name},'grocery'); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
+    row.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item,icon:item.emoji||'🛒'},'grocery'); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
     container.appendChild(row);
+  });
+  makeSortable(container,async()=>{
+    const names=[...container.querySelectorAll('.grocery-name')].map(el=>el.textContent);
+    const reordered=names.map(n=>_groceryItems.find(it=>it.name===n)).filter(Boolean);
+    _groceryItems=reordered; await saveGrocery();
   });
 }
 async function addGroceryItem(){
-  const input=document.getElementById('grocery-input'),ei=document.getElementById('grocery-emoji-input'),name=input.value.trim();
+  const input=document.getElementById('grocery-input'),name=input.value.trim();
   if(!name){input.focus();return;}
-  _groceryItems.push({emoji:ei.value.trim()||'🛒',name,desc:'',notes:'',mapUrl:''});
-  await saveGrocery(); input.value=''; ei.value=''; buildGroceryUI(); input.focus();
+  input.value='';
+  openEditModal({name,icon:'🛒',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
+    if(!n) return;
+    _groceryItems.push({emoji:icon,name:n,desc,notes,mapUrl}); await saveGrocery(); buildGroceryUI();
+  });
+  input.focus();
 }
 document.getElementById('grocery-add-btn').addEventListener('click',addGroceryItem);
 document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
+// remove old emoji input since icon picker replaces it
+const emojiInp=document.getElementById('grocery-emoji-input');
+if(emojiInp) emojiInp.style.display='none';
 
-// ── NOTES ────────────────────────────────────────────────────────
+// ── SECTION CUSTOM ITEMS ────────────────────────────────────────
+const SECTION_META={
+  fete:      {label:'14 Juillet',icon:'🇫🇷',cardClass:'fete'},
+  sights:    {label:'Sights',icon:'🏛',cardClass:'sight'},
+  hiking:    {label:'Hiking',icon:'🥾',cardClass:'hike'},
+  beaches:   {label:'Beaches',icon:'🏖',cardClass:''},
+  boats:     {label:'Boats',icon:'⛵',cardClass:'boat'},
+  market:    {label:'Market',icon:'🧺',cardClass:''},
+  activities:{label:'Activities',icon:'🎯',cardClass:''},
+  tips:      {label:'Tips',icon:'💡',cardClass:''},
+};
+let _sectionItems={};
+async function loadSectionItems(){ const v=await fbGet('sectionItems'); _sectionItems=v||{}; }
+async function saveSectionItems(){ await fbSet('sectionItems',_sectionItems); }
+
+function buildSectionCustomUI(sid){
+  const container=document.getElementById(sid+'-custom'); if(!container) return;
+  container.innerHTML='';
+  const items=_sectionItems[sid]||[];
+  const meta=SECTION_META[sid]||{icon:'📌',cardClass:''};
+  items.forEach((item,idx)=>{
+    const card=document.createElement('div'); card.className='card '+meta.cardClass;
+    const href=item.mapUrl||'';
+    const mapBtn=href?`<a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>`:'';
+    card.innerHTML=`
+      <div class="card-top">
+        <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||meta.icon||'📌'}</span>
+        <span class="card-title">${item.name}</span>
+        <div class="card-actions">
+          ${dragHandle()}
+          ${mapBtn}
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+          <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+          <button data-action="del" class="pack-delete" title="Remove">×</button>
+        </div>
+      </div>
+      ${item.desc?`<p>${item.desc}</p>`:''}
+      ${item.notes?`<p style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:5px;">📝 ${item.notes}</p>`:''}
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
+    card.querySelector('[data-action="edit"]').addEventListener('click',e=>{ e.stopPropagation();
+      openEditModal({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
+        if(!name) return;
+        _sectionItems[sid][idx]={...item,icon,name,desc,notes,mapUrl};
+        saveSectionItems(); buildSectionCustomUI(sid);
+      });
+    });
+    card.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation();
+      await addToTrash({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},sid);
+      _sectionItems[sid].splice(idx,1); await saveSectionItems(); buildSectionCustomUI(sid);
+    });
+    container.appendChild(card); initAccordionCard(card); initNoteCard(card);
+  });
+  makeSortable(container,async()=>{
+    const titles=[...container.querySelectorAll('.card-title')].map(el=>el.textContent);
+    const reordered=titles.map(t=>(_sectionItems[sid]||[]).find(it=>it.name===t)).filter(Boolean);
+    _sectionItems[sid]=reordered; await saveSectionItems();
+  });
+}
+function buildAllSectionCustomUI(){ Object.keys(SECTION_META).forEach(sid=>buildSectionCustomUI(sid)); }
+window.openSectionAdd=function(sid){
+  const meta=SECTION_META[sid]||{icon:'📌'};
+  openEditModal({name:'',icon:meta.icon,desc:'',notes:'',mapUrl:''},async({icon,name,desc,notes,mapUrl})=>{
+    if(!name) return;
+    if(!_sectionItems[sid]) _sectionItems[sid]=[];
+    _sectionItems[sid].push({name,icon,desc:desc||'',notes:notes||'',mapUrl:mapUrl||''});
+    await saveSectionItems(); buildSectionCustomUI(sid);
+  });
+};
+
+// ── NOTES ───────────────────────────────────────────────────────
 let _notes={};
 async function loadNotesFb(){ const v=await fbGet('notes'); _notes=v||{}; }
 async function saveNotesFb(){ await fbSet('notes',_notes); }
@@ -2309,95 +2533,7 @@ function initNoteCard(card){
 }
 function initAllNotes(){ document.querySelectorAll('.card').forEach(card=>initNoteCard(card)); }
 
-
-// ── GENERIC SECTION CUSTOM ITEMS ────────────────────────────────
-const SECTION_META = {
-  fete:       {label:'14 Juillet',   icon:'🇫🇷', cardClass:'fete'},
-  sights:     {label:'Sights',       icon:'🏛',  cardClass:'sight'},
-  hiking:     {label:'Hiking',       icon:'🥾',  cardClass:'hike'},
-  beaches:    {label:'Beaches',      icon:'🏖',  cardClass:''},
-  boats:      {label:'Boats',        icon:'⛵',  cardClass:'boat'},
-  market:     {label:'Market',       icon:'🧺',  cardClass:''},
-  activities: {label:'Activities',   icon:'🎯',  cardClass:''},
-  tips:       {label:'Tips',         icon:'💡',  cardClass:''},
-};
-
-let _sectionItems = {}; // { sectionId: [ {name,desc,notes,mapUrl}, ... ] }
-
-async function loadSectionItems() {
-  const v = await fbGet('sectionItems');
-  _sectionItems = v || {};
-}
-async function saveSectionItems() {
-  await fbSet('sectionItems', _sectionItems);
-}
-
-function buildSectionCustomUI(sid) {
-  const container = document.getElementById(sid + '-custom');
-  if (!container) return;
-  container.innerHTML = '';
-  const items = _sectionItems[sid] || [];
-  const meta  = SECTION_META[sid] || {icon:'📌', cardClass:''};
-  items.forEach((item, idx) => {
-    const card = document.createElement('div');
-    card.className = 'card ' + meta.cardClass;
-    const href = item.mapUrl || '';
-    const mapBtn = href
-      ? `<a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>`
-      : '';
-    card.innerHTML = `
-      <div class="card-top">
-        <span class="card-title">${item.name}</span>
-        <div class="card-actions">
-          ${mapBtn}
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-          <button class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
-          <button class="pack-delete" title="Remove">×</button>
-        </div>
-      </div>
-      ${item.desc  ? `<p>${item.desc}</p>`  : ''}
-      ${item.notes ? `<p style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:5px;">📝 ${item.notes}</p>` : ''}
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
-
-    const [editBtn, delBtn] = [...card.querySelectorAll('.pack-delete')];
-
-    editBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      openEditModal({ name: item.name, notes: item.notes || '', mapUrl: item.mapUrl || '' }, ({ name, notes, mapUrl }) => {
-        if (!name) return;
-        _sectionItems[sid][idx] = { ...item, name, notes, mapUrl };
-        saveSectionItems(); buildSectionCustomUI(sid);
-      });
-    });
-
-    delBtn.addEventListener('click', async e => {
-      e.stopPropagation();
-      await addToTrash({ name: item.name, desc: item.desc || '', notes: item.notes || '', mapUrl: item.mapUrl || '' }, sid);
-      _sectionItems[sid].splice(idx, 1);
-      await saveSectionItems(); buildSectionCustomUI(sid);
-    });
-
-    container.appendChild(card);
-    initAccordionCard(card);
-    initNoteCard(card);
-  });
-}
-
-function buildAllSectionCustomUI() {
-  Object.keys(SECTION_META).forEach(sid => buildSectionCustomUI(sid));
-}
-
-window.openSectionAdd = function(sid) {
-  openEditModal({ name: '', notes: '', mapUrl: '' }, async ({ name, notes, mapUrl }) => {
-    if (!name) return;
-    if (!_sectionItems[sid]) _sectionItems[sid] = [];
-    _sectionItems[sid].push({ name, notes: notes || '', mapUrl: mapUrl || '', desc: '' });
-    await saveSectionItems();
-    buildSectionCustomUI(sid);
-  });
-};
-
-// ── REAL-TIME LISTENERS ──────────────────────────────────────────
+// ── REAL-TIME LISTENERS ─────────────────────────────────────────
 fbListen('dayPlans',v=>{ _dayPlans=v||{}; buildDaysUI(); });
 fbListen('packItems',v=>{ if(v){_packItems=v; buildPackUI();} });
 fbListen('foodItems',v=>{ if(v){_foodItems=v; buildFoodUI();} });
@@ -2406,10 +2542,10 @@ fbListen('trash',v=>{ if(v){_trash=v; buildTrashUI();} });
 fbListen('sectionItems',v=>{ if(v){_sectionItems=v; buildAllSectionCustomUI();} });
 fbListen('notes',v=>{ if(v){_notes=v; initAllNotes();} });
 
-// ── INIT ─────────────────────────────────────────────────────────
+// ── INIT ────────────────────────────────────────────────────────
 async function init(){
   try{ await Promise.all([loadDayPlans(),loadPack(),loadFood(),loadGrocery(),loadNotesFb(),loadTrash(),loadSectionItems()]); }
-  catch(e){ console.warn('Firebase load error, using defaults',e); }
+  catch(e){ console.warn('Firebase load error',e); }
   document.querySelectorAll('.card').forEach(initAccordionCard);
   buildDaysUI(); buildPackUI(); buildFoodUI(); buildGroceryUI(); buildTrashUI(); buildAllSectionCustomUI(); initAllNotes();
   const overlay=document.getElementById('loading-overlay');
