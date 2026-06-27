@@ -26,7 +26,6 @@
     --violet-ink: #4C1D95;
     --red:        #FEE2E2;
     --red-ink:    #991B1B;
-    --tricolor:   linear-gradient(90deg, #002395 33%, #fff 33% 66%, #ED2939 66%);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -469,22 +468,40 @@
   }
   .pack-delete {
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    min-width: 34px;
+    height: 34px;
     border: none;
-    background: none;
-    color: #ccc;
+    background: #f5f5f5;
+    color: #888;
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
-    border-radius: 50%;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 0 8px;
     transition: color 0.15s, background 0.15s;
+    gap: 2px;
   }
   .pack-delete:hover, .pack-delete:active { color: var(--red-ink); background: var(--red); }
+  .pack-delete[data-action="edit"] { background: var(--lake-light); color: var(--lake); }
+  .pack-delete[data-action="edit"]:hover { background: var(--lake); color: #fff; }
+
+  /* Action buttons in day items — styled via CSS instead of inline */
+  .card-actions { gap: 6px; }
+  .day-item-action {
+    flex-shrink: 0;
+    min-width: 34px; height: 34px;
+    border: none; border-radius: 8px;
+    font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .day-item-action.edit { background: var(--lake-light); color: var(--lake); }
+  .day-item-action.edit:hover { background: var(--lake); color: #fff; }
+  .day-item-action.remove { background: #f5f5f5; color: #888; }
+  .day-item-action.remove:hover { background: var(--red); color: var(--red-ink); }
 
   /* add item row */
   .pack-add-row {
@@ -644,19 +661,7 @@
   }
   .day-item-icon { font-size: 1rem; flex-shrink: 0; }
   .day-item-label { flex: 1; line-height: 1.3; }
-  .day-item-remove {
-    flex-shrink: 0;
-    background: none;
-    border: none;
-    color: #ccc;
-    font-size: 1rem;
-    cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-    line-height: 1;
-  }
-  .day-item-remove:hover { color: var(--red-ink); background: var(--red); }
+  /* day-item remove/edit buttons → .day-item-action class */
 
   .day-empty {
     font-size: 0.8rem;
@@ -684,7 +689,6 @@
   }
   .day-add-btn:hover { border-color: var(--lake); background: var(--lake-light); }
   .day-add-btn:active { background: var(--lake-light); }
-  .day-add-btn-icon { font-size: 1rem; line-height: 1; }
 
   /* ─── ADD TO DAY MODAL ─── */
   .modal-overlay {
@@ -825,8 +829,7 @@
   .modal-item-icon { font-size: 1rem; flex-shrink: 0; }
   .modal-item-text { flex: 1; }
   .modal-item-name { font-weight: 600; }
-  .modal-item-cat  { font-size: 0.72rem; color: var(--muted); }
-  .modal-item.already-added { opacity: 0.4; pointer-events: none; }
+  .modal-item.already-added { opacity: 0.5; }
 
   .modal-close {
     position: absolute;
@@ -983,7 +986,6 @@
   }
   .trash-restore-btn:hover { background: #a7f3d0; }
   .trash-empty { font-size: 0.82rem; color: var(--muted); font-style: italic; padding: 8px 2px; }
-
 
   /* ─── ICON PICKER ─── */
   .icon-picker-grid {
@@ -1600,7 +1602,6 @@
     <div id="grocery-list"></div>
     <div class="pack-add-row" style="margin-top:12px;">
       <input class="pack-add-input" id="grocery-input" type="text" placeholder="Add a specialty…" maxlength="60">
-      <input class="pack-add-input" id="grocery-emoji-input" type="text" placeholder="🛒" maxlength="4" style="max-width:54px;text-align:center;">
       <button class="pack-add-btn" id="grocery-add-btn" aria-label="Add">+</button>
     </div>
     <div class="tip" style="margin-top:12px;">
@@ -1890,7 +1891,20 @@ async function fbSet(id,v){ lockWrite(id); try{ await setDoc(doc(db,'guide',id),
 function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()&&!isLocked(id)) cb(s.data().value); }); }
 
 // ── ICON PICKER ─────────────────────────────────────────────────
-const ICONS = ['📌','🍽','🥾','🏖','⛵','🏛','🇫🇷','🎯','💡','🛒','🧺','🎒','🗺','📍','⭐','❤️','🔥','✅','🎵','🍷','🍕','☕','🍦','🥐','🏔','🌊','🚴','🚶','🎪','🎭','🛍','💈','🏰','⛪','🌸','🌿','🎿','🛶','🎣','🏊','🚣','🌅','🌄','🗻','🦅','🐾','🦝','📸','🎬','📖','💬'];
+const ICONS = [
+  // Nature & outdoors
+  '🏔','🌊','🌅','🌄','🗻','🌸','🌿','🌲','🌴','🍃','🌾','🦅','🦆','🐾','🦝','🐻','🦌','🌺','🌻','🌈',
+  // Activities
+  '🥾','🚴','🚶','🎿','🛶','🎣','🏊','🚣','🧗','🏄','🤿','🎯','⛷','🧘','🏋',
+  // Food & drink
+  '🍽','🍷','🍕','☕','🍦','🥐','🧀','🥗','🍺','🥂','🍰','🧁','🥩','🍷','🥘','🫕','🧆','🥪',
+  // Sights & places
+  '🏛','🏰','⛪','🗼','🎪','🎭','🛍','💈','🗽','🎡','🎢','🏟','🕌','⛩','🏯',
+  // Transport
+  '🚂','✈️','🚁','⛵','🛥','🚌','🚗','🚲','🛵','🛳',
+  // Essentials & misc
+  '📌','📍','⭐','❤️','🔥','✅','🎵','🛒','🧺','🎒','🗺','💡','🎯','📸','🎬','📖','💬','🗓','💊','🩹','🏥','💳','💰','🔑','🧲','📞','🌐','🔔','⚡','🎁','🎉','🎀','🏆','🥇','🎖','💎','🌙','☀️','❄️','🌊','🍀',
+];
 let _selectedIcon = '📌';
 
 function buildIconGrid(){
@@ -1976,14 +1990,13 @@ const NAV_SECTIONS=[
 })();
 
 // ── SWIPE NAV ───────────────────────────────────────────────────
-let _currentSlide=0;
 (function(){
   const track=document.getElementById('slides-track');
   const navLinks=Array.from(document.querySelectorAll('nav a'));
   const sections=Array.from(document.querySelectorAll('#slides-track > section'));
   let cur=0,tx0=0,ty0=0,tdx=0,dragging=false,locked=false;
   window.goTo=function(i,anim=true){
-    i=Math.max(0,Math.min(sections.length-1,i)); cur=i; _currentSlide=i;
+    i=Math.max(0,Math.min(sections.length-1,i)); cur=i;
     if(!anim) track.style.transition='none';
     track.style.transform=`translateX(-${i*100}%)`;
     if(!anim) requestAnimationFrame(()=>{track.style.transition='';});
@@ -2103,7 +2116,7 @@ async function saveDayPlans(){ await fbSet('dayPlans',_dayPlans); }
 
 function getGuideItems(){
   const items=[],seen=new Set();
-  document.querySelectorAll('section:not(#days):not(#pack):not(#trash) .card-title').forEach(el=>{
+  document.querySelectorAll('section:not(#days):not(#pack):not(#trash):not(#food):not(#grocery) .card-title').forEach(el=>{
     const sec=el.closest('section'),icon=sec?.querySelector('.section-icon')?.textContent?.trim()||'',name=el.textContent.trim();
     if(!name||seen.has(name))return; seen.add(name); items.push({name,icon});
   });
@@ -2142,19 +2155,21 @@ function buildDaysUI(){
 function renderDayItems(card,date,items){
   const list=card.querySelector('.day-items-list'); list.innerHTML='';
   if(!items.length){ list.innerHTML='<div class="day-empty">Tap + to start planning this day.</div>'; return; }
+  const snapshot=[...items]; // freeze order at render time for sortable
   items.forEach((item,idx)=>{
     const row=document.createElement('div'); row.className='day-item';
+    row.dataset.idx=String(idx);
     row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;';
     const href=item.mapUrl||'';
     const mapBtn=href?`<a href="${href}" target="_blank" class="map-link" style="font-size:0.65rem;padding:3px 7px">${MAP_SVG} Map</a>`:'';
     const topRow=document.createElement('div');
     topRow.style.cssText='display:flex;align-items:center;gap:6px;width:100%';
-    topRow.innerHTML=`${dragHandle()}<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label" style="flex:1;font-weight:600">${item.name}</span>${mapBtn}<button class="day-item-edit" style="flex-shrink:0;background:none;border:none;color:var(--lake);font-size:0.9rem;cursor:pointer;padding:2px 4px" title="Edit">✎</button><button class="day-item-remove" style="flex-shrink:0">×</button>`;
+    topRow.innerHTML=`${dragHandle()}<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label" style="flex:1;font-weight:600">${item.name}</span>${mapBtn}<button class="day-item-action edit" title="Edit">✎</button><button class="day-item-action remove">×</button>`;
     row.appendChild(topRow);
     if(item.desc){ const d=document.createElement('div'); d.style.cssText='font-size:0.78rem;color:#555;padding-left:26px;line-height:1.4'; d.textContent=item.desc; row.appendChild(d); }
     if(item.notes){ const n=document.createElement('div'); n.style.cssText='font-size:0.75rem;color:var(--muted);font-style:italic;padding-left:26px'; n.textContent='📝 '+item.notes; row.appendChild(n); }
-    topRow.querySelector('.day-item-remove').addEventListener('click',()=>removeDayItem(date,idx));
-    topRow.querySelector('.day-item-edit').addEventListener('click',()=>{
+    topRow.querySelector('.day-item-action.remove').addEventListener('click',()=>removeDayItem(date,idx));
+    topRow.querySelector('.day-item-action.edit').addEventListener('click',()=>{
       openEditModal({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'},async({icon,name,desc,notes,mapUrl})=>{
         if(!name) return;
         _dayPlans[date][idx]={..._dayPlans[date][idx],icon,name,desc,notes,mapUrl};
@@ -2164,16 +2179,15 @@ function renderDayItems(card,date,items){
     });
     list.appendChild(row);
   });
-  // sortable
+  // sortable — use data-idx into snapshot so name-matching can't drop items
   makeSortable(list, async()=>{
-    const newOrder=[...list.querySelectorAll('.day-item')].map((_,i)=>items[i]);
-    // rebuild from DOM order
-    const reordered=[...list.children].map(row=>{
-      const label=row.querySelector('.day-item-label');
-      return _dayPlans[date].find(it=>it.name===label?.textContent)||{};
-    }).filter(x=>x.name);
+    const reordered=[...list.querySelectorAll('.day-item')]
+      .map(row=>snapshot[parseInt(row.dataset.idx,10)])
+      .filter(Boolean);
     _dayPlans[date]=reordered;
     await saveDayPlans();
+    buildDaysUI();
+    document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
   });
 }
 async function removeDayItem(date,idx){
@@ -2184,7 +2198,9 @@ async function removeDayItem(date,idx){
 }
 async function addDayItem(date,item){
   if(!_dayPlans[date]) _dayPlans[date]=[];
-  if(!_dayPlans[date].find(i=>i.name===item.name)){ _dayPlans[date].push(item); await saveDayPlans(); }
+  // always push — allow multiple items with same name, use _id to distinguish
+  _dayPlans[date].push({...item, _id: Date.now()+Math.random()});
+  await saveDayPlans();
   buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
 }
 
@@ -2429,9 +2445,6 @@ async function addGroceryItem(){
 }
 document.getElementById('grocery-add-btn').addEventListener('click',addGroceryItem);
 document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
-// remove old emoji input since icon picker replaces it
-const emojiInp=document.getElementById('grocery-emoji-input');
-if(emojiInp) emojiInp.style.display='none';
 
 // ── SECTION CUSTOM ITEMS ────────────────────────────────────────
 const SECTION_META={
