@@ -2337,9 +2337,12 @@ function buildFoodUI(){
   cats.forEach(cat=>{
     const lbl=document.createElement('p'); lbl.className='sublabel'; lbl.textContent=cat; container.appendChild(lbl);
     const catContainer=document.createElement('div'); catContainer.dataset.cat=cat; container.appendChild(catContainer);
-    map[cat].forEach(item=>{
+    const catItems=map[cat];
+    const catSnapshot=[...catItems]; // freeze for this category's sortable
+    catItems.forEach((item,catIdx)=>{
       const idx=_foodItems.indexOf(item);
       const card=document.createElement('div'); card.className='card food';
+      card.dataset.idx=String(catIdx); // index into catSnapshot
       const href=item.mapUrl||(item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`);
       card.innerHTML=`
         <div class="card-top">
@@ -2366,8 +2369,9 @@ function buildFoodUI(){
       catContainer.appendChild(card); initAccordionCard(card); initNoteCard(card);
     });
     makeSortable(catContainer,async()=>{
-      const titles=[...catContainer.querySelectorAll('.card-title')].map(el=>el.textContent);
-      const reordered=titles.map(t=>_foodItems.find(it=>it.name===t)).filter(Boolean);
+      const reordered=[...catContainer.querySelectorAll('.card[data-idx]')]
+        .map(card=>catSnapshot[parseInt(card.dataset.idx,10)])
+        .filter(Boolean);
       const rest=_foodItems.filter(it=>it.cat!==cat);
       _foodItems=[...rest,...reordered];
       await saveFood();
@@ -2405,8 +2409,10 @@ async function loadGrocery(){ const v=await fbGet('groceryItems'); _groceryItems
 async function saveGrocery(){ await fbSet('groceryItems',_groceryItems); }
 function buildGroceryUI(){
   const container=document.getElementById('grocery-list'); container.innerHTML='';
+  const snapshot=[..._groceryItems];
   _groceryItems.forEach((item,idx)=>{
     const row=document.createElement('div'); row.className='grocery-item';
+    row.dataset.idx=String(idx);
     const mapPart=item.mapUrl?`<a href="${item.mapUrl}" target="_blank" class="map-link" style="margin-top:4px;display:inline-flex">${MAP_SVG} Map</a>`:'';
     const notesPart=item.notes?`<div class="grocery-desc" style="font-style:italic;margin-top:2px;">📝 ${item.notes}</div>`:'';
     row.innerHTML=`${dragHandle()}<span class="grocery-emoji">${item.emoji||'🛒'}</span>
@@ -2428,8 +2434,9 @@ function buildGroceryUI(){
     container.appendChild(row);
   });
   makeSortable(container,async()=>{
-    const names=[...container.querySelectorAll('.grocery-name')].map(el=>el.textContent);
-    const reordered=names.map(n=>_groceryItems.find(it=>it.name===n)).filter(Boolean);
+    const reordered=[...container.querySelectorAll('.grocery-item[data-idx]')]
+      .map(row=>snapshot[parseInt(row.dataset.idx,10)])
+      .filter(Boolean);
     _groceryItems=reordered; await saveGrocery();
   });
 }
@@ -2466,8 +2473,11 @@ function buildSectionCustomUI(sid){
   container.innerHTML='';
   const items=_sectionItems[sid]||[];
   const meta=SECTION_META[sid]||{icon:'📌',cardClass:''};
+  const snapshot=[...items]; // freeze for sortable
   items.forEach((item,idx)=>{
-    const card=document.createElement('div'); card.className='card '+meta.cardClass;
+    const card=document.createElement('div');
+    card.className='card '+meta.cardClass;
+    card.dataset.idx=String(idx); // stable index into snapshot
     const href=item.mapUrl||'';
     const mapBtn=href?`<a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>`:'';
     card.innerHTML=`
@@ -2496,12 +2506,17 @@ function buildSectionCustomUI(sid){
       await addToTrash({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},sid);
       _sectionItems[sid].splice(idx,1); await saveSectionItems(); buildSectionCustomUI(sid);
     });
-    container.appendChild(card); initAccordionCard(card); initNoteCard(card);
+    container.appendChild(card);
+    initAccordionCard(card);
+    initNoteCard(card);
   });
+  // Reorder using data-idx into snapshot — never match by name
   makeSortable(container,async()=>{
-    const titles=[...container.querySelectorAll('.card-title')].map(el=>el.textContent);
-    const reordered=titles.map(t=>(_sectionItems[sid]||[]).find(it=>it.name===t)).filter(Boolean);
-    _sectionItems[sid]=reordered; await saveSectionItems();
+    const reordered=[...container.querySelectorAll('.card[data-idx]')]
+      .map(card=>snapshot[parseInt(card.dataset.idx,10)])
+      .filter(Boolean);
+    _sectionItems[sid]=reordered;
+    await saveSectionItems();
   });
 }
 function buildAllSectionCustomUI(){ Object.keys(SECTION_META).forEach(sid=>buildSectionCustomUI(sid)); }
@@ -2510,7 +2525,8 @@ window.openSectionAdd=function(sid){
   openEditModal({name:'',icon:meta.icon,desc:'',notes:'',mapUrl:''},async({icon,name,desc,notes,mapUrl})=>{
     if(!name) return;
     if(!_sectionItems[sid]) _sectionItems[sid]=[];
-    _sectionItems[sid].push({name,icon,desc:desc||'',notes:notes||'',mapUrl:mapUrl||''});
+    // add unique _id so items are always distinguishable
+    _sectionItems[sid].push({name,icon,desc:desc||'',notes:notes||'',mapUrl:mapUrl||'',_id:Date.now()+Math.random()});
     await saveSectionItems(); buildSectionCustomUI(sid);
   });
 };
