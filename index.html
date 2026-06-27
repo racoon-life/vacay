@@ -1890,6 +1890,31 @@ async function fbGet(id){ try{ const s=await getDoc(doc(db,'guide',id)); return 
 async function fbSet(id,v){ lockWrite(id); try{ await setDoc(doc(db,'guide',id),{value:v}); }catch(e){ console.warn(e); } }
 function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()&&!isLocked(id)) cb(s.data().value); }); }
 
+// ── CONSTANTS ────────────────────────────────────────────────────
+const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+
+const SECTION_META={
+  fete:      {label:'14 Juillet',  icon:'🇫🇷', cardClass:'fete'},
+  sights:    {label:'Sights',      icon:'🏛',  cardClass:'sight'},
+  hiking:    {label:'Hiking',      icon:'🥾',  cardClass:'hike'},
+  beaches:   {label:'Beaches',     icon:'🏖',  cardClass:''},
+  boats:     {label:'Boats',       icon:'⛵',  cardClass:'boat'},
+  market:    {label:'Market',      icon:'🧺',  cardClass:''},
+  activities:{label:'Activities',  icon:'🎯',  cardClass:''},
+  tips:      {label:'Tips',        icon:'💡',  cardClass:''},
+};
+
+const TRIP_DAYS=[
+  {date:'2026-07-09',name:'Thu, 9 Jul — Arrival Day'},
+  {date:'2026-07-10',name:'Fri, 10 Jul — Market Day 🧺'},
+  {date:'2026-07-11',name:'Sat, 11 Jul'},
+  {date:'2026-07-12',name:'Sun, 12 Jul — Market Day 🧺'},
+  {date:'2026-07-13',name:'Mon, 13 Jul'},
+  {date:'2026-07-14',name:'Tue, 14 Jul — 🇫🇷 Bastille Day'},
+  {date:'2026-07-15',name:'Wed, 15 Jul — Market Day 🧺'},
+  {date:'2026-07-16',name:'Thu, 16 Jul — Departure Day'},
+];
+
 // ── ICON PICKER ─────────────────────────────────────────────────
 const ICONS = [
   // Nature & outdoors
@@ -2100,16 +2125,6 @@ document.getElementById('edit-save-btn').addEventListener('click',()=>{
 });
 
 // ── TRIP DAYS ───────────────────────────────────────────────────
-const TRIP_DAYS=[
-  {date:'2026-07-09',name:'Thu, 9 Jul — Arrival Day'},
-  {date:'2026-07-10',name:'Fri, 10 Jul — Market Day 🧺'},
-  {date:'2026-07-11',name:'Sat, 11 Jul'},
-  {date:'2026-07-12',name:'Sun, 12 Jul — Market Day 🧺'},
-  {date:'2026-07-13',name:'Mon, 13 Jul'},
-  {date:'2026-07-14',name:'Tue, 14 Jul — 🇫🇷 Bastille Day'},
-  {date:'2026-07-15',name:'Wed, 15 Jul — Market Day 🧺'},
-  {date:'2026-07-16',name:'Thu, 16 Jul — Departure Day'},
-];
 let _dayPlans={};
 async function loadDayPlans(){ const v=await fbGet('dayPlans'); _dayPlans=v||{}; }
 async function saveDayPlans(){ await fbSet('dayPlans',_dayPlans); }
@@ -2318,7 +2333,6 @@ document.getElementById('pack-add-btn').addEventListener('click',addPackItem);
 document.getElementById('pack-input').addEventListener('keydown',e=>{if(e.key==='Enter')addPackItem();});
 
 // ── FOOD ────────────────────────────────────────────────────────
-const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
 const DEFAULT_FOOD=[
   {name:'Le Freti',cat:'🍽 Savoyard',desc:'Fondue, raclette, and tartiflette in a charming timber interior. Book ahead.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Le+Freti+Annecy+France',icon:'🍽'},
   {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace. Local fish (perch, char), Savoyard meat dishes.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy',icon:'🍽'},
@@ -2455,16 +2469,6 @@ document.getElementById('grocery-add-btn').addEventListener('click',addGroceryIt
 document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
 
 // ── SECTION CUSTOM ITEMS ────────────────────────────────────────
-const SECTION_META={
-  fete:      {label:'14 Juillet',icon:'🇫🇷',cardClass:'fete'},
-  sights:    {label:'Sights',icon:'🏛',cardClass:'sight'},
-  hiking:    {label:'Hiking',icon:'🥾',cardClass:'hike'},
-  beaches:   {label:'Beaches',icon:'🏖',cardClass:''},
-  boats:     {label:'Boats',icon:'⛵',cardClass:'boat'},
-  market:    {label:'Market',icon:'🧺',cardClass:''},
-  activities:{label:'Activities',icon:'🎯',cardClass:''},
-  tips:      {label:'Tips',icon:'💡',cardClass:''},
-};
 let _sectionItems={};
 async function loadSectionItems(){ const v=await fbGet('sectionItems'); _sectionItems=v||{}; }
 async function saveSectionItems(){ await fbSet('sectionItems',_sectionItems); }
