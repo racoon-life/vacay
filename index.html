@@ -1895,15 +1895,15 @@ const ICONS = [
   // Nature & outdoors
   '🏔','🌊','🌅','🌄','🗻','🌸','🌿','🌲','🌴','🍃','🌾','🦅','🦆','🐾','🦝','🐻','🦌','🌺','🌻','🌈',
   // Activities
-  '🥾','🚴','🚶','🎿','🛶','🎣','🏊','🚣','🧗','🏄','🤿','🎯','⛷','🧘','🏋',
+  '🥾','🚴','🚶','🎿','🛶','🎣','🏊','🚣','🧗','🏄','🤿','⛷','🧘','🏋',
   // Food & drink
-  '🍽','🍷','🍕','☕','🍦','🥐','🧀','🥗','🍺','🥂','🍰','🧁','🥩','🍷','🥘','🫕','🧆','🥪',
+  '🍽','🍷','🍕','☕','🍦','🥐','🧀','🥗','🍺','🥂','🍰','🧁','🥩','🥘','🫕','🧆','🥪',
   // Sights & places
   '🏛','🏰','⛪','🗼','🎪','🎭','🛍','💈','🗽','🎡','🎢','🏟','🕌','⛩','🏯',
   // Transport
   '🚂','✈️','🚁','⛵','🛥','🚌','🚗','🚲','🛵','🛳',
   // Essentials & misc
-  '📌','📍','⭐','❤️','🔥','✅','🎵','🛒','🧺','🎒','🗺','💡','🎯','📸','🎬','📖','💬','🗓','💊','🩹','🏥','💳','💰','🔑','🧲','📞','🌐','🔔','⚡','🎁','🎉','🎀','🏆','🥇','🎖','💎','🌙','☀️','❄️','🌊','🍀',
+  '📌','📍','⭐','❤️','🔥','✅','🎵','🛒','🧺','🎒','🗺','💡','🎯','📸','🎬','📖','💬','🗓','💊','🩹','🏥','💳','💰','🔑','🧲','📞','🌐','🔔','⚡','🎁','🎉','🎀','🏆','🥇','🎖','💎','🌙','☀️','❄️','🍀',
 ];
 let _selectedIcon = '📌';
 
@@ -2234,10 +2234,11 @@ document.getElementById('modal-search').addEventListener('input',function(){ ren
 async function addCustomItemToDay(){
   const input=document.getElementById('modal-custom-input'),name=input.value.trim();
   if(!name||!_activeDay) return;
+  const date=_activeDay; // capture before closeModal nulls it
   window.closeModal(); input.value='';
   openEditModal({name,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
     if(!n) return;
-    await addDayItem(_activeDay,{name:n,icon,desc,notes,mapUrl});
+    await addDayItem(date,{name:n,icon,desc,notes,mapUrl});
   });
 }
 document.getElementById('modal-custom-add-btn').addEventListener('click',addCustomItemToDay);
