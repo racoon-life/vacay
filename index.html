@@ -1138,6 +1138,11 @@
     <div class="tip">
       <strong>⚠️ 14 Juillet tips:</strong> Most shops and some restaurants close on the 14th. Stock up on food the day before. Roads around the lake get extremely congested — arrive on foot or by bike. The morning of the 14th is a great time to hike (quieter trails, festive atmosphere in town when you return).
     </div>
+
+    <div id="fete-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('fete')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── SIGHTS ── -->
@@ -1242,6 +1247,11 @@
       <p>Dramatic river gorge 10 km from Annecy with walkways suspended over rushing water. The labyrinthe de rochers (boulder maze) at the exit is a bonus. Bus accessible.</p>
       <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
     </div>
+
+    <div id="sights-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('sights')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── HIKING ── -->
@@ -1320,6 +1330,11 @@
     <div class="tip">
       <strong>⏰ Tip:</strong> In peak summer, start at sunrise and aim to be off exposed trails by early afternoon. The shuttle boat connects villages so you're not limited to trails starting in Annecy.
     </div>
+
+    <div id="hiking-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('hiking')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── BEACHES ── -->
@@ -1434,6 +1449,11 @@
     <div class="tip">
       <strong>🚲 Getting there:</strong> Vélonecy e-bikes are free for the first 30 min (app required, re-dock every 30 min). Buses run around the lake for ~€2.
     </div>
+
+    <div id="beaches-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('beaches')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── BOATS ── -->
@@ -1494,6 +1514,11 @@
     <div class="tip">
       <strong>⚠️ Tip:</strong> Pedal boats at the Pâquier sell out fast in peak summer — book ahead or arrive early. All electric boat operators require a €1,000 deposit (credit card).
     </div>
+
+    <div id="boats-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('boats')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── EAT & DRINK ── -->
@@ -1565,6 +1590,11 @@
     <div class="tip">
       <strong>🧀 Don't miss:</strong> Pierre Gay fromagerie for aged reblochon, beaufort, tomme de Savoie · Le Glacier des Alpes for Alpine ice cream · Boulangerie Aristide for sourdough on the canal.
     </div>
+
+    <div id="market-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('market')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── ACTIVITIES ── -->
@@ -1653,6 +1683,11 @@
       <p>Rock-face climbing route above the lake near Talloires. Spectacular views over the water. Requires a harness and via ferrata set — hire available locally.</p>
       <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
     </div>
+
+    <div id="activities-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('activities')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── TIPS ── -->
@@ -1692,6 +1727,11 @@
     <div class="tip">
       <strong>📲 Useful apps:</strong> Vélonecy (e-bikes) · Compagnie des Bateaux (lake shuttles) · SIBRA (local buses) · IGNrando or Komoot (trails) · Google Maps offline download covers the whole area well.
     </div>
+
+    <div id="tips-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('tips')">
+      <span>＋</span> Add item
+    </button>
   </section>
 
   <!-- ── PACK LIST ── -->
@@ -1904,22 +1944,36 @@ async function restoreFromTrash(idx){
   if(!item) return;
   _trash.splice(idx,1);
   await saveTrash();
-  // restore to appropriate list
   if(item.section==='food'){ _foodItems.push({name:item.name,cat:item.cat||'✨ Other',desc:item.desc||'',tag:item.tag||'',tagClass:item.tagClass||'',mapQ:'',mapUrl:item.mapUrl||''}); await saveFood(); buildFoodUI(); }
   else if(item.section==='grocery'){ _groceryItems.push({emoji:item.emoji||'🛒',name:item.name,desc:item.desc||'',mapUrl:item.mapUrl||''}); await saveGrocery(); buildGroceryUI(); }
   else if(item.section==='pack'){ _packItems.push({label:item.name,cat:item.cat||'🎒 Essentials',checked:false}); await savePack(); buildPackUI(); }
+  else if(item.section==='days' && item.date){ await addDayItem(item.date,{name:item.name,icon:item.icon||'📌'}); }
+  else if(SECTION_META[item.section]){
+    if(!_sectionItems[item.section]) _sectionItems[item.section]=[];
+    _sectionItems[item.section].push({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''});
+    await saveSectionItems(); buildSectionCustomUI(item.section);
+  }
   buildTrashUI();
 }
+
 function buildTrashUI(){
   const container=document.getElementById('trash-list'); container.innerHTML='';
   const active=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
   if(!active.length){ container.innerHTML='<div class="trash-empty">No recently removed items.</div>'; return; }
   active.forEach((item,idx)=>{
     const daysLeft=Math.ceil((THIRTY_DAYS-(Date.now()-item.removedAt))/(24*60*60*1000));
+    // Build a readable source label
+    let sourceLabel = item.section;
+    if(item.section==='days' && item.date){
+      const d=TRIP_DAYS.find(t=>t.date===item.date);
+      sourceLabel = d ? d.name : item.date;
+    } else if(SECTION_META[item.section]){
+      sourceLabel = SECTION_META[item.section].label;
+    }
     const row=document.createElement('div'); row.className='trash-item';
     row.innerHTML=`<div class="trash-item-info">
-      <div class="trash-item-name">${item.emoji?item.emoji+' ':''} ${item.name}</div>
-      <div class="trash-item-meta">${item.section} · expires in ${daysLeft}d</div>
+      <div class="trash-item-name">${item.icon?item.icon+' ':''}${item.emoji?item.emoji+' ':''}${item.name}</div>
+      <div class="trash-item-meta">${sourceLabel} · expires in ${daysLeft}d</div>
     </div>
     <button class="trash-restore-btn">Restore</button>`;
     row.querySelector('.trash-restore-btn').addEventListener('click',()=>restoreFromTrash(idx));
@@ -2010,8 +2064,12 @@ function renderDayItems(card,date,items){
   });
 }
 async function removeDayItem(date,idx){
-  const items=_dayPlans[date]||[]; items.splice(idx,1); _dayPlans[date]=items;
-  await saveDayPlans(); buildDaysUI();
+  const items=_dayPlans[date]||[];
+  const removed=items[idx];
+  items.splice(idx,1); _dayPlans[date]=items;
+  await saveDayPlans();
+  if(removed) await addToTrash({name:removed.name,icon:removed.icon||'📌',date},'days');
+  buildDaysUI();
   document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
 }
 async function addDayItem(date,item){
@@ -2251,20 +2309,109 @@ function initNoteCard(card){
 }
 function initAllNotes(){ document.querySelectorAll('.card').forEach(card=>initNoteCard(card)); }
 
+
+// ── GENERIC SECTION CUSTOM ITEMS ────────────────────────────────
+const SECTION_META = {
+  fete:       {label:'14 Juillet',   icon:'🇫🇷', cardClass:'fete'},
+  sights:     {label:'Sights',       icon:'🏛',  cardClass:'sight'},
+  hiking:     {label:'Hiking',       icon:'🥾',  cardClass:'hike'},
+  beaches:    {label:'Beaches',      icon:'🏖',  cardClass:''},
+  boats:      {label:'Boats',        icon:'⛵',  cardClass:'boat'},
+  market:     {label:'Market',       icon:'🧺',  cardClass:''},
+  activities: {label:'Activities',   icon:'🎯',  cardClass:''},
+  tips:       {label:'Tips',         icon:'💡',  cardClass:''},
+};
+
+let _sectionItems = {}; // { sectionId: [ {name,desc,notes,mapUrl}, ... ] }
+
+async function loadSectionItems() {
+  const v = await fbGet('sectionItems');
+  _sectionItems = v || {};
+}
+async function saveSectionItems() {
+  await fbSet('sectionItems', _sectionItems);
+}
+
+function buildSectionCustomUI(sid) {
+  const container = document.getElementById(sid + '-custom');
+  if (!container) return;
+  container.innerHTML = '';
+  const items = _sectionItems[sid] || [];
+  const meta  = SECTION_META[sid] || {icon:'📌', cardClass:''};
+  items.forEach((item, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card ' + meta.cardClass;
+    const href = item.mapUrl || '';
+    const mapBtn = href
+      ? `<a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>`
+      : '';
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="card-title">${item.name}</span>
+        <div class="card-actions">
+          ${mapBtn}
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+          <button class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+          <button class="pack-delete" title="Remove">×</button>
+        </div>
+      </div>
+      ${item.desc  ? `<p>${item.desc}</p>`  : ''}
+      ${item.notes ? `<p style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:5px;">📝 ${item.notes}</p>` : ''}
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
+
+    const [editBtn, delBtn] = [...card.querySelectorAll('.pack-delete')];
+
+    editBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openEditModal({ name: item.name, notes: item.notes || '', mapUrl: item.mapUrl || '' }, ({ name, notes, mapUrl }) => {
+        if (!name) return;
+        _sectionItems[sid][idx] = { ...item, name, notes, mapUrl };
+        saveSectionItems(); buildSectionCustomUI(sid);
+      });
+    });
+
+    delBtn.addEventListener('click', async e => {
+      e.stopPropagation();
+      await addToTrash({ name: item.name, desc: item.desc || '', notes: item.notes || '', mapUrl: item.mapUrl || '' }, sid);
+      _sectionItems[sid].splice(idx, 1);
+      await saveSectionItems(); buildSectionCustomUI(sid);
+    });
+
+    container.appendChild(card);
+    initAccordionCard(card);
+    initNoteCard(card);
+  });
+}
+
+function buildAllSectionCustomUI() {
+  Object.keys(SECTION_META).forEach(sid => buildSectionCustomUI(sid));
+}
+
+window.openSectionAdd = function(sid) {
+  openEditModal({ name: '', notes: '', mapUrl: '' }, async ({ name, notes, mapUrl }) => {
+    if (!name) return;
+    if (!_sectionItems[sid]) _sectionItems[sid] = [];
+    _sectionItems[sid].push({ name, notes: notes || '', mapUrl: mapUrl || '', desc: '' });
+    await saveSectionItems();
+    buildSectionCustomUI(sid);
+  });
+};
+
 // ── REAL-TIME LISTENERS ──────────────────────────────────────────
 fbListen('dayPlans',v=>{ _dayPlans=v||{}; buildDaysUI(); });
 fbListen('packItems',v=>{ if(v){_packItems=v; buildPackUI();} });
 fbListen('foodItems',v=>{ if(v){_foodItems=v; buildFoodUI();} });
 fbListen('groceryItems',v=>{ if(v){_groceryItems=v; buildGroceryUI();} });
 fbListen('trash',v=>{ if(v){_trash=v; buildTrashUI();} });
+fbListen('sectionItems',v=>{ if(v){_sectionItems=v; buildAllSectionCustomUI();} });
 fbListen('notes',v=>{ if(v){_notes=v; initAllNotes();} });
 
 // ── INIT ─────────────────────────────────────────────────────────
 async function init(){
-  try{ await Promise.all([loadDayPlans(),loadPack(),loadFood(),loadGrocery(),loadNotesFb(),loadTrash()]); }
+  try{ await Promise.all([loadDayPlans(),loadPack(),loadFood(),loadGrocery(),loadNotesFb(),loadTrash(),loadSectionItems()]); }
   catch(e){ console.warn('Firebase load error, using defaults',e); }
   document.querySelectorAll('.card').forEach(initAccordionCard);
-  buildDaysUI(); buildPackUI(); buildFoodUI(); buildGroceryUI(); buildTrashUI(); initAllNotes();
+  buildDaysUI(); buildPackUI(); buildFoodUI(); buildGroceryUI(); buildTrashUI(); buildAllSectionCustomUI(); initAllNotes();
   const overlay=document.getElementById('loading-overlay');
   overlay.classList.add('done'); setTimeout(()=>overlay.remove(),500);
 }
