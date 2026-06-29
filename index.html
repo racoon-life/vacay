@@ -1,15 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── Default preferences ────────────────────────────────────────────
-const DEFAULT_PREFS = {
-  transport: [],
-  accommodation: [],
-  dietary: [],
-  budget: "",
-  groupType: "",
-  mobility: "",
-  freetext: "",
-};
+// ─── Shared styles ───────────────────────────────────────────────────
+const labelStyle = { display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#555", marginBottom: "0.3rem" };
+const inputStyle = { width: "100%", padding: "0.65rem 0.85rem", border: "1.5px solid #e0e0e0", borderRadius: "0.6rem", fontSize: "0.95rem", color: "#111", background: "#fafafa", outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
+const btnPrimary = { padding: "0.65rem 1.25rem", background: "#2B7A9E", color: "#fff", border: "none", borderRadius: "0.65rem", fontWeight: 600, cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit" };
+const btnSecondary = { padding: "0.65rem 1.25rem", background: "#f0f0f0", color: "#333", border: "none", borderRadius: "0.65rem", fontWeight: 500, cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit" };
+const iconBtn = { background: "#f5f5f5", border: "none", borderRadius: "0.4rem", padding: "0.3rem 0.55rem", cursor: "pointer", fontSize: "0.9rem", color: "#555" };
+
+// ─── Palettes ────────────────────────────────────────────────────────
+const PALETTES = [
+  { bg: "#E8F4F8", accent: "#2B7A9E", text: "#1a3a4a" },
+  { bg: "#F0EBF8", accent: "#6B3FA0", text: "#2d1a45" },
+  { bg: "#FFF0E6", accent: "#C05C1A", text: "#3d1f0a" },
+  { bg: "#E6F7EE", accent: "#1A8C4E", text: "#0c3020" },
+  { bg: "#FDF0F0", accent: "#B52B2B", text: "#3d0a0a" },
+  { bg: "#F5F5E8", accent: "#7A6B1A", text: "#2a240a" },
+];
+
+// ─── Default prefs ───────────────────────────────────────────────────
+const DEFAULT_PREFS = { transport: [], accommodation: [], dietary: [], budget: "", groupType: "", mobility: "", freetext: "" };
 
 const PREF_OPTIONS = {
   transport: [
@@ -38,7 +47,7 @@ const PREF_OPTIONS = {
   ],
 };
 
-// ─── Annecy seed data ───────────────────────────────────────────────
+// ─── Annecy seed ─────────────────────────────────────────────────────
 const ANNECY_DEST = {
   id: "dest_annecy_2026",
   name: "Annecy, France",
@@ -47,22 +56,22 @@ const ANNECY_DEST = {
   createdAt: "2026-06-01T00:00:00.000Z",
   notes: "Mobile-first vacation guide. Firebase Firestore for real-time sync. Published on GitHub Pages.",
   sections: [
-    { id: "days", icon: "📅", label: "Days", type: "dynamic" },
-    { id: "fete", icon: "🇫🇷", label: "14 Juillet", type: "static" },
-    { id: "sights", icon: "🏛", label: "Sights", type: "static" },
-    { id: "hiking", icon: "🥾", label: "Hiking", type: "static" },
-    { id: "beaches", icon: "🏖", label: "Beaches", type: "static" },
-    { id: "boats", icon: "⛵", label: "Boats", type: "static" },
-    { id: "eat", icon: "🍽", label: "Eat & Drink", type: "dynamic" },
-    { id: "grocery", icon: "🛒", label: "Grocery", type: "dynamic" },
-    { id: "market", icon: "🧺", label: "Market", type: "static" },
-    { id: "activities", icon: "🎯", label: "Activities", type: "static" },
-    { id: "tips", icon: "💡", label: "Tips", type: "static" },
-    { id: "pack", icon: "🎒", label: "Pack", type: "dynamic" },
+    { id: "days",       icon: "📅", label: "Days",        type: "dynamic" },
+    { id: "fete",       icon: "🎆", label: "14 Juillet",  type: "static"  },
+    { id: "sights",     icon: "🏛",  label: "Sights",      type: "static"  },
+    { id: "hiking",     icon: "🥾", label: "Hiking",      type: "static"  },
+    { id: "beaches",    icon: "🏖",  label: "Beaches",     type: "static"  },
+    { id: "boats",      icon: "⛵", label: "Boats",       type: "static"  },
+    { id: "eat",        icon: "🍽",  label: "Eat & Drink", type: "dynamic" },
+    { id: "grocery",    icon: "🛒", label: "Grocery",     type: "dynamic" },
+    { id: "market",     icon: "🧺", label: "Market",      type: "static"  },
+    { id: "activities", icon: "🎯", label: "Activities",  type: "static"  },
+    { id: "tips",       icon: "💡", label: "Tips",        type: "static"  },
+    { id: "pack",       icon: "🎒", label: "Pack",        type: "dynamic" },
   ],
   sectionData: {
     sights: [
-      { id: "s1", name: "Palais de l'Île", desc: "12th-century island prison, most photographed in Annecy", notes: "Visit at golden hour for the best photos. Free to walk around, fee to enter." },
+      { id: "s1", name: "Palais de l'Île", desc: "12th-century island prison, most photographed in Annecy", notes: "Visit at golden hour for best photos. Free to walk around, fee to enter." },
       { id: "s2", name: "Château d'Annecy", desc: "Medieval castle overlooking the old town and lake", notes: "€4.50 entry. Museum inside. Great views from the ramparts." },
       { id: "s3", name: "Old Town (Vieille Ville)", desc: "Pastel arcaded streets along canals", notes: "Busiest on market days (Tue/Fri/Sun). Morning visits quieter." },
       { id: "s4", name: "Jardins de l'Europe", desc: "Lakeside gardens with swans and mountain views", notes: "Free. Perfect for an evening stroll." },
@@ -96,7 +105,7 @@ const ANNECY_DEST = {
     activities: [
       { id: "a1", name: "Paragliding from Planfait", desc: "Tandem flights with a qualified guide, 20–30 min in the air", notes: "Summum Parapente and Air et Sens are well reviewed. Book ahead." },
       { id: "a2", name: "Bastille Day (14 Juillet)", desc: "Fireworks over the lake — July 14th", notes: "Arrive at the lake by 9pm for a good spot. Fireworks at 11pm." },
-      { id: "a3", name: "Annecy International Animation Festival", desc: "If your dates overlap — world-renowned festival", notes: "June dates only — but check programming at annecy.org." },
+      { id: "a3", name: "Annecy International Animation Festival", desc: "World-renowned festival", notes: "June dates only — check programming at annecy.org." },
     ],
     tips: [
       { id: "t1", name: "Getting around", desc: "Annecy old town is tiny and walkable. Rent bikes for the lakeside path.", notes: "Vélo'Annecy bike share is cheap. The lake loop is 37km total." },
@@ -105,7 +114,7 @@ const ANNECY_DEST = {
       { id: "t4", name: "Language", desc: "French only in most restaurants and shops.", notes: "Basic French phrases go a long way. Menus rarely have English." },
     ],
     fete: [
-      { id: "f1", name: "Fireworks — July 14th", desc: "Biggest display of the year over the lake", notes: "Paquier meadow and the Albigny beach are the best viewing spots. Very crowded." },
+      { id: "f1", name: "Fireworks — July 14th", desc: "Biggest display of the year over the lake", notes: "Paquier meadow and Albigny beach are the best viewing spots. Very crowded." },
       { id: "f2", name: "Bal des Pompiers", desc: "Firemen's ball — free street dancing on July 13th evening", notes: "Starts around 9pm near the fire station. Very local, very fun." },
       { id: "f3", name: "Military parade", desc: "Morning of July 14th in the town centre", notes: "Starts 10am. Short parade through the main street." },
     ],
@@ -119,256 +128,202 @@ const ANNECY_DEST = {
       { id: "p1", name: "Sunscreen SPF 50+", desc: "Lake reflection + altitude = intense sun", notes: "" },
       { id: "p2", name: "Light rain jacket", desc: "Afternoon thunderstorms are likely", notes: "" },
       { id: "p3", name: "Hiking shoes", desc: "Essential even for moderate trails", notes: "" },
-      { id: "p4", name: "Swimwear × 2", desc: "You'll be in the lake daily", notes: "" },
+      { id: "p4", name: "Swimwear x2", desc: "You'll be in the lake daily", notes: "" },
       { id: "p5", name: "Reusable water bottle", desc: "Tap water is excellent. Fountains everywhere.", notes: "" },
       { id: "p6", name: "European power adapter", desc: "Type E/F plug", notes: "" },
-      { id: "p7", name: "Cash (€)", desc: "Many market stalls and small restaurants cash only", notes: "" },
-      { id: "p8", name: "French phrasebook / app", desc: "Even basic phrases help", notes: "" },
+      { id: "p7", name: "Cash (euros)", desc: "Many market stalls and small restaurants cash only", notes: "" },
+      { id: "p8", name: "French phrasebook / app", desc: "Even basic phrases help a lot", notes: "" },
     ],
   },
 };
 
-// ─── Default sections template ──────────────────────────────────────
+// ─── Default sections for new destinations ───────────────────────────
 const DEFAULT_SECTIONS = [
   { id: "days",       icon: "📅", label: "Days",        type: "dynamic" },
   { id: "sights",     icon: "🏛",  label: "Sights",      type: "static"  },
   { id: "eat",        icon: "🍽",  label: "Eat & Drink", type: "dynamic" },
-  { id: "hiking",     icon: "🥾", label: "Hiking",      type: "static"  },
-  { id: "beaches",    icon: "🏖",  label: "Beaches",     type: "static"  },
   { id: "activities", icon: "🎯", label: "Activities",  type: "static"  },
   { id: "tips",       icon: "💡", label: "Tips",        type: "static"  },
   { id: "pack",       icon: "🎒", label: "Pack",        type: "dynamic" },
 ];
 
-function newDestination(name, dates, emoji, scaffoldData) {
+function makeNewDest(name, dates, emoji, scaffold) {
   return {
-    id: `dest_${Date.now()}`,
+    id: "dest_" + Date.now(),
     name,
     dates,
     emoji: emoji || "✈️",
     createdAt: new Date().toISOString(),
-    sections: scaffoldData?.sections || DEFAULT_SECTIONS.map(s => ({ ...s })),
-    sectionData: scaffoldData?.sectionData || {},
-    notes: scaffoldData?.notes || "",
+    sections: scaffold ? scaffold.sections : DEFAULT_SECTIONS.map(s => Object.assign({}, s)),
+    sectionData: scaffold ? scaffold.sectionData : {},
+    notes: scaffold ? (scaffold.notes || "") : "",
   };
 }
 
-// ─── Palettes ────────────────────────────────────────────────────────
-const PALETTES = [
-  { bg: "#E8F4F8", accent: "#2B7A9E", text: "#1a3a4a" },
-  { bg: "#F0EBF8", accent: "#6B3FA0", text: "#2d1a45" },
-  { bg: "#FFF0E6", accent: "#C05C1A", text: "#3d1f0a" },
-  { bg: "#E6F7EE", accent: "#1A8C4E", text: "#0c3020" },
-  { bg: "#FDF0F0", accent: "#B52B2B", text: "#3d0a0a" },
-  { bg: "#F5F5E8", accent: "#7A6B1A", text: "#2a240a" },
-];
-
-// ─── Storage helpers (defined after ANNECY_DEST so seed ref works) ──
-const loadDestinations = async () => {
+// ─── Storage ─────────────────────────────────────────────────────────
+async function loadDestinations() {
   try {
     const r = await window.storage.get("destinations");
     const dests = r ? JSON.parse(r.value) : [];
-    const hasAnnecy = dests.some(d => d.id === "dest_annecy_2026");
-    return hasAnnecy ? dests : [ANNECY_DEST, ...dests];
-  } catch { return [ANNECY_DEST]; }
-};
-const saveDestinations = async (dests) => {
-  try { await window.storage.set("destinations", JSON.stringify(dests)); } catch {}
-};
-const loadPreferences = async () => {
-  try { const r = await window.storage.get("travel_prefs"); return r ? JSON.parse(r.value) : DEFAULT_PREFS; }
-  catch { return DEFAULT_PREFS; }
-};
-const savePreferences = async (prefs) => {
-  try { await window.storage.set("travel_prefs", JSON.stringify(prefs)); } catch {}
-};
+    const hasAnnecy = dests.some(function(d) { return d.id === "dest_annecy_2026"; });
+    return hasAnnecy ? dests : [ANNECY_DEST].concat(dests);
+  } catch(e) {
+    return [ANNECY_DEST];
+  }
+}
+async function saveDestinations(dests) {
+  try { await window.storage.set("destinations", JSON.stringify(dests)); } catch(e) {}
+}
+async function loadPreferences() {
+  try {
+    const r = await window.storage.get("travel_prefs");
+    return r ? JSON.parse(r.value) : Object.assign({}, DEFAULT_PREFS);
+  } catch(e) {
+    return Object.assign({}, DEFAULT_PREFS);
+  }
+}
+async function savePreferences(prefs) {
+  try { await window.storage.set("travel_prefs", JSON.stringify(prefs)); } catch(e) {}
+}
 
-// ─── Shared styles ───────────────────────────────────────────────────
-const labelStyle = { display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#555", marginBottom: "0.3rem" };
-const inputStyle = {
-  width: "100%", padding: "0.65rem 0.85rem",
-  border: "1.5px solid #e0e0e0", borderRadius: "0.6rem",
-  fontSize: "0.95rem", color: "#111", background: "#fafafa",
-  outline: "none", boxSizing: "border-box", fontFamily: "inherit",
-};
-const btnPrimary = {
-  padding: "0.65rem 1.25rem", background: "#2B7A9E", color: "#fff",
-  border: "none", borderRadius: "0.65rem", fontWeight: 600,
-  cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit",
-};
-const btnSecondary = {
-  padding: "0.65rem 1.25rem", background: "#f0f0f0", color: "#333",
-  border: "none", borderRadius: "0.65rem", fontWeight: 500,
-  cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit",
-};
-const iconBtn = {
-  background: "#f5f5f5", border: "none", borderRadius: "0.4rem",
-  padding: "0.3rem 0.55rem", cursor: "pointer", fontSize: "0.9rem", color: "#555",
-};
-
-// ─── Modal wrapper ───────────────────────────────────────────────────
+// ─── Modal ───────────────────────────────────────────────────────────
 function Modal({ onClose, children, wide }) {
   return (
-    <div onClick={onClose} style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-      zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "1rem", overflowY: "auto",
-    }}>
-      <div onClick={e => e.stopPropagation()} style={{
-        background: "#fff", borderRadius: "1.25rem", padding: "1.75rem",
-        width: "100%", maxWidth: wide ? "560px" : "420px",
-        boxShadow: "0 24px 60px rgba(0,0,0,0.2)", margin: "auto",
-      }}>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", overflowY: "auto" }}>
+      <div onClick={function(e){ e.stopPropagation(); }} style={{ background: "#fff", borderRadius: "1.25rem", padding: "1.75rem", width: "100%", maxWidth: wide ? "560px" : "420px", boxShadow: "0 24px 60px rgba(0,0,0,0.2)", margin: "auto" }}>
         {children}
       </div>
     </div>
   );
 }
 
-// ─── Preferences Panel ───────────────────────────────────────────────
+// ─── Preferences panel ───────────────────────────────────────────────
 function PreferencesPanel({ prefs, onSave, onClose }) {
-  const [local, setLocal] = useState({ ...prefs });
+  const [local, setLocal] = useState(Object.assign({}, prefs));
 
   function toggle(category, id) {
-    setLocal(p => {
+    setLocal(function(p) {
       const arr = p[category] || [];
-      return { ...p, [category]: arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id] };
+      const next = arr.includes(id) ? arr.filter(function(x){ return x !== id; }) : arr.concat([id]);
+      return Object.assign({}, p, { [category]: next });
     });
   }
 
-  const chipActive = { background: "#2B7A9E", color: "#fff", border: "1.5px solid #2B7A9E" };
-  const chipInactive = { background: "#f5f5f5", color: "#444", border: "1.5px solid #e0e0e0" };
+  const chipOn  = { background: "#2B7A9E", color: "#fff",  border: "1.5px solid #2B7A9E" };
+  const chipOff = { background: "#f5f5f5", color: "#444",  border: "1.5px solid #e0e0e0" };
+  const baseChip = { padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem", cursor: "pointer", fontFamily: "inherit", fontWeight: 500 };
 
   function ChipGroup({ label, category }) {
     return (
-      <div style={{ marginBottom: "1.25rem" }}>
-        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>{label}</div>
+      <div style={{ marginBottom: "1.1rem" }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.45rem" }}>{label}</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-          {PREF_OPTIONS[category].map(opt => (
-            <button key={opt.id} onClick={() => toggle(category, opt.id)} style={{
-              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
-              cursor: "pointer", fontFamily: "inherit", fontWeight: 500,
-              ...(local[category]?.includes(opt.id) ? chipActive : chipInactive),
-            }}>{opt.label}</button>
-          ))}
+          {PREF_OPTIONS[category].map(function(opt) {
+            const active = (local[category] || []).includes(opt.id);
+            return (
+              <button key={opt.id} onClick={function(){ toggle(category, opt.id); }} style={Object.assign({}, baseChip, active ? chipOn : chipOff)}>
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
   }
 
+  const groups = ["Budget 💰", "Mid-range 💰💰", "Luxury 💰💰💰"];
+  const groupTypes = ["Solo 🧍", "Couple 👫", "Family 👨‍👩‍👧", "Friends 👯", "Seniors 👴"];
+  const mobilityOpts = ["No restrictions", "Limited walking", "Wheelchair accessible", "No stairs"];
+
   return (
     <Modal onClose={onClose} wide>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-        <h2 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "#111" }}>⚙️ Travel Preferences</h2>
-        <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "1.3rem", cursor: "pointer", color: "#999", lineHeight: 1 }}>×</button>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+        <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800, color: "#111" }}>⚙️ Travel Preferences</h2>
+        <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "1.3rem", cursor: "pointer", color: "#999" }}>×</button>
       </div>
-      <p style={{ margin: "0 0 1.25rem", fontSize: "0.85rem", color: "#666", lineHeight: 1.5 }}>
-        These preferences are passed to Claude when generating guide scaffolds for new destinations — so suggestions will respect your restrictions from the start.
+      <p style={{ margin: "0 0 1.1rem", fontSize: "0.83rem", color: "#666", lineHeight: 1.5 }}>
+        These are passed to Claude when generating guide scaffolds — suggestions will respect your restrictions from the start.
       </p>
 
       <ChipGroup label="Transport" category="transport" />
       <ChipGroup label="Accommodation" category="accommodation" />
       <ChipGroup label="Dietary" category="dietary" />
 
-      <div style={{ marginBottom: "1.25rem" }}>
-        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>Budget level</div>
+      <div style={{ marginBottom: "1.1rem" }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.45rem" }}>Budget level</div>
         <div style={{ display: "flex", gap: "0.4rem" }}>
-          {["Budget 💰", "Mid-range 💰💰", "Luxury 💰💰💰"].map(b => (
-            <button key={b} onClick={() => setLocal(p => ({ ...p, budget: p.budget === b ? "" : b }))} style={{
-              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
-              cursor: "pointer", fontFamily: "inherit", fontWeight: 500, flex: 1,
-              ...(local.budget === b ? chipActive : chipInactive),
-            }}>{b}</button>
-          ))}
+          {groups.map(function(b) {
+            const active = local.budget === b;
+            return (
+              <button key={b} onClick={function(){ setLocal(function(p){ return Object.assign({}, p, { budget: p.budget === b ? "" : b }); }); }}
+                style={Object.assign({}, baseChip, active ? chipOn : chipOff, { flex: 1 })}>{b}</button>
+            );
+          })}
         </div>
       </div>
 
-      <div style={{ marginBottom: "1.25rem" }}>
-        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>Travelling as</div>
+      <div style={{ marginBottom: "1.1rem" }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.45rem" }}>Travelling as</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-          {["Solo 🧍", "Couple 👫", "Family with kids 👨‍👩‍👧", "Friends group 👯", "Seniors 👴"].map(g => (
-            <button key={g} onClick={() => setLocal(p => ({ ...p, groupType: p.groupType === g ? "" : g }))} style={{
-              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
-              cursor: "pointer", fontFamily: "inherit", fontWeight: 500,
-              ...(local.groupType === g ? chipActive : chipInactive),
-            }}>{g}</button>
-          ))}
+          {groupTypes.map(function(g) {
+            const active = local.groupType === g;
+            return (
+              <button key={g} onClick={function(){ setLocal(function(p){ return Object.assign({}, p, { groupType: p.groupType === g ? "" : g }); }); }}
+                style={Object.assign({}, baseChip, active ? chipOn : chipOff)}>{g}</button>
+            );
+          })}
         </div>
       </div>
 
-      <div style={{ marginBottom: "1.25rem" }}>
-        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>Mobility / accessibility</div>
+      <div style={{ marginBottom: "1.1rem" }}>
+        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.45rem" }}>Mobility / accessibility</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-          {["No restrictions", "Limited walking", "Wheelchair accessible", "No stairs"].map(m => (
-            <button key={m} onClick={() => setLocal(p => ({ ...p, mobility: p.mobility === m ? "" : m }))} style={{
-              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
-              cursor: "pointer", fontFamily: "inherit", fontWeight: 500,
-              ...(local.mobility === m ? chipActive : chipInactive),
-            }}>{m}</button>
-          ))}
+          {mobilityOpts.map(function(m) {
+            const active = local.mobility === m;
+            return (
+              <button key={m} onClick={function(){ setLocal(function(p){ return Object.assign({}, p, { mobility: p.mobility === m ? "" : m }); }); }}
+                style={Object.assign({}, baseChip, active ? chipOn : chipOff)}>{m}</button>
+            );
+          })}
         </div>
       </div>
 
-      <div style={{ marginBottom: "1.5rem" }}>
+      <div style={{ marginBottom: "1.4rem" }}>
         <label style={labelStyle}>Anything else Claude should know</label>
-        <textarea
-          value={local.freetext}
-          onChange={e => setLocal(p => ({ ...p, freetext: e.target.value }))}
-          rows={3}
-          placeholder="e.g. We travel with a baby. We avoid tourist traps. We love street food. We need wifi everywhere."
-          style={{ ...inputStyle, resize: "vertical" }}
-        />
+        <textarea value={local.freetext} onChange={function(e){ setLocal(function(p){ return Object.assign({}, p, { freetext: e.target.value }); }); }}
+          rows={3} placeholder="e.g. We travel with a baby. We avoid tourist traps. We love street food."
+          style={Object.assign({}, inputStyle, { resize: "vertical" })} />
       </div>
 
       <div style={{ display: "flex", gap: "0.75rem" }}>
-        <button onClick={onClose} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
-        <button onClick={() => { onSave(local); onClose(); }} style={{ ...btnPrimary, flex: 2 }}>Save preferences</button>
+        <button onClick={onClose} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
+        <button onClick={function(){ onSave(local); onClose(); }} style={Object.assign({}, btnPrimary, { flex: 2 })}>Save preferences</button>
       </div>
     </Modal>
   );
 }
 
-// ─── New Destination modal with AI scaffold ──────────────────────────
+// ─── New destination modal ────────────────────────────────────────────
 const EMOJIS = ["✈️","🌍","🏝","🗺","🎒","🏔","🌅","🛳","🌴","🏜","🌋","🗽","⛩","🏯","🎪","🏙","🌃","🗼","🎭","🏕"];
 
 function buildSystemPrompt(prefs) {
-  const restrictions = [];
-  if (prefs.transport?.length) restrictions.push("Transport restrictions: " + prefs.transport.map(id => PREF_OPTIONS.transport.find(o=>o.id===id)?.label).filter(Boolean).join(", "));
-  if (prefs.accommodation?.length) restrictions.push("Accommodation preferences: " + prefs.accommodation.map(id => PREF_OPTIONS.accommodation.find(o=>o.id===id)?.label).filter(Boolean).join(", "));
-  if (prefs.dietary?.length) restrictions.push("Dietary requirements: " + prefs.dietary.map(id => PREF_OPTIONS.dietary.find(o=>o.id===id)?.label).filter(Boolean).join(", "));
-  if (prefs.budget) restrictions.push("Budget: " + prefs.budget);
-  if (prefs.groupType) restrictions.push("Group type: " + prefs.groupType);
-  if (prefs.mobility) restrictions.push("Mobility/accessibility: " + prefs.mobility);
-  if (prefs.freetext) restrictions.push("Additional notes: " + prefs.freetext);
+  const lines = [];
+  if (prefs.transport && prefs.transport.length)     lines.push("Transport: " + prefs.transport.map(function(id){ const o = PREF_OPTIONS.transport.find(function(x){ return x.id===id; }); return o ? o.label : id; }).join(", "));
+  if (prefs.accommodation && prefs.accommodation.length) lines.push("Accommodation: " + prefs.accommodation.map(function(id){ const o = PREF_OPTIONS.accommodation.find(function(x){ return x.id===id; }); return o ? o.label : id; }).join(", "));
+  if (prefs.dietary && prefs.dietary.length)         lines.push("Dietary: " + prefs.dietary.map(function(id){ const o = PREF_OPTIONS.dietary.find(function(x){ return x.id===id; }); return o ? o.label : id; }).join(", "));
+  if (prefs.budget)    lines.push("Budget: " + prefs.budget);
+  if (prefs.groupType) lines.push("Group: " + prefs.groupType);
+  if (prefs.mobility)  lines.push("Mobility: " + prefs.mobility);
+  if (prefs.freetext)  lines.push("Notes: " + prefs.freetext);
 
-  return `You are a travel guide generator. Your job is to create a structured vacation guide scaffold for a destination.
-
-${restrictions.length > 0 ? `IMPORTANT — USER TRAVEL PREFERENCES & RESTRICTIONS:\n${restrictions.join("\n")}\n\nAll suggestions MUST respect these restrictions. Never suggest car rentals if the user prefers no car rental. Tailor every recommendation to their context.` : "No specific travel restrictions set."}
-
-Respond ONLY with a valid JSON object — no markdown fences, no preamble, no explanation. The JSON must have this exact shape:
-{
-  "notes": "A 1–2 sentence description of the destination for the guide header",
-  "sections": [
-    { "id": "string", "icon": "emoji", "label": "string", "type": "static" }
-  ],
-  "sectionData": {
-    "sectionId": [
-      { "id": "string", "name": "string", "desc": "string", "notes": "string" }
-    ]
-  }
+  return "You are a travel guide generator. Create a structured vacation guide scaffold.\n\n" +
+    (lines.length ? "USER TRAVEL PREFERENCES (MUST be respected in all suggestions):\n" + lines.join("\n") + "\n\n" : "") +
+    "Respond ONLY with valid JSON — no markdown, no preamble. Shape:\n" +
+    '{"notes":"1-2 sentence destination description","sections":[{"id":"string","icon":"emoji","label":"string","type":"static"}],"sectionData":{"sectionId":[{"id":"string","name":"string","desc":"string","notes":"string"}]}}\n\n' +
+    "Rules: 8-12 sections. Always include days (📅, dynamic), tips (💡, static), pack (🎒, dynamic). Add destination-relevant sections. 3-6 items per section. Be specific — real place names. Item ids like s1, h2, t3. Respect all preferences strictly.";
 }
 
-Rules:
-- Include 8–12 sections relevant to this destination. Always include: days (📅, dynamic), tips (💡), pack (🎒, dynamic). Add destination-appropriate sections like sights, hiking, beaches, skiing, food, etc.
-- For each section, include 3–6 items with a name, short desc (one sentence), and notes (practical tip or empty string).
-- Item ids must be unique strings like "s1", "h2", "t3" etc.
-- The "days" and "pack" sections should have type "dynamic". All others "static".
-- Tailor content to the destination. Be specific — real place names, real restaurants (if well-known), real trails. Not generic filler.
-- If dietary restrictions are set, food recommendations must reflect them.
-- If no car rental is set, all transport tips must focus on public transit, walking, cycling, etc.`;
-}
-
-function NewDestinationModal({ onSave, onClose, prefs }) {
+function NewDestModal({ onSave, onClose, prefs }) {
   const [name, setName] = useState("");
   const [dates, setDates] = useState("");
   const [emoji, setEmoji] = useState("✈️");
@@ -379,10 +334,7 @@ function NewDestinationModal({ onSave, onClose, prefs }) {
 
   async function handleCreate() {
     if (!valid) return;
-    if (!useAI) {
-      onSave(newDestination(name.trim(), dates.trim(), emoji));
-      return;
-    }
+    if (!useAI) { onSave(makeNewDest(name.trim(), dates.trim(), emoji, null)); return; }
     setGenerating(true);
     setError("");
     try {
@@ -393,130 +345,91 @@ function NewDestinationModal({ onSave, onClose, prefs }) {
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
           system: buildSystemPrompt(prefs),
-          messages: [{ role: "user", content: `Generate a vacation guide scaffold for: ${name.trim()}${dates.trim() ? ` (${dates.trim()})` : ""}` }],
+          messages: [{ role: "user", content: "Generate a vacation guide scaffold for: " + name.trim() + (dates.trim() ? " (" + dates.trim() + ")" : "") }],
         }),
       });
       const data = await resp.json();
-      const raw = data.content?.find(b => b.type === "text")?.text || "";
+      const raw = (data.content || []).filter(function(b){ return b.type === "text"; }).map(function(b){ return b.text; }).join("");
       const clean = raw.replace(/```json|```/g, "").trim();
       const scaffold = JSON.parse(clean);
-      onSave(newDestination(name.trim(), dates.trim(), emoji, scaffold));
-    } catch (e) {
+      onSave(makeNewDest(name.trim(), dates.trim(), emoji, scaffold));
+    } catch(e) {
       setError("Couldn't generate AI scaffold — creating a blank guide instead.");
-      onSave(newDestination(name.trim(), dates.trim(), emoji));
+      onSave(makeNewDest(name.trim(), dates.trim(), emoji, null));
     }
   }
 
   const hasPrefs = prefs && (
-    prefs.transport?.length || prefs.accommodation?.length || prefs.dietary?.length ||
-    prefs.budget || prefs.groupType || prefs.mobility || prefs.freetext
+    (prefs.transport && prefs.transport.length) ||
+    (prefs.dietary && prefs.dietary.length) ||
+    prefs.budget || prefs.groupType || prefs.freetext
   );
 
   return (
     <Modal onClose={onClose} wide>
-      <h2 style={{ margin: "0 0 1.25rem", fontSize: "1.2rem", fontWeight: 800, color: "#111" }}>
-        Add a destination
-      </h2>
+      <h2 style={{ margin: "0 0 1.1rem", fontSize: "1.15rem", fontWeight: 800, color: "#111" }}>Add a destination</h2>
 
-      <div style={{ marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "0.9rem" }}>
         <label style={labelStyle}>Icon</label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.4rem" }}>
-          {EMOJIS.map(e => (
-            <button key={e} onClick={() => setEmoji(e)} style={{
-              fontSize: "1.35rem", padding: "0.3rem 0.4rem",
-              border: emoji === e ? "2px solid #2B7A9E" : "2px solid transparent",
-              borderRadius: "0.5rem", background: emoji === e ? "#E8F4F8" : "#f5f5f5",
-              cursor: "pointer", lineHeight: 1,
-            }}>{e}</button>
-          ))}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginTop: "0.35rem" }}>
+          {EMOJIS.map(function(e) {
+            return (
+              <button key={e} onClick={function(){ setEmoji(e); }} style={{ fontSize: "1.3rem", padding: "0.3rem 0.4rem", border: emoji === e ? "2px solid #2B7A9E" : "2px solid transparent", borderRadius: "0.5rem", background: emoji === e ? "#E8F4F8" : "#f5f5f5", cursor: "pointer", lineHeight: 1 }}>{e}</button>
+            );
+          })}
         </div>
       </div>
 
-      <div style={{ marginBottom: "1rem" }}>
+      <div style={{ marginBottom: "0.9rem" }}>
         <label style={labelStyle}>Destination name *</label>
-        <input autoFocus value={name} onChange={e => setName(e.target.value)}
-          placeholder="e.g. Lisbon, Portugal"
-          style={inputStyle}
-          onKeyDown={e => e.key === "Enter" && valid && !generating && handleCreate()}
-        />
+        <input autoFocus value={name} onChange={function(e){ setName(e.target.value); }} placeholder="e.g. Lisbon, Portugal" style={inputStyle} />
       </div>
 
-      <div style={{ marginBottom: "1.25rem" }}>
+      <div style={{ marginBottom: "1.1rem" }}>
         <label style={labelStyle}>Trip dates <span style={{ fontWeight: 400, color: "#888" }}>(optional)</span></label>
-        <input value={dates} onChange={e => setDates(e.target.value)}
-          placeholder="e.g. Aug 3–10, 2026" style={inputStyle} />
+        <input value={dates} onChange={function(e){ setDates(e.target.value); }} placeholder="e.g. Aug 3–10, 2026" style={inputStyle} />
       </div>
 
-      {/* AI scaffold toggle */}
-      <div style={{
-        background: "#F7F9FC", border: "1.5px solid #dce8f0", borderRadius: "0.85rem",
-        padding: "1rem 1.1rem", marginBottom: "1.25rem",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#1a3a4a" }}>✨ Generate guide with AI</div>
-          <button
-            onClick={() => setUseAI(v => !v)}
-            style={{
-              width: "42px", height: "24px", borderRadius: "12px", border: "none",
-              background: useAI ? "#2B7A9E" : "#ccc", cursor: "pointer", position: "relative",
-              transition: "background 0.2s",
-            }}
-          >
-            <span style={{
-              position: "absolute", top: "3px", left: useAI ? "20px" : "3px",
-              width: "18px", height: "18px", borderRadius: "50%", background: "#fff",
-              transition: "left 0.2s", display: "block",
-            }} />
+      <div style={{ background: "#F7F9FC", border: "1.5px solid #dce8f0", borderRadius: "0.85rem", padding: "0.9rem 1rem", marginBottom: "1.1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+          <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#1a3a4a" }}>✨ Generate guide with AI</div>
+          <button onClick={function(){ setUseAI(function(v){ return !v; }); }} style={{ width: "42px", height: "24px", borderRadius: "12px", border: "none", background: useAI ? "#2B7A9E" : "#ccc", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+            <span style={{ position: "absolute", top: "3px", left: useAI ? "20px" : "3px", width: "18px", height: "18px", borderRadius: "50%", background: "#fff", transition: "left 0.2s", display: "block" }} />
           </button>
         </div>
-        <p style={{ margin: 0, fontSize: "0.8rem", color: "#666", lineHeight: 1.45 }}>
+        <p style={{ margin: 0, fontSize: "0.79rem", color: "#666", lineHeight: 1.45 }}>
           {useAI
-            ? hasPrefs
-              ? "Claude will scaffold sections and suggestions tailored to your saved travel preferences."
-              : "Claude will scaffold sections and starter suggestions for this destination. Set travel preferences to personalise results."
-            : "A blank guide with default sections will be created."
-          }
+            ? (hasPrefs ? "Claude will scaffold this guide respecting your saved travel preferences." : "Claude will scaffold sections and starter suggestions. Set preferences to personalise results.")
+            : "A blank guide with default sections will be created."}
         </p>
-        {hasPrefs && useAI && (
-          <div style={{ marginTop: "0.6rem", display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-            {[...(prefs.transport||[]), ...(prefs.dietary||[])].slice(0,4).map(id => {
-              const opt = [...PREF_OPTIONS.transport, ...PREF_OPTIONS.dietary].find(o => o.id === id);
-              return opt ? <span key={id} style={{ fontSize: "0.75rem", background: "#E8F4F8", color: "#2B7A9E", borderRadius: "2rem", padding: "0.2rem 0.55rem", fontWeight: 500 }}>{opt.label}</span> : null;
-            })}
-            {prefs.groupType && <span style={{ fontSize: "0.75rem", background: "#E8F4F8", color: "#2B7A9E", borderRadius: "2rem", padding: "0.2rem 0.55rem", fontWeight: 500 }}>{prefs.groupType}</span>}
-            {prefs.budget && <span style={{ fontSize: "0.75rem", background: "#E8F4F8", color: "#2B7A9E", borderRadius: "2rem", padding: "0.2rem 0.55rem", fontWeight: 500 }}>{prefs.budget}</span>}
-          </div>
-        )}
       </div>
 
       {error && <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: "#C05C1A" }}>{error}</p>}
 
       <div style={{ display: "flex", gap: "0.75rem" }}>
-        <button onClick={onClose} style={{ ...btnSecondary, flex: 1 }} disabled={generating}>Cancel</button>
-        <button disabled={!valid || generating} onClick={handleCreate}
-          style={{ ...btnPrimary, flex: 2, opacity: valid && !generating ? 1 : 0.6, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-          {generating ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⟳</span> Generating…</> : useAI ? "✨ Create with AI" : "Create blank guide"}
+        <button onClick={onClose} style={Object.assign({}, btnSecondary, { flex: 1 })} disabled={generating}>Cancel</button>
+        <button disabled={!valid || generating} onClick={handleCreate} style={Object.assign({}, btnPrimary, { flex: 2, opacity: (valid && !generating) ? 1 : 0.6 })}>
+          {generating ? "Generating…" : useAI ? "✨ Create with AI" : "Create blank guide"}
         </button>
       </div>
     </Modal>
   );
 }
 
-// ─── Edit item form ──────────────────────────────────────────────────
-function EditItemForm({ initial, palette, onSave, onCancel, isNew }) {
-  const [form, setForm] = useState({ name: initial.name || "", desc: initial.desc || "", notes: initial.notes || "" });
-  const valid = form.name.trim().length > 0;
+// ─── Edit item form ───────────────────────────────────────────────────
+function EditItemForm({ initial, onSave, onCancel, isNew }) {
+  const [name, setName] = useState(initial.name || "");
+  const [desc, setDesc] = useState(initial.desc || "");
+  const [notes, setNotes] = useState(initial.notes || "");
+  const valid = name.trim().length > 0;
   return (
     <div>
-      <input autoFocus value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-        placeholder="Name *" style={{ ...inputStyle, marginBottom: "0.5rem" }} />
-      <input value={form.desc} onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}
-        placeholder="Short description" style={{ ...inputStyle, marginBottom: "0.5rem" }} />
-      <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-        placeholder="Notes (optional)" rows={2} style={{ ...inputStyle, resize: "vertical", marginBottom: "0.75rem" }} />
+      <input autoFocus value={name} onChange={function(e){ setName(e.target.value); }} placeholder="Name *" style={Object.assign({}, inputStyle, { marginBottom: "0.5rem" })} />
+      <input value={desc} onChange={function(e){ setDesc(e.target.value); }} placeholder="Short description" style={Object.assign({}, inputStyle, { marginBottom: "0.5rem" })} />
+      <textarea value={notes} onChange={function(e){ setNotes(e.target.value); }} placeholder="Notes (optional)" rows={2} style={Object.assign({}, inputStyle, { resize: "vertical", marginBottom: "0.75rem" })} />
       <div style={{ display: "flex", gap: "0.5rem" }}>
-        <button onClick={onCancel} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
-        <button disabled={!valid} onClick={() => onSave(form)} style={{ ...btnPrimary, flex: 2, opacity: valid ? 1 : 0.5 }}>
+        <button onClick={onCancel} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
+        <button disabled={!valid} onClick={function(){ onSave({ name: name.trim(), desc, notes }); }} style={Object.assign({}, btnPrimary, { flex: 2, opacity: valid ? 1 : 0.5 })}>
           {isNew ? "Add" : "Save"}
         </button>
       </div>
@@ -524,118 +437,123 @@ function EditItemForm({ initial, palette, onSave, onCancel, isNew }) {
   );
 }
 
-// ─── Section view ────────────────────────────────────────────────────
+// ─── Section view ─────────────────────────────────────────────────────
 function SectionView({ section, palette, dest, onUpdate }) {
-  const [items, setItems] = useState(() => (dest.sectionData || {})[section.id] || []);
+  const initItems = (dest.sectionData && dest.sectionData[section.id]) ? dest.sectionData[section.id] : [];
+  const [items, setItems] = useState(initItems);
   const [adding, setAdding] = useState(false);
-  const [newItem] = useState({ name: "", desc: "", notes: "" });
   const [editId, setEditId] = useState(null);
 
   function persist(newItems) {
-    const sectionData = { ...(dest.sectionData || {}), [section.id]: newItems };
-    onUpdate({ ...dest, sectionData });
+    const sd = Object.assign({}, dest.sectionData || {});
+    sd[section.id] = newItems;
+    onUpdate(Object.assign({}, dest, { sectionData: sd }));
   }
 
   function addItem(form) {
-    if (!form.name.trim()) return;
-    const next = [...items, { ...form, id: `item_${Date.now()}` }];
+    const next = items.concat([Object.assign({}, form, { id: "item_" + Date.now() })]);
     setItems(next); persist(next); setAdding(false);
   }
   function removeItem(id) {
-    const next = items.filter(i => i.id !== id);
+    const next = items.filter(function(i){ return i.id !== id; });
     setItems(next); persist(next);
   }
-  function saveEdit(id, updates) {
-    const next = items.map(i => i.id === id ? { ...i, ...updates } : i);
+  function saveEdit(id, form) {
+    const next = items.map(function(i){ return i.id === id ? Object.assign({}, i, form) : i; });
     setItems(next); persist(next); setEditId(null);
   }
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
-        <span style={{ fontSize: "1.75rem" }}>{section.icon}</span>
-        <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 800, color: palette.text }}>{section.label}</h2>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.1rem" }}>
+        <span style={{ fontSize: "1.6rem" }}>{section.icon}</span>
+        <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: palette.text }}>{section.label}</h2>
       </div>
+
       {items.length === 0 && !adding && (
-        <div style={{ background: "#fff", borderRadius: "1rem", padding: "2rem", textAlign: "center", color: "#aaa", fontSize: "0.9rem", marginBottom: "1rem" }}>
+        <div style={{ background: "#fff", borderRadius: "1rem", padding: "2rem", textAlign: "center", color: "#aaa", fontSize: "0.88rem", marginBottom: "0.75rem" }}>
           No items yet. Add one below.
         </div>
       )}
-      {items.map(item => (
-        <div key={item.id} style={{ background: "#fff", borderRadius: "1rem", padding: "1rem 1.25rem", marginBottom: "0.75rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-          {editId === item.id ? (
-            <EditItemForm initial={item} palette={palette} onSave={u => saveEdit(item.id, u)} onCancel={() => setEditId(null)} />
-          ) : (
-            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, color: "#111", marginBottom: "0.2rem" }}>{item.name}</div>
-                {item.desc && <div style={{ fontSize: "0.85rem", color: "#555" }}>{item.desc}</div>}
-                {item.notes && <div style={{ fontSize: "0.8rem", color: "#888", fontStyle: "italic", marginTop: "0.25rem" }}>{item.notes}</div>}
+
+      {items.map(function(item) {
+        return (
+          <div key={item.id} style={{ background: "#fff", borderRadius: "1rem", padding: "1rem 1.1rem", marginBottom: "0.65rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+            {editId === item.id ? (
+              <EditItemForm initial={item} onSave={function(f){ saveEdit(item.id, f); }} onCancel={function(){ setEditId(null); }} />
+            ) : (
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, color: "#111", marginBottom: "0.15rem" }}>{item.name}</div>
+                  {item.desc  && <div style={{ fontSize: "0.84rem", color: "#555" }}>{item.desc}</div>}
+                  {item.notes && <div style={{ fontSize: "0.79rem", color: "#888", fontStyle: "italic", marginTop: "0.2rem" }}>{item.notes}</div>}
+                </div>
+                <div style={{ display: "flex", gap: "0.35rem", flexShrink: 0 }}>
+                  <button onClick={function(){ setEditId(item.id); }} style={iconBtn}>✎</button>
+                  <button onClick={function(){ removeItem(item.id); }} style={Object.assign({}, iconBtn, { color: "#C0392B" })}>×</button>
+                </div>
               </div>
-              <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
-                <button onClick={() => setEditId(item.id)} style={iconBtn}>✎</button>
-                <button onClick={() => removeItem(item.id)} style={{ ...iconBtn, color: "#C0392B" }}>×</button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
+            )}
+          </div>
+        );
+      })}
+
       {adding ? (
-        <div style={{ background: "#fff", borderRadius: "1rem", padding: "1.25rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: "0.75rem" }}>
-          <EditItemForm initial={newItem} palette={palette} onSave={addItem} onCancel={() => setAdding(false)} isNew />
+        <div style={{ background: "#fff", borderRadius: "1rem", padding: "1.1rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: "0.65rem" }}>
+          <EditItemForm initial={{ name: "", desc: "", notes: "" }} onSave={addItem} onCancel={function(){ setAdding(false); }} isNew />
         </div>
       ) : (
-        <button onClick={() => setAdding(true)} style={{
-          width: "100%", padding: "0.85rem", border: `2px dashed ${palette.accent}55`,
-          borderRadius: "1rem", background: "transparent", color: palette.accent,
-          cursor: "pointer", fontSize: "0.9rem", fontWeight: 600,
-        }}>＋ Add item</button>
+        <button onClick={function(){ setAdding(true); }} style={{ width: "100%", padding: "0.8rem", border: "2px dashed " + palette.accent + "55", borderRadius: "1rem", background: "transparent", color: palette.accent, cursor: "pointer", fontSize: "0.88rem", fontWeight: 600 }}>
+          ＋ Add item
+        </button>
       )}
     </div>
   );
 }
 
-// ─── Destination view ────────────────────────────────────────────────
+// ─── Destination view ─────────────────────────────────────────────────
 function DestinationView({ dest, palette, onBack, onUpdate, onDelete }) {
-  const [activeSection, setActiveSection] = useState(null);
+  const [activeSid, setActiveSid] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editNotes, setEditNotes] = useState(false);
   const [notes, setNotes] = useState(dest.notes || "");
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    function h(e) { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); }
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
+  useEffect(function() {
+    function handleClick(e) { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); }
+    document.addEventListener("mousedown", handleClick);
+    return function() { document.removeEventListener("mousedown", handleClick); };
   }, []);
 
-  const section = dest.sections.find(s => s.id === activeSection);
+  const activeSection = dest.sections.find(function(s){ return s.id === activeSid; });
 
   return (
     <div style={{ minHeight: "100vh", background: palette.bg, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* Header */}
-      <div style={{ background: palette.accent, color: "#fff", padding: "1rem 1.25rem", display: "flex", alignItems: "center", gap: "1rem", position: "sticky", top: 0, zIndex: 100 }}>
-        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.75rem", cursor: "pointer", fontSize: "0.9rem" }}>← Back</button>
+      <div style={{ background: palette.accent, color: "#fff", padding: "0.9rem 1.1rem", display: "flex", alignItems: "center", gap: "0.9rem", position: "sticky", top: 0, zIndex: 100 }}>
+        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.7rem", cursor: "pointer", fontSize: "0.88rem" }}>← Back</button>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: "1.2rem", fontWeight: 700 }}>{dest.emoji} {dest.name}</div>
-          {dest.dates && <div style={{ fontSize: "0.8rem", opacity: 0.8 }}>{dest.dates}</div>}
+          <div style={{ fontSize: "1.1rem", fontWeight: 700 }}>{dest.emoji} {dest.name}</div>
+          {dest.dates && <div style={{ fontSize: "0.78rem", opacity: 0.8 }}>{dest.dates}</div>}
         </div>
         <div style={{ position: "relative" }} ref={menuRef}>
-          <button onClick={() => setMenuOpen(v => !v)} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.75rem", cursor: "pointer", fontSize: "1rem" }}>☰</button>
+          <button onClick={function(){ setMenuOpen(function(v){ return !v; }); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.7rem", cursor: "pointer", fontSize: "1rem" }}>☰</button>
           {menuOpen && (
-            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: "#fff", borderRadius: "0.75rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: "210px", overflow: "hidden", zIndex: 300 }}>
-              <div style={{ padding: "0.5rem 0.75rem", fontSize: "0.7rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sections</div>
-              <button onClick={() => { setActiveSection(null); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", padding: "0.6rem 1rem", border: "none", background: activeSection === null ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.9rem", color: activeSection === null ? palette.accent : "#222", fontWeight: activeSection === null ? 600 : 400 }}>
+            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: "#fff", borderRadius: "0.75rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: "200px", overflow: "hidden", zIndex: 300, maxHeight: "70vh", overflowY: "auto" }}>
+              <div style={{ padding: "0.45rem 0.75rem", fontSize: "0.68rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sections</div>
+              <button onClick={function(){ setActiveSid(null); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.65rem", width: "100%", padding: "0.55rem 0.9rem", border: "none", background: activeSid === null ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.88rem", color: activeSid === null ? palette.accent : "#222", fontWeight: activeSid === null ? 600 : 400 }}>
                 🏠 Overview
               </button>
-              {dest.sections.map(s => (
-                <button key={s.id} onClick={() => { setActiveSection(s.id); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", padding: "0.6rem 1rem", border: "none", background: activeSection === s.id ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.9rem", color: activeSection === s.id ? palette.accent : "#222", fontWeight: activeSection === s.id ? 600 : 400 }}>
-                  <span>{s.icon}</span> {s.label}
-                </button>
-              ))}
-              <div style={{ height: "1px", background: "#eee", margin: "0.25rem 0" }} />
-              <button onClick={() => { setConfirmDelete(true); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", padding: "0.6rem 1rem", border: "none", background: "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.9rem", color: "#C0392B" }}>
+              {dest.sections.map(function(s) {
+                return (
+                  <button key={s.id} onClick={function(){ setActiveSid(s.id); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.65rem", width: "100%", padding: "0.55rem 0.9rem", border: "none", background: activeSid === s.id ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.88rem", color: activeSid === s.id ? palette.accent : "#222", fontWeight: activeSid === s.id ? 600 : 400 }}>
+                    <span>{s.icon}</span> {s.label}
+                  </button>
+                );
+              })}
+              <div style={{ height: "1px", background: "#eee", margin: "0.2rem 0" }} />
+              <button onClick={function(){ setConfirmDel(true); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.65rem", width: "100%", padding: "0.55rem 0.9rem", border: "none", background: "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.88rem", color: "#C0392B" }}>
                 🗑 Delete destination
               </button>
             </div>
@@ -644,54 +562,56 @@ function DestinationView({ dest, palette, onBack, onUpdate, onDelete }) {
       </div>
 
       {/* Tab bar */}
-      <div style={{ display: "flex", overflowX: "auto", gap: "0.4rem", padding: "0.6rem 1rem", background: "#fff", borderBottom: "1px solid #eee", scrollbarWidth: "none" }}>
-        <button onClick={() => setActiveSection(null)} style={{ flexShrink: 0, padding: "0.35rem 0.8rem", borderRadius: "2rem", border: "none", background: activeSection === null ? palette.accent : "#f0f0f0", color: activeSection === null ? "#fff" : "#444", fontWeight: activeSection === null ? 600 : 400, cursor: "pointer", fontSize: "0.82rem", whiteSpace: "nowrap" }}>🏠 Overview</button>
-        {dest.sections.map(s => (
-          <button key={s.id} onClick={() => setActiveSection(s.id)} style={{ flexShrink: 0, padding: "0.35rem 0.8rem", borderRadius: "2rem", border: "none", background: activeSection === s.id ? palette.accent : "#f0f0f0", color: activeSection === s.id ? "#fff" : "#444", fontWeight: activeSection === s.id ? 600 : 400, cursor: "pointer", fontSize: "0.82rem", whiteSpace: "nowrap" }}>
-            {s.icon} {s.label}
-          </button>
-        ))}
+      <div style={{ display: "flex", overflowX: "auto", gap: "0.35rem", padding: "0.55rem 0.9rem", background: "#fff", borderBottom: "1px solid #eee", scrollbarWidth: "none" }}>
+        <button onClick={function(){ setActiveSid(null); }} style={{ flexShrink: 0, padding: "0.3rem 0.7rem", borderRadius: "2rem", border: "none", background: activeSid === null ? palette.accent : "#f0f0f0", color: activeSid === null ? "#fff" : "#444", fontWeight: activeSid === null ? 600 : 400, cursor: "pointer", fontSize: "0.8rem", whiteSpace: "nowrap" }}>🏠</button>
+        {dest.sections.map(function(s) {
+          return (
+            <button key={s.id} onClick={function(){ setActiveSid(s.id); }} style={{ flexShrink: 0, padding: "0.3rem 0.7rem", borderRadius: "2rem", border: "none", background: activeSid === s.id ? palette.accent : "#f0f0f0", color: activeSid === s.id ? "#fff" : "#444", fontWeight: activeSid === s.id ? 600 : 400, cursor: "pointer", fontSize: "0.8rem", whiteSpace: "nowrap" }}>
+              {s.icon} {s.label}
+            </button>
+          );
+        })}
       </div>
 
-      <div style={{ padding: "1.25rem", maxWidth: "680px", margin: "0 auto" }}>
-        {!activeSection ? (
+      <div style={{ padding: "1.1rem", maxWidth: "680px", margin: "0 auto" }}>
+        {activeSid === null ? (
           <div>
-            <div style={{ background: "#fff", borderRadius: "1.25rem", padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: "1rem" }}>
-              <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>{dest.emoji}</div>
-              <h1 style={{ margin: "0 0 0.25rem", fontSize: "1.75rem", fontWeight: 800, color: palette.text }}>{dest.name}</h1>
-              {dest.dates && <p style={{ margin: "0 0 1rem", color: "#666", fontSize: "0.95rem" }}>{dest.dates}</p>}
-              <p style={{ margin: 0, color: "#888", fontSize: "0.9rem" }}>Select a section above or from the ☰ menu to start planning.</p>
+            <div style={{ background: "#fff", borderRadius: "1.15rem", padding: "1.35rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: "0.9rem" }}>
+              <div style={{ fontSize: "2.75rem", marginBottom: "0.4rem" }}>{dest.emoji}</div>
+              <h1 style={{ margin: "0 0 0.25rem", fontSize: "1.6rem", fontWeight: 800, color: palette.text }}>{dest.name}</h1>
+              {dest.dates && <p style={{ margin: "0 0 0.75rem", color: "#666", fontSize: "0.9rem" }}>{dest.dates}</p>}
+              <p style={{ margin: 0, color: "#888", fontSize: "0.88rem" }}>Select a section from the tabs above or the ☰ menu.</p>
             </div>
-            <div style={{ background: "#fff", borderRadius: "1.25rem", padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: palette.text }}>📝 Trip notes</h2>
-                {!editNotes && <button onClick={() => setEditNotes(true)} style={{ ...btnSecondary, padding: "0.3rem 0.7rem", fontSize: "0.8rem" }}>Edit</button>}
+            <div style={{ background: "#fff", borderRadius: "1.15rem", padding: "1.35rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.65rem" }}>
+                <h2 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 700, color: palette.text }}>📝 Trip notes</h2>
+                {!editNotes && <button onClick={function(){ setEditNotes(true); }} style={Object.assign({}, btnSecondary, { padding: "0.25rem 0.6rem", fontSize: "0.78rem" })}>Edit</button>}
               </div>
               {editNotes ? (
                 <>
-                  <textarea autoFocus value={notes} onChange={e => setNotes(e.target.value)} rows={5} placeholder="Add any notes about this trip…" style={{ ...inputStyle, resize: "vertical" }} />
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-                    <button onClick={() => { setNotes(dest.notes || ""); setEditNotes(false); }} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
-                    <button onClick={() => { onUpdate({ ...dest, notes }); setEditNotes(false); }} style={{ ...btnPrimary, flex: 2 }}>Save</button>
+                  <textarea autoFocus value={notes} onChange={function(e){ setNotes(e.target.value); }} rows={4} placeholder="Add any notes about this trip…" style={Object.assign({}, inputStyle, { resize: "vertical" })} />
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.65rem" }}>
+                    <button onClick={function(){ setNotes(dest.notes || ""); setEditNotes(false); }} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
+                    <button onClick={function(){ onUpdate(Object.assign({}, dest, { notes: notes })); setEditNotes(false); }} style={Object.assign({}, btnPrimary, { flex: 2 })}>Save</button>
                   </div>
                 </>
               ) : (
-                <p style={{ margin: 0, color: notes ? "#333" : "#bbb", fontSize: "0.9rem", whiteSpace: "pre-wrap" }}>{notes || "No notes yet. Tap Edit to add some."}</p>
+                <p style={{ margin: 0, color: notes ? "#333" : "#bbb", fontSize: "0.88rem", whiteSpace: "pre-wrap" }}>{notes || "No notes yet."}</p>
               )}
             </div>
           </div>
-        ) : section ? (
-          <SectionView section={section} palette={palette} dest={dest} onUpdate={onUpdate} />
+        ) : activeSection ? (
+          <SectionView section={activeSection} palette={palette} dest={dest} onUpdate={onUpdate} />
         ) : null}
       </div>
 
-      {confirmDelete && (
-        <Modal onClose={() => setConfirmDelete(false)}>
-          <h2 style={{ margin: "0 0 0.75rem", fontSize: "1.1rem" }}>Delete {dest.emoji} {dest.name}?</h2>
-          <p style={{ margin: "0 0 1.5rem", color: "#666", fontSize: "0.9rem" }}>This will permanently remove this destination. This cannot be undone.</p>
-          <div style={{ display: "flex", gap: "0.75rem" }}>
-            <button onClick={() => setConfirmDelete(false)} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
-            <button onClick={onDelete} style={{ ...btnPrimary, flex: 1, background: "#C0392B" }}>Delete</button>
+      {confirmDel && (
+        <Modal onClose={function(){ setConfirmDel(false); }}>
+          <h2 style={{ margin: "0 0 0.65rem", fontSize: "1.05rem" }}>Delete {dest.emoji} {dest.name}?</h2>
+          <p style={{ margin: "0 0 1.25rem", color: "#666", fontSize: "0.88rem" }}>This cannot be undone.</p>
+          <div style={{ display: "flex", gap: "0.65rem" }}>
+            <button onClick={function(){ setConfirmDel(false); }} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
+            <button onClick={onDelete} style={Object.assign({}, btnPrimary, { flex: 1, background: "#C0392B" })}>Delete</button>
           </div>
         </Modal>
       )}
@@ -699,117 +619,123 @@ function DestinationView({ dest, palette, onBack, onUpdate, onDelete }) {
   );
 }
 
-// ─── Home screen ─────────────────────────────────────────────────────
+// ─── Home ─────────────────────────────────────────────────────────────
 function Home({ destinations, prefs, onCreate, onOpen, onOpenPrefs }) {
   const [showNew, setShowNew] = useState(false);
+  const hasPrefs = prefs && ((prefs.transport && prefs.transport.length) || (prefs.dietary && prefs.dietary.length) || prefs.budget || prefs.groupType || prefs.freetext);
 
   return (
     <div style={{ minHeight: "100vh", background: "#F7F8FA", fontFamily: "'DM Sans', system-ui, sans-serif" }}>
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-      <div style={{ background: "#fff", borderBottom: "1px solid #eee", padding: "1.1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ background: "#fff", borderBottom: "1px solid #eee", padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <div style={{ fontSize: "1.35rem", fontWeight: 800, color: "#111" }}>✈️ Vacation Guides</div>
-          <div style={{ fontSize: "0.78rem", color: "#888" }}>{destinations.length === 0 ? "No trips yet" : `${destinations.length} destination${destinations.length !== 1 ? "s" : ""}`}</div>
+          <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#111" }}>✈️ Vacation Guides</div>
+          <div style={{ fontSize: "0.77rem", color: "#888" }}>{destinations.length} destination{destinations.length !== 1 ? "s" : ""}</div>
         </div>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button onClick={onOpenPrefs} style={{ ...btnSecondary, padding: "0.5rem 0.75rem", fontSize: "0.85rem" }} title="Travel preferences">⚙️ Preferences</button>
-          <button onClick={() => setShowNew(true)} style={{ ...btnPrimary, padding: "0.5rem 0.9rem", fontSize: "0.85rem" }}>＋ New destination</button>
+        <div style={{ display: "flex", gap: "0.45rem" }}>
+          <button onClick={onOpenPrefs} style={Object.assign({}, btnSecondary, { padding: "0.45rem 0.75rem", fontSize: "0.82rem" })}>⚙️ Preferences</button>
+          <button onClick={function(){ setShowNew(true); }} style={Object.assign({}, btnPrimary, { padding: "0.45rem 0.85rem", fontSize: "0.82rem" })}>＋ New</button>
         </div>
       </div>
 
-      <div style={{ padding: "1.25rem", maxWidth: "720px", margin: "0 auto" }}>
-        {/* Preferences hint */}
-        {(() => {
-          const hasPrefs = prefs && (prefs.transport?.length || prefs.dietary?.length || prefs.groupType || prefs.budget || prefs.freetext);
-          if (!hasPrefs) return (
-            <div onClick={onOpenPrefs} style={{ background: "#EDF6FB", border: "1.5px dashed #9BC8DC", borderRadius: "1rem", padding: "0.85rem 1.1rem", marginBottom: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-              <span style={{ fontSize: "1.3rem" }}>⚙️</span>
-              <div>
-                <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#2B7A9E" }}>Set travel preferences</div>
-                <div style={{ fontSize: "0.78rem", color: "#5a9ab5" }}>Tell Claude about restrictions like no car rental, dietary needs, or budget — guides will be tailored from the start.</div>
-              </div>
+      <div style={{ padding: "1.1rem", maxWidth: "720px", margin: "0 auto" }}>
+        {!hasPrefs && (
+          <div onClick={onOpenPrefs} style={{ background: "#EDF6FB", border: "1.5px dashed #9BC8DC", borderRadius: "0.9rem", padding: "0.8rem 1rem", marginBottom: "1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
+            <span style={{ fontSize: "1.2rem" }}>⚙️</span>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "#2B7A9E" }}>Set travel preferences</div>
+              <div style={{ fontSize: "0.77rem", color: "#5a9ab5" }}>Tell Claude about restrictions like no car rental, dietary needs, or budget so new guides are tailored from the start.</div>
             </div>
-          );
-          return null;
-        })()}
-
-        {destinations.length === 0 ? (
-          <div style={{ background: "#fff", borderRadius: "1.5rem", padding: "3rem 2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-            <div style={{ fontSize: "3rem", marginBottom: "0.75rem" }}>🗺</div>
-            <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.2rem", fontWeight: 700, color: "#111" }}>No trips yet</h2>
-            <p style={{ margin: "0 0 1.5rem", color: "#888", fontSize: "0.9rem" }}>Add your first destination to start planning.</p>
-            <button onClick={() => setShowNew(true)} style={btnPrimary}>＋ Add destination</button>
           </div>
-        ) : (
-          <div style={{ display: "grid", gap: "0.85rem" }}>
-            {destinations.map((dest, i) => {
-              const pal = PALETTES[i % PALETTES.length];
-              return (
-                <button key={dest.id} onClick={() => onOpen(dest.id)} style={{ display: "flex", alignItems: "center", gap: "1.1rem", background: "#fff", borderRadius: "1.15rem", padding: "1.1rem 1.25rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", border: "2px solid transparent", cursor: "pointer", textAlign: "left", transition: "border-color 0.15s, box-shadow 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = pal.accent; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.12)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.07)"; }}>
-                  <div style={{ width: "3.25rem", height: "3.25rem", borderRadius: "0.85rem", background: pal.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.65rem", flexShrink: 0 }}>{dest.emoji}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: "1rem", color: "#111", marginBottom: "0.15rem" }}>{dest.name}</div>
-                    {dest.dates && <div style={{ fontSize: "0.8rem", color: "#888" }}>{dest.dates}</div>}
-                    <div style={{ fontSize: "0.75rem", color: "#bbb", marginTop: "0.15rem" }}>{dest.sections.length} sections</div>
-                  </div>
-                  <div style={{ color: pal.accent, fontSize: "1.1rem", flexShrink: 0 }}>›</div>
-                </button>
-              );
-            })}
+        )}
+
+        <div style={{ display: "grid", gap: "0.8rem" }}>
+          {destinations.map(function(dest, i) {
+            const pal = PALETTES[i % PALETTES.length];
+            return (
+              <button key={dest.id} onClick={function(){ onOpen(dest.id); }}
+                style={{ display: "flex", alignItems: "center", gap: "1rem", background: "#fff", borderRadius: "1.1rem", padding: "1rem 1.15rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", border: "2px solid transparent", cursor: "pointer", textAlign: "left", transition: "border-color 0.15s" }}
+                onMouseEnter={function(e){ e.currentTarget.style.borderColor = pal.accent; }}
+                onMouseLeave={function(e){ e.currentTarget.style.borderColor = "transparent"; }}>
+                <div style={{ width: "3rem", height: "3rem", borderRadius: "0.8rem", background: pal.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.55rem", flexShrink: 0 }}>{dest.emoji}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.97rem", color: "#111", marginBottom: "0.12rem" }}>{dest.name}</div>
+                  {dest.dates && <div style={{ fontSize: "0.78rem", color: "#888" }}>{dest.dates}</div>}
+                  <div style={{ fontSize: "0.73rem", color: "#bbb", marginTop: "0.1rem" }}>{dest.sections.length} sections</div>
+                </div>
+                <div style={{ color: pal.accent, fontSize: "1rem", flexShrink: 0 }}>›</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {destinations.length === 0 && (
+          <div style={{ background: "#fff", borderRadius: "1.4rem", padding: "3rem 2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: "2.8rem", marginBottom: "0.65rem" }}>🗺</div>
+            <h2 style={{ margin: "0 0 0.45rem", fontSize: "1.15rem", fontWeight: 700, color: "#111" }}>No trips yet</h2>
+            <p style={{ margin: "0 0 1.35rem", color: "#888", fontSize: "0.88rem" }}>Add your first destination to start planning.</p>
+            <button onClick={function(){ setShowNew(true); }} style={btnPrimary}>＋ Add destination</button>
           </div>
         )}
       </div>
 
-      {showNew && <NewDestinationModal prefs={prefs} onSave={d => { onCreate(d); setShowNew(false); }} onClose={() => setShowNew(false)} />}
+      {showNew && <NewDestModal prefs={prefs} onSave={function(d){ onCreate(d); setShowNew(false); }} onClose={function(){ setShowNew(false); }} />}
     </div>
   );
 }
 
-// ─── App root ────────────────────────────────────────────────────────
+// ─── App root ─────────────────────────────────────────────────────────
 export default function App() {
   const [destinations, setDestinations] = useState(null);
   const [prefs, setPrefs] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [showPrefs, setShowPrefs] = useState(false);
 
-  useEffect(() => {
-    Promise.all([loadDestinations(), loadPreferences()]).then(([dests, p]) => {
-      setDestinations(dests);
-      setPrefs(p);
+  useEffect(function() {
+    Promise.all([loadDestinations(), loadPreferences()]).then(function(results) {
+      setDestinations(results[0]);
+      setPrefs(results[1]);
     });
   }, []);
 
-  useEffect(() => { if (destinations !== null) saveDestinations(destinations); }, [destinations]);
-  useEffect(() => { if (prefs !== null) savePreferences(prefs); }, [prefs]);
+  useEffect(function() { if (destinations !== null) saveDestinations(destinations); }, [destinations]);
+  useEffect(function() { if (prefs !== null) savePreferences(prefs); }, [prefs]);
 
   if (destinations === null || prefs === null) {
     return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "system-ui", color: "#888" }}>Loading…</div>;
   }
 
-  const activeDest = destinations.find(d => d.id === activeId);
-  const activeIdx = destinations.findIndex(d => d.id === activeId);
+  const activeDest = destinations.find(function(d){ return d.id === activeId; });
+  const activeIdx  = destinations.findIndex(function(d){ return d.id === activeId; });
 
-  if (activeDest) {
-    const palette = PALETTES[activeIdx % PALETTES.length];
-    return (
-      <>
-        <DestinationView dest={activeDest} palette={palette} onBack={() => setActiveId(null)}
-          onUpdate={u => setDestinations(prev => prev.map(d => d.id === u.id ? u : d))}
-          onDelete={() => { setDestinations(prev => prev.filter(d => d.id !== activeDest.id)); setActiveId(null); }} />
-        {showPrefs && <PreferencesPanel prefs={prefs} onSave={p => { setPrefs(p); }} onClose={() => setShowPrefs(false)} />}
-      </>
-    );
-  }
+  function updateDest(updated) { setDestinations(function(prev){ return prev.map(function(d){ return d.id === updated.id ? updated : d; }); }); }
+  function deleteDest(id)      { setDestinations(function(prev){ return prev.filter(function(d){ return d.id !== id; }); }); setActiveId(null); }
 
   return (
     <>
-      <Home destinations={destinations} prefs={prefs}
-        onCreate={d => { setDestinations(prev => [...prev, d]); setActiveId(d.id); }}
-        onOpen={setActiveId}
-        onOpenPrefs={() => setShowPrefs(true)} />
-      {showPrefs && <PreferencesPanel prefs={prefs} onSave={p => { setPrefs(p); setShowPrefs(false); }} onClose={() => setShowPrefs(false)} />}
+      {activeDest ? (
+        <DestinationView
+          dest={activeDest}
+          palette={PALETTES[activeIdx % PALETTES.length]}
+          onBack={function(){ setActiveId(null); }}
+          onUpdate={updateDest}
+          onDelete={function(){ deleteDest(activeDest.id); }}
+        />
+      ) : (
+        <Home
+          destinations={destinations}
+          prefs={prefs}
+          onCreate={function(d){ setDestinations(function(prev){ return prev.concat([d]); }); setActiveId(d.id); }}
+          onOpen={setActiveId}
+          onOpenPrefs={function(){ setShowPrefs(true); }}
+        />
+      )}
+      {showPrefs && (
+        <PreferencesPanel
+          prefs={prefs}
+          onSave={function(p){ setPrefs(p); }}
+          onClose={function(){ setShowPrefs(false); }}
+        />
+      )}
     </>
   );
 }
