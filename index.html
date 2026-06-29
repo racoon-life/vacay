@@ -1,733 +1,861 @@
-import { useState, useEffect, useRef } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacation Guides</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #F7F8FA; min-height: 100vh; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea { font-family: inherit; }
 
-const labelStyle = { display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#555", marginBottom: "0.3rem" };
-const inputStyle = { width: "100%", padding: "0.65rem 0.85rem", border: "1.5px solid #e0e0e0", borderRadius: "0.6rem", fontSize: "0.95rem", color: "#111", background: "#fafafa", outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
-const btnPrimary = { padding: "0.65rem 1.25rem", background: "#2B7A9E", color: "#fff", border: "none", borderRadius: "0.65rem", fontWeight: 600, cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit" };
-const btnSecondary = { padding: "0.65rem 1.25rem", background: "#f0f0f0", color: "#333", border: "none", borderRadius: "0.65rem", fontWeight: 500, cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit" };
-const iconBtn = { background: "#f5f5f5", border: "none", borderRadius: "0.4rem", padding: "0.3rem 0.55rem", cursor: "pointer", fontSize: "0.9rem", color: "#555" };
+.btn-primary { padding: .55rem 1.1rem; background: #2B7A9E; color: #fff; border: none; border-radius: .6rem; font-weight: 600; font-size: .88rem; }
+.btn-secondary { padding: .55rem 1.1rem; background: #f0f0f0; color: #333; border: none; border-radius: .6rem; font-weight: 500; font-size: .88rem; }
+.btn-danger { padding: .55rem 1.1rem; background: #C0392B; color: #fff; border: none; border-radius: .6rem; font-weight: 600; font-size: .88rem; }
+.field { display: block; width: 100%; padding: .6rem .8rem; border: 1.5px solid #e0e0e0; border-radius: .55rem; font-size: .93rem; color: #111; background: #fafafa; outline: none; }
+.field:focus { border-color: #2B7A9E; }
+label.lbl { display: block; font-size: .78rem; font-weight: 600; color: #555; margin-bottom: .3rem; }
 
-const PALETTES = [
-  { bg: "#E8F4F8", accent: "#2B7A9E", text: "#1a3a4a" },
-  { bg: "#F0EBF8", accent: "#6B3FA0", text: "#2d1a45" },
-  { bg: "#FFF0E6", accent: "#C05C1A", text: "#3d1f0a" },
-  { bg: "#E6F7EE", accent: "#1A8C4E", text: "#0c3020" },
-  { bg: "#FDF0F0", accent: "#B52B2B", text: "#3d0a0a" },
-  { bg: "#F5F5E8", accent: "#7A6B1A", text: "#2a240a" },
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.48); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
+.modal-box { background: #fff; border-radius: 1.2rem; padding: 1.6rem; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+.modal-box.wide { max-width: 540px; }
+
+/* Home */
+#home-screen { display: block; }
+#dest-screen { display: none; }
+
+.header { background: #fff; border-bottom: 1px solid #eee; padding: .9rem 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+.header-title { font-size: 1.25rem; font-weight: 800; color: #111; }
+.header-sub { font-size: .75rem; color: #888; margin-top: .1rem; }
+.header-actions { display: flex; gap: .4rem; }
+
+.prefs-hint { background: #EDF6FB; border: 1.5px dashed #9BC8DC; border-radius: .85rem; padding: .75rem 1rem; margin-bottom: .9rem; cursor: pointer; }
+.prefs-hint-title { font-weight: 600; font-size: .83rem; color: #2B7A9E; }
+.prefs-hint-sub { font-size: .75rem; color: #5a9ab5; margin-top: .15rem; }
+
+.dest-list { display: grid; gap: .75rem; padding: 1rem 1.2rem; max-width: 720px; margin: 0 auto; }
+.dest-card { display: flex; align-items: center; gap: .9rem; background: #fff; border-radius: 1rem; padding: .9rem 1.1rem; box-shadow: 0 2px 10px rgba(0,0,0,.07); border: 2px solid transparent; cursor: pointer; text-align: left; width: 100%; transition: border-color .15s; }
+.dest-card:hover { border-color: var(--accent); }
+.dest-icon { width: 2.8rem; height: 2.8rem; border-radius: .75rem; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+.dest-name { font-weight: 700; font-size: .95rem; color: #111; }
+.dest-dates { font-size: .77rem; color: #888; margin-top: .1rem; }
+.dest-meta { font-size: .72rem; color: #bbb; margin-top: .1rem; }
+.dest-arrow { color: #999; font-size: .95rem; flex-shrink: 0; margin-left: auto; }
+
+/* Destination view */
+.dest-header { color: #fff; padding: .85rem 1.1rem; display: flex; align-items: center; gap: .8rem; position: sticky; top: 0; z-index: 100; }
+.dest-header-back { background: rgba(255,255,255,.2); border: none; color: #fff; border-radius: .45rem; padding: .35rem .7rem; font-size: .83rem; }
+.dest-header-title { font-size: 1.05rem; font-weight: 700; flex: 1; }
+.dest-header-dates { font-size: .75rem; opacity: .8; }
+.menu-btn { background: rgba(255,255,255,.2); border: none; color: #fff; border-radius: .45rem; padding: .35rem .7rem; font-size: .85rem; position: relative; }
+.menu-dropdown { position: absolute; right: 0; top: calc(100% + .35rem); background: #fff; border-radius: .7rem; box-shadow: 0 8px 30px rgba(0,0,0,.18); min-width: 185px; overflow: hidden; z-index: 200; max-height: 70vh; overflow-y: auto; display: none; }
+.menu-dropdown.open { display: block; }
+.menu-section-label { padding: .4rem .75rem; font-size: .65rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .08em; }
+.menu-item { display: flex; align-items: center; gap: .55rem; width: 100%; padding: .5rem .85rem; border: none; background: #fff; cursor: pointer; text-align: left; font-size: .85rem; color: #222; }
+.menu-item:hover { background: #f5f5f5; }
+.menu-item.active { background: var(--pal-bg); color: var(--accent); font-weight: 600; }
+.menu-item.danger { color: #C0392B; }
+.menu-divider { height: 1px; background: #eee; margin: .2rem 0; }
+
+.tab-bar { display: flex; overflow-x: auto; gap: .3rem; padding: .5rem .9rem; background: #fff; border-bottom: 1px solid #eee; scrollbar-width: none; }
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn { flex-shrink: 0; padding: .28rem .65rem; border-radius: 2rem; border: none; background: #f0f0f0; color: #444; font-size: .77rem; white-space: nowrap; }
+.tab-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+.dest-content { padding: 1rem 1.1rem; max-width: 680px; margin: 0 auto; }
+
+.card { background: #fff; border-radius: 1rem; padding: 1.1rem; margin-bottom: .7rem; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
+.item-row { display: flex; align-items: flex-start; gap: .7rem; }
+.item-text { flex: 1; }
+.item-name { font-weight: 600; color: #111; font-size: .92rem; }
+.item-desc { font-size: .82rem; color: #555; margin-top: .12rem; }
+.item-notes { font-size: .78rem; color: #888; font-style: italic; margin-top: .18rem; }
+.item-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+.icon-btn { background: #f5f5f5; border: none; border-radius: .35rem; padding: .28rem .5rem; font-size: .82rem; color: #555; }
+.icon-btn.del { color: #C0392B; }
+
+.empty-state { background: #fff; border-radius: 1rem; padding: 1.8rem; text-align: center; color: #aaa; font-size: .87rem; margin-bottom: .7rem; }
+.add-btn { width: 100%; padding: .75rem; border: 2px dashed var(--accent-light); border-radius: 1rem; background: transparent; color: var(--accent); font-size: .87rem; font-weight: 600; }
+
+/* Overview */
+.overview-hero { font-size: 2.4rem; margin-bottom: .35rem; }
+.overview-title { font-size: 1.5rem; font-weight: 800; margin-bottom: .15rem; }
+.overview-dates { font-size: .88rem; color: #666; margin-bottom: .55rem; }
+.overview-hint { font-size: .85rem; color: #888; }
+
+/* Edit form */
+.edit-form { display: flex; flex-direction: column; gap: .45rem; }
+.edit-form-actions { display: flex; gap: .5rem; margin-top: .2rem; }
+
+/* Chips */
+.chip-group { display: flex; flex-wrap: wrap; gap: .32rem; margin-top: .35rem; }
+.chip { padding: .32rem .72rem; border-radius: 2rem; font-size: .8rem; font-weight: 500; border: 1.5px solid #e0e0e0; background: #f5f5f5; color: #444; cursor: pointer; }
+.chip.on { background: #2B7A9E; color: #fff; border-color: #2B7A9E; }
+
+/* Toggle */
+.toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
+.toggle { width: 40px; height: 22px; border-radius: 11px; border: none; background: #ccc; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; padding: 0; }
+.toggle.on { background: #2B7A9E; }
+.toggle-knob { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.toggle.on .toggle-knob { left: 21px; }
+
+.ai-box { background: #F7F9FC; border: 1.5px solid #dce8f0; border-radius: .8rem; padding: .85rem .95rem; margin-bottom: 1rem; }
+.ai-box-title { font-weight: 600; font-size: .86rem; color: #1a3a4a; }
+.ai-box-desc { font-size: .78rem; color: #666; margin-top: .3rem; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="home-screen">
+  <div class="header">
+    <div>
+      <div class="header-title">Vacation Guides</div>
+      <div class="header-sub" id="dest-count">0 destinations</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" onclick="openPrefs()">Preferences</button>
+      <button class="btn-primary" onclick="openNewDest()">+ New</button>
+    </div>
+  </div>
+  <div class="dest-list" id="dest-list">
+    <div id="prefs-hint" class="prefs-hint" onclick="openPrefs()" style="display:none">
+      <div class="prefs-hint-title">Set travel preferences</div>
+      <div class="prefs-hint-sub">Tell Claude about restrictions like no car rental, dietary needs, or budget so new guides are tailored from the start.</div>
+    </div>
+    <div id="dest-cards"></div>
+    <div id="empty-home" style="display:none">
+      <div class="card" style="text-align:center;padding:2.5rem 1.5rem">
+        <div style="font-size:2.5rem;margin-bottom:.5rem">🗺</div>
+        <div style="font-weight:700;font-size:1.05rem;margin-bottom:.4rem">No trips yet</div>
+        <div style="color:#888;font-size:.87rem;margin-bottom:1.1rem">Add your first destination to start planning.</div>
+        <button class="btn-primary" onclick="openNewDest()">+ Add destination</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DESTINATION SCREEN -->
+<div id="dest-screen">
+  <div class="dest-header" id="dest-header">
+    <button class="dest-header-back" onclick="goHome()">&#8592; Back</button>
+    <div style="flex:1">
+      <div class="dest-header-title" id="dest-header-title"></div>
+      <div class="dest-header-dates" id="dest-header-dates"></div>
+    </div>
+    <div style="position:relative">
+      <button class="menu-btn" id="menu-btn" onclick="toggleMenu()">Menu &#9660;</button>
+      <div class="menu-dropdown" id="menu-dropdown">
+        <div class="menu-section-label">Sections</div>
+        <div id="menu-items"></div>
+        <div class="menu-divider"></div>
+        <button class="menu-item danger" onclick="confirmDeleteDest()">Delete destination</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-bar" id="tab-bar"></div>
+  <div class="dest-content" id="dest-content"></div>
+</div>
+
+<!-- MODALS -->
+<div id="modal-container"></div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────
+var PALETTES = [
+  {bg:"#E8F4F8",accent:"#2B7A9E",text:"#1a3a4a"},
+  {bg:"#F0EBF8",accent:"#6B3FA0",text:"#2d1a45"},
+  {bg:"#FFF0E6",accent:"#C05C1A",text:"#3d1f0a"},
+  {bg:"#E6F7EE",accent:"#1A8C4E",text:"#0c3020"},
+  {bg:"#FDF0F0",accent:"#B52B2B",text:"#3d0a0a"},
+  {bg:"#F5F5E8",accent:"#7A6B1A",text:"#2a240a"},
 ];
 
-const DEFAULT_PREFS = { transport: [], accommodation: [], dietary: [], budget: "", groupType: "", mobility: "", freetext: "" };
-
-const PREF_OPTIONS = {
-  transport: [
-    { id: "no_car", label: "No car rental" },
-    { id: "public_transit", label: "Public transit only" },
-    { id: "walking", label: "Walking-focused" },
-    { id: "cycling", label: "Cycling-friendly" },
-    { id: "no_flights", label: "No domestic flights" },
-    { id: "taxi_ok", label: "Taxis/rideshare OK" },
-  ],
-  accommodation: [
-    { id: "hotel", label: "Hotels" },
-    { id: "airbnb", label: "Apartments/Airbnb" },
-    { id: "hostel", label: "Hostels OK" },
-    { id: "no_resort", label: "No all-inclusives" },
-    { id: "central", label: "Must be central" },
-  ],
-  dietary: [
-    { id: "vegetarian", label: "Vegetarian" },
-    { id: "vegan", label: "Vegan" },
-    { id: "gluten_free", label: "Gluten-free" },
-    { id: "halal", label: "Halal" },
-    { id: "kosher", label: "Kosher" },
-    { id: "no_seafood", label: "No seafood" },
-    { id: "allergies", label: "Severe allergies" },
-  ],
+var SECTION_ICONS = {
+  days:"📅",fete:"🎆",sights:"🏛",hiking:"🥾",beaches:"🏖",boats:"⛵",
+  eat:"🍽",grocery:"🛒",market:"🧺",activities:"🎯",tips:"💡",pack:"🎒"
 };
 
-const ANNECY_DEST = {
-  id: "dest_annecy_2026",
-  name: "Annecy, France",
-  dates: "July 9-16, 2026",
-  emoji: "FR",
-  createdAt: "2026-06-01T00:00:00.000Z",
-  notes: "Mobile-first vacation guide. Firebase Firestore for real-time sync. Published on GitHub Pages.",
-  sections: [
-    { id: "days",       icon: "D",  label: "Days",        type: "dynamic" },
-    { id: "fete",       icon: "F",  label: "14 Juillet",  type: "static"  },
-    { id: "sights",     icon: "S",  label: "Sights",      type: "static"  },
-    { id: "hiking",     icon: "H",  label: "Hiking",      type: "static"  },
-    { id: "beaches",    icon: "B",  label: "Beaches",     type: "static"  },
-    { id: "boats",      icon: "Bo", label: "Boats",       type: "static"  },
-    { id: "eat",        icon: "E",  label: "Eat & Drink", type: "dynamic" },
-    { id: "grocery",    icon: "G",  label: "Grocery",     type: "dynamic" },
-    { id: "market",     icon: "M",  label: "Market",      type: "static"  },
-    { id: "activities", icon: "A",  label: "Activities",  type: "static"  },
-    { id: "tips",       icon: "T",  label: "Tips",        type: "static"  },
-    { id: "pack",       icon: "P",  label: "Pack",        type: "dynamic" },
-  ],
-  sectionData: {
-    sights: [
-      { id: "s1", name: "Palais de l'Ile", desc: "12th-century island prison, most photographed in Annecy", notes: "Visit at golden hour for best photos. Free to walk around, fee to enter." },
-      { id: "s2", name: "Chateau d'Annecy", desc: "Medieval castle overlooking the old town and lake", notes: "4.50 entry. Museum inside. Great views from the ramparts." },
-      { id: "s3", name: "Old Town (Vieille Ville)", desc: "Pastel arcaded streets along canals", notes: "Busiest on market days (Tue/Fri/Sun). Morning visits quieter." },
-      { id: "s4", name: "Jardins de l'Europe", desc: "Lakeside gardens with swans and mountain views", notes: "Free. Perfect for an evening stroll." },
-    ],
-    hiking: [
-      { id: "h1", name: "Mont Veyrier", desc: "3.5h round trip, panoramic lake views", notes: "Start from Veyrier-du-Lac. Moderate difficulty. Take water." },
-      { id: "h2", name: "La Tournette", desc: "Annecy's highest peak - strenuous day hike", notes: "Start early. Snow possible into July near the summit." },
-      { id: "h3", name: "Gorges du Fier", desc: "Easy canyon walkway 10km from Annecy", notes: "6.50 entry. 45-min loop. Impressive even in low water." },
-      { id: "h4", name: "Semnoz Plateau", desc: "Drive or hike to the ridge above town", notes: "Reachable by car. Paragliding launch site. Epic 360 degree views." },
-    ],
-    beaches: [
-      { id: "b1", name: "Plage d'Albigny", desc: "Largest free beach, grass and shingle, north end of lake", notes: "Gets crowded by 11am in summer. Arrive early." },
-      { id: "b2", name: "Plage des Marquisats", desc: "Close to town, lido-style with diving boards", notes: "5 entry for the lido section. Great for kids." },
-      { id: "b3", name: "Plage de Doussard", desc: "Quieter beach at the south end of the lake", notes: "Worth the 20-min drive. Much less crowded." },
-    ],
-    boats: [
-      { id: "bo1", name: "Compagnie des Bateaux du Lac d'Annecy", desc: "Scheduled boat tours around the full lake", notes: "Book online. 1h or 2h15 options. Departs from Jardins de l'Europe." },
-      { id: "bo2", name: "Pedalo / rowboat rental", desc: "Self-hire from the dock near Champ de Mars", notes: "~15-20/hr. No reservation needed. Fun with kids." },
-      { id: "bo3", name: "Kayak / SUP rental", desc: "Available at several beaches", notes: "Albigny and Marquisats both have hire stands." },
-    ],
-    eat: [
-      { id: "e1", name: "Le Freti", desc: "Classic Savoyard - fondue, raclette, tartiflette", notes: "Book ahead in summer. Cosy cave-like room in the old town." },
-      { id: "e2", name: "Brasserie Saint-Maurice", desc: "Local institution, good for lunch with lake-view terrace", notes: "" },
-      { id: "e3", name: "L'Esquisse", desc: "One Michelin star. Tasting menus only.", notes: "Book weeks ahead. Lunch menu better value at ~55pp." },
-      { id: "e4", name: "Cafe de la Bonbonniere", desc: "Best crepes in old town, always a queue", notes: "Worth the wait. Try the Savoyard (reblochon + lardons)." },
-    ],
-    market: [
-      { id: "m1", name: "Old Town Market", desc: "Tue, Fri, Sun 7am-1pm - Annecy's main market", notes: "Huge. Fills the whole old town. Get there before 9am for parking." },
-      { id: "m2", name: "Organic Market", desc: "Saturday mornings at Paquier meadow", notes: "Smaller, artisan producers. Good for cheese and charcuterie." },
-    ],
-    activities: [
-      { id: "a1", name: "Paragliding from Planfait", desc: "Tandem flights with a qualified guide, 20-30 min in the air", notes: "Summum Parapente and Air et Sens are well reviewed. Book ahead." },
-      { id: "a2", name: "Bastille Day (14 Juillet)", desc: "Fireworks over the lake - July 14th", notes: "Arrive at the lake by 9pm for a good spot. Fireworks at 11pm." },
-      { id: "a3", name: "Annecy International Animation Festival", desc: "World-renowned festival", notes: "June dates only - check programming at annecy.org." },
-    ],
-    tips: [
-      { id: "t1", name: "Getting around", desc: "Annecy old town is tiny and walkable. Rent bikes for the lakeside path.", notes: "Velo'Annecy bike share is cheap. The lake loop is 37km total." },
-      { id: "t2", name: "Parking", desc: "Expensive and scarce in summer. Use Parking Courier on the edge of town.", notes: "Park once and walk everywhere. Don't move the car mid-day." },
-      { id: "t3", name: "Weather", desc: "July is hot (25-30C). Afternoon thunderstorms are common.", notes: "Plan outdoor/lake activities for mornings. Museums for afternoons." },
-      { id: "t4", name: "Language", desc: "French only in most restaurants and shops.", notes: "Basic French phrases go a long way. Menus rarely have English." },
-    ],
-    fete: [
-      { id: "f1", name: "Fireworks - July 14th", desc: "Biggest display of the year over the lake", notes: "Paquier meadow and Albigny beach are the best viewing spots. Very crowded." },
-      { id: "f2", name: "Bal des Pompiers", desc: "Firemen's ball - free street dancing on July 13th evening", notes: "Starts around 9pm near the fire station. Very local, very fun." },
-      { id: "f3", name: "Military parade", desc: "Morning of July 14th in the town centre", notes: "Starts 10am. Short parade through the main street." },
-    ],
-    grocery: [
-      { id: "g1", name: "Reblochon", desc: "The Savoyard cheese - buy at the market, not the supermarket", notes: "" },
-      { id: "g2", name: "Genepi", desc: "Local alpine liqueur", notes: "Good souvenir. Available at most caves a vins." },
-      { id: "g3", name: "Diots sausages", desc: "Smoked pork sausages, cook in white wine", notes: "Buy at the charcuterie in the market." },
-      { id: "g4", name: "Blueberries / raspberries", desc: "In season July - from the Sunday organic market", notes: "" },
-    ],
-    pack: [
-      { id: "p1", name: "Sunscreen SPF 50+", desc: "Lake reflection + altitude = intense sun", notes: "" },
-      { id: "p2", name: "Light rain jacket", desc: "Afternoon thunderstorms are likely", notes: "" },
-      { id: "p3", name: "Hiking shoes", desc: "Essential even for moderate trails", notes: "" },
-      { id: "p4", name: "Swimwear x2", desc: "You'll be in the lake daily", notes: "" },
-      { id: "p5", name: "Reusable water bottle", desc: "Tap water is excellent. Fountains everywhere.", notes: "" },
-      { id: "p6", name: "European power adapter", desc: "Type E/F plug", notes: "" },
-      { id: "p7", name: "Cash (euros)", desc: "Many market stalls and small restaurants cash only", notes: "" },
-      { id: "p8", name: "French phrasebook / app", desc: "Even basic phrases help a lot", notes: "" },
-    ],
-  },
-};
-
-const SECTION_ICONS = {
-  days: "📅", fete: "🎆", sights: "🏛", hiking: "🥾", beaches: "🏖", boats: "⛵",
-  eat: "🍽", grocery: "🛒", market: "🧺", activities: "🎯", tips: "💡", pack: "🎒",
-  default: "📌"
-};
-
-const DEFAULT_SECTIONS = [
-  { id: "days",       icon: "📅", label: "Days",        type: "dynamic" },
-  { id: "sights",     icon: "🏛",  label: "Sights",      type: "static"  },
-  { id: "eat",        icon: "🍽",  label: "Eat & Drink", type: "dynamic" },
-  { id: "activities", icon: "🎯", label: "Activities",  type: "static"  },
-  { id: "tips",       icon: "💡", label: "Tips",        type: "static"  },
-  { id: "pack",       icon: "🎒", label: "Pack",        type: "dynamic" },
+var DEFAULT_SECTIONS = [
+  {id:"days",label:"Days",type:"dynamic"},
+  {id:"sights",label:"Sights",type:"static"},
+  {id:"eat",label:"Eat & Drink",type:"dynamic"},
+  {id:"activities",label:"Activities",type:"static"},
+  {id:"tips",label:"Tips",type:"static"},
+  {id:"pack",label:"Pack",type:"dynamic"},
 ];
 
-function makeNewDest(name, dates, emoji, scaffold) {
-  return {
-    id: "dest_" + Date.now(),
+var ANNECY = {
+  id:"dest_annecy_2026", name:"Annecy, France", dates:"July 9-16, 2026", emoji:"🇫🇷",
+  notes:"Mobile-first vacation guide. Firebase for real-time sync.",
+  sections:[
+    {id:"days",label:"Days",type:"dynamic"},
+    {id:"fete",label:"14 Juillet",type:"static"},
+    {id:"sights",label:"Sights",type:"static"},
+    {id:"hiking",label:"Hiking",type:"static"},
+    {id:"beaches",label:"Beaches",type:"static"},
+    {id:"boats",label:"Boats",type:"static"},
+    {id:"eat",label:"Eat & Drink",type:"dynamic"},
+    {id:"grocery",label:"Grocery",type:"dynamic"},
+    {id:"market",label:"Market",type:"static"},
+    {id:"activities",label:"Activities",type:"static"},
+    {id:"tips",label:"Tips",type:"static"},
+    {id:"pack",label:"Pack",type:"dynamic"},
+  ],
+  sectionData:{
+    sights:[
+      {id:"s1",name:"Palais de l'Ile",desc:"12th-century island prison, most photographed in Annecy",notes:"Visit at golden hour. Free to walk around, fee to enter."},
+      {id:"s2",name:"Chateau d'Annecy",desc:"Medieval castle overlooking the old town and lake",notes:"4.50 entry. Museum inside. Great views from the ramparts."},
+      {id:"s3",name:"Old Town (Vieille Ville)",desc:"Pastel arcaded streets along canals",notes:"Busiest on market days (Tue/Fri/Sun). Mornings quieter."},
+      {id:"s4",name:"Jardins de l'Europe",desc:"Lakeside gardens with swans and mountain views",notes:"Free. Perfect for an evening stroll."},
+    ],
+    hiking:[
+      {id:"h1",name:"Mont Veyrier",desc:"3.5h round trip, panoramic lake views",notes:"Start from Veyrier-du-Lac. Moderate. Take water."},
+      {id:"h2",name:"La Tournette",desc:"Annecy's highest peak — strenuous day hike",notes:"Start early. Snow possible into July near summit."},
+      {id:"h3",name:"Gorges du Fier",desc:"Easy canyon walkway 10km from Annecy",notes:"6.50 entry. 45-min loop. Impressive even in low water."},
+      {id:"h4",name:"Semnoz Plateau",desc:"Drive or hike to the ridge above town",notes:"Reachable by car. Paragliding site. Epic 360 views."},
+    ],
+    beaches:[
+      {id:"b1",name:"Plage d'Albigny",desc:"Largest free beach, grass and shingle, north end",notes:"Gets crowded by 11am. Arrive early."},
+      {id:"b2",name:"Plage des Marquisats",desc:"Close to town, lido-style with diving boards",notes:"5 entry for lido. Great for kids."},
+      {id:"b3",name:"Plage de Doussard",desc:"Quieter beach at the south end of the lake",notes:"Worth the 20-min drive. Much less crowded."},
+    ],
+    boats:[
+      {id:"bo1",name:"Compagnie des Bateaux du Lac d'Annecy",desc:"Scheduled boat tours around the full lake",notes:"Book online. 1h or 2h15 options."},
+      {id:"bo2",name:"Pedalo / rowboat rental",desc:"Self-hire from the dock near Champ de Mars",notes:"~15-20/hr. No reservation needed."},
+      {id:"bo3",name:"Kayak / SUP rental",desc:"Available at several beaches",notes:"Albigny and Marquisats both have hire stands."},
+    ],
+    eat:[
+      {id:"e1",name:"Le Freti",desc:"Classic Savoyard — fondue, raclette, tartiflette",notes:"Book ahead in summer. Cosy cave-like room."},
+      {id:"e2",name:"Brasserie Saint-Maurice",desc:"Local institution, good for lunch with lake-view terrace",notes:""},
+      {id:"e3",name:"L'Esquisse",desc:"One Michelin star. Tasting menus only.",notes:"Book weeks ahead. Lunch menu ~55pp."},
+      {id:"e4",name:"Cafe de la Bonbonniere",desc:"Best crepes in old town, always a queue",notes:"Worth the wait. Try the Savoyard (reblochon + lardons)."},
+    ],
+    market:[
+      {id:"m1",name:"Old Town Market",desc:"Tue, Fri, Sun 7am-1pm — Annecy's main market",notes:"Huge. Get there before 9am for parking."},
+      {id:"m2",name:"Organic Market",desc:"Saturday mornings at Paquier meadow",notes:"Artisan producers. Good for cheese and charcuterie."},
+    ],
+    activities:[
+      {id:"a1",name:"Paragliding from Planfait",desc:"Tandem flights, 20-30 min in the air",notes:"Summum Parapente and Air et Sens well reviewed. Book ahead."},
+      {id:"a2",name:"Bastille Day (14 Juillet)",desc:"Fireworks over the lake — July 14th",notes:"Arrive by 9pm. Fireworks at 11pm."},
+      {id:"a3",name:"Annecy Animation Festival",desc:"World-renowned animation festival",notes:"June dates only — check annecy.org."},
+    ],
+    tips:[
+      {id:"t1",name:"Getting around",desc:"Old town is tiny and walkable. Rent bikes for the lakeside path.",notes:"Velo'Annecy bike share is cheap. Lake loop is 37km."},
+      {id:"t2",name:"Parking",desc:"Expensive and scarce in summer.",notes:"Park at Parking Courier and walk. Don't move the car mid-day."},
+      {id:"t3",name:"Weather",desc:"July is hot (25-30C). Afternoon thunderstorms are common.",notes:"Do outdoor activities in the morning."},
+      {id:"t4",name:"Language",desc:"French only in most restaurants and shops.",notes:"Basic French phrases go a long way."},
+    ],
+    fete:[
+      {id:"f1",name:"Fireworks — July 14th",desc:"Biggest display of the year over the lake",notes:"Paquier meadow and Albigny beach are best spots."},
+      {id:"f2",name:"Bal des Pompiers",desc:"Free street dancing on July 13th evening",notes:"Starts ~9pm near the fire station. Very local."},
+      {id:"f3",name:"Military parade",desc:"Morning of July 14th in the town centre",notes:"Starts 10am."},
+    ],
+    grocery:[
+      {id:"g1",name:"Reblochon",desc:"The Savoyard cheese — buy at the market",notes:""},
+      {id:"g2",name:"Genepi",desc:"Local alpine liqueur",notes:"Good souvenir. Available at most caves a vins."},
+      {id:"g3",name:"Diots sausages",desc:"Smoked pork sausages, cook in white wine",notes:"Buy at the charcuterie in the market."},
+      {id:"g4",name:"Blueberries / raspberries",desc:"In season July — Sunday organic market",notes:""},
+    ],
+    pack:[
+      {id:"p1",name:"Sunscreen SPF 50+",desc:"Lake reflection + altitude = intense sun",notes:""},
+      {id:"p2",name:"Light rain jacket",desc:"Afternoon thunderstorms are likely",notes:""},
+      {id:"p3",name:"Hiking shoes",desc:"Essential even for moderate trails",notes:""},
+      {id:"p4",name:"Swimwear x2",desc:"You'll be in the lake daily",notes:""},
+      {id:"p5",name:"Reusable water bottle",desc:"Tap water is excellent. Fountains everywhere.",notes:""},
+      {id:"p6",name:"European power adapter",desc:"Type E/F plug",notes:""},
+      {id:"p7",name:"Cash (euros)",desc:"Many market stalls cash only",notes:""},
+      {id:"p8",name:"French phrasebook / app",desc:"Even basic phrases help a lot",notes:""},
+    ],
+  }
+};
+
+var PREF_OPTIONS = {
+  transport:[
+    {id:"no_car",label:"No car rental"},
+    {id:"public_transit",label:"Public transit only"},
+    {id:"walking",label:"Walking-focused"},
+    {id:"cycling",label:"Cycling-friendly"},
+    {id:"no_flights",label:"No domestic flights"},
+    {id:"taxi_ok",label:"Taxis/rideshare OK"},
+  ],
+  accommodation:[
+    {id:"hotel",label:"Hotels"},
+    {id:"airbnb",label:"Apartments/Airbnb"},
+    {id:"hostel",label:"Hostels OK"},
+    {id:"no_resort",label:"No all-inclusives"},
+    {id:"central",label:"Must be central"},
+  ],
+  dietary:[
+    {id:"vegetarian",label:"Vegetarian"},
+    {id:"vegan",label:"Vegan"},
+    {id:"gluten_free",label:"Gluten-free"},
+    {id:"halal",label:"Halal"},
+    {id:"kosher",label:"Kosher"},
+    {id:"no_seafood",label:"No seafood"},
+    {id:"allergies",label:"Severe allergies"},
+  ],
+};
+
+// ── State ─────────────────────────────────────────────────────────────
+var destinations = [];
+var prefs = {transport:[],accommodation:[],dietary:[],budget:"",groupType:"",mobility:"",freetext:""};
+var activeDestId = null;
+var activeSectionId = null;
+
+// ── Storage ───────────────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    var dr = await window.storage.get("vg_destinations");
+    var dests = dr ? JSON.parse(dr.value) : [];
+    if (!dests.some(function(d){return d.id==="dest_annecy_2026";})) {
+      dests = [ANNECY].concat(dests);
+    }
+    destinations = dests;
+  } catch(e) { destinations = [ANNECY]; }
+  try {
+    var pr = await window.storage.get("vg_prefs");
+    if (pr) prefs = JSON.parse(pr.value);
+  } catch(e) {}
+}
+async function saveDests() {
+  try { await window.storage.set("vg_destinations", JSON.stringify(destinations)); } catch(e) {}
+}
+async function savePrefs() {
+  try { await window.storage.set("vg_prefs", JSON.stringify(prefs)); } catch(e) {}
+}
+
+// ── Render home ───────────────────────────────────────────────────────
+function renderHome() {
+  document.getElementById("home-screen").style.display = "block";
+  document.getElementById("dest-screen").style.display = "none";
+
+  var hasPrefs = (prefs.transport.length || prefs.dietary.length || prefs.budget || prefs.groupType || prefs.freetext);
+  document.getElementById("prefs-hint").style.display = hasPrefs ? "none" : "block";
+  document.getElementById("dest-count").textContent = destinations.length + " destination" + (destinations.length !== 1 ? "s" : "");
+  document.getElementById("empty-home").style.display = destinations.length === 0 ? "block" : "none";
+
+  var container = document.getElementById("dest-cards");
+  container.innerHTML = "";
+  destinations.forEach(function(dest, i) {
+    var pal = PALETTES[i % PALETTES.length];
+    var btn = document.createElement("button");
+    btn.className = "dest-card";
+    btn.style.setProperty("--accent", pal.accent);
+    btn.innerHTML =
+      '<div class="dest-icon" style="background:' + pal.bg + '">' + dest.emoji + '</div>' +
+      '<div style="flex:1">' +
+        '<div class="dest-name">' + esc(dest.name) + '</div>' +
+        (dest.dates ? '<div class="dest-dates">' + esc(dest.dates) + '</div>' : '') +
+        '<div class="dest-meta">' + dest.sections.length + ' sections</div>' +
+      '</div>' +
+      '<div class="dest-arrow" style="color:' + pal.accent + '">&#8250;</div>';
+    btn.onclick = function() { openDest(dest.id); };
+    container.appendChild(btn);
+  });
+}
+
+// ── Open destination ──────────────────────────────────────────────────
+function openDest(id) {
+  activeDestId = id;
+  activeSectionId = null;
+  var dest = getDest();
+  var idx = destinations.findIndex(function(d){return d.id===id;});
+  var pal = PALETTES[idx % PALETTES.length];
+
+  document.getElementById("home-screen").style.display = "none";
+  document.getElementById("dest-screen").style.display = "block";
+
+  var hdr = document.getElementById("dest-header");
+  hdr.style.background = pal.accent;
+  document.getElementById("dest-header-title").textContent = dest.emoji + " " + dest.name;
+  var datesEl = document.getElementById("dest-header-dates");
+  datesEl.textContent = dest.dates || "";
+  datesEl.style.display = dest.dates ? "block" : "none";
+
+  // CSS vars for this dest
+  document.documentElement.style.setProperty("--accent", pal.accent);
+  document.documentElement.style.setProperty("--accent-light", pal.accent + "55");
+  document.documentElement.style.setProperty("--pal-bg", pal.bg);
+  document.getElementById("dest-screen").style.background = pal.bg;
+
+  renderMenu();
+  renderTabs();
+  renderSection();
+}
+
+function goHome() {
+  activeDestId = null;
+  activeSectionId = null;
+  renderHome();
+}
+
+function getDest() {
+  return destinations.find(function(d){return d.id===activeDestId;});
+}
+
+function updateDest(updated) {
+  destinations = destinations.map(function(d){return d.id===updated.id?updated:d;});
+  saveDests();
+}
+
+// ── Menu ──────────────────────────────────────────────────────────────
+function toggleMenu() {
+  var dd = document.getElementById("menu-dropdown");
+  dd.classList.toggle("open");
+}
+document.addEventListener("click", function(e) {
+  var mb = document.getElementById("menu-btn");
+  var dd = document.getElementById("menu-dropdown");
+  if (mb && dd && !mb.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove("open");
+  }
+});
+
+function renderMenu() {
+  var dest = getDest();
+  var container = document.getElementById("menu-items");
+  container.innerHTML = "";
+
+  // Overview
+  var ov = document.createElement("button");
+  ov.className = "menu-item" + (activeSectionId === null ? " active" : "");
+  ov.textContent = "Overview";
+  ov.onclick = function() { activeSectionId = null; renderTabs(); renderSection(); toggleMenu(); };
+  container.appendChild(ov);
+
+  dest.sections.forEach(function(s) {
+    var btn = document.createElement("button");
+    btn.className = "menu-item" + (activeSectionId === s.id ? " active" : "");
+    var icon = SECTION_ICONS[s.id] || "📌";
+    btn.innerHTML = '<span>' + icon + '</span> ' + esc(s.label);
+    btn.onclick = function() { activeSectionId = s.id; renderTabs(); renderSection(); toggleMenu(); };
+    container.appendChild(btn);
+  });
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────
+function renderTabs() {
+  var dest = getDest();
+  var bar = document.getElementById("tab-bar");
+  bar.innerHTML = "";
+
+  var ov = document.createElement("button");
+  ov.className = "tab-btn" + (activeSectionId === null ? " active" : "");
+  ov.textContent = "Home";
+  ov.onclick = function() { activeSectionId = null; renderMenu(); renderSection(); };
+  bar.appendChild(ov);
+
+  dest.sections.forEach(function(s) {
+    var btn = document.createElement("button");
+    btn.className = "tab-btn" + (activeSectionId === s.id ? " active" : "");
+    var icon = SECTION_ICONS[s.id] || "📌";
+    btn.innerHTML = icon + " " + esc(s.label);
+    btn.onclick = function() { activeSectionId = s.id; renderMenu(); renderSection(); };
+    bar.appendChild(btn);
+  });
+}
+
+// ── Section content ───────────────────────────────────────────────────
+function renderSection() {
+  var dest = getDest();
+  var container = document.getElementById("dest-content");
+  container.innerHTML = "";
+
+  if (activeSectionId === null) {
+    renderOverview(dest, container);
+    return;
+  }
+  var section = dest.sections.find(function(s){return s.id===activeSectionId;});
+  if (!section) return;
+  renderSectionItems(dest, section, container);
+}
+
+function renderOverview(dest, container) {
+  var notesId = "notes_" + dest.id;
+  container.innerHTML =
+    '<div class="card">' +
+      '<div class="overview-hero">' + dest.emoji + '</div>' +
+      '<div class="overview-title" style="color:var(--accent)">' + esc(dest.name) + '</div>' +
+      (dest.dates ? '<div class="overview-dates">' + esc(dest.dates) + '</div>' : '') +
+      '<div class="overview-hint">Select a section from the tabs above or the Menu button.</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">' +
+        '<div style="font-weight:700;font-size:.93rem">Trip notes</div>' +
+        '<button class="btn-secondary" style="padding:.25rem .6rem;font-size:.76rem" onclick="editNotes()">Edit</button>' +
+      '</div>' +
+      '<p id="notes-display" style="font-size:.87rem;color:' + (dest.notes ? '#333' : '#bbb') + ';white-space:pre-wrap">' +
+        (dest.notes ? esc(dest.notes) : 'No notes yet.') + '</p>' +
+    '</div>';
+}
+
+function editNotes() {
+  var dest = getDest();
+  showModal(
+    '<h2 style="margin:0 0 1rem;font-size:1.05rem;font-weight:800">Trip notes</h2>' +
+    '<textarea id="modal-notes" class="field" rows="6" style="resize:vertical;margin-bottom:1rem" placeholder="Add any notes...">' + esc(dest.notes||'') + '</textarea>' +
+    '<div style="display:flex;gap:.6rem">' +
+      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn-primary" style="flex:2" onclick="saveNotes()">Save</button>' +
+    '</div>'
+  );
+}
+function saveNotes() {
+  var dest = getDest();
+  var v = document.getElementById("modal-notes").value;
+  updateDest(Object.assign({}, dest, {notes: v}));
+  closeModal();
+  renderSection();
+}
+
+function renderSectionItems(dest, section, container) {
+  var items = (dest.sectionData && dest.sectionData[section.id]) ? dest.sectionData[section.id] : [];
+  var icon = SECTION_ICONS[section.id] || "📌";
+
+  var html = '<div style="display:flex;align-items:center;gap:.65rem;margin-bottom:1rem">' +
+    '<span style="font-size:1.5rem">' + icon + '</span>' +
+    '<h2 style="font-size:1.1rem;font-weight:800;color:var(--accent)">' + esc(section.label) + '</h2>' +
+    '</div>';
+
+  if (items.length === 0) {
+    html += '<div class="empty-state">No items yet. Add one below.</div>';
+  } else {
+    items.forEach(function(item, idx) {
+      html +=
+        '<div class="card" id="item-card-' + esc(item.id) + '">' +
+          '<div class="item-row">' +
+            '<div class="item-text">' +
+              '<div class="item-name">' + esc(item.name) + '</div>' +
+              (item.desc  ? '<div class="item-desc">'  + esc(item.desc)  + '</div>' : '') +
+              (item.notes ? '<div class="item-notes">' + esc(item.notes) + '</div>' : '') +
+            '</div>' +
+            '<div class="item-actions">' +
+              '<button class="icon-btn" onclick="editItem(' + JSON.stringify(section.id) + ',' + JSON.stringify(item.id) + ')">&#9998;</button>' +
+              '<button class="icon-btn del" onclick="deleteItem(' + JSON.stringify(section.id) + ',' + JSON.stringify(item.id) + ')">&#10005;</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    });
+  }
+
+  html += '<button class="add-btn" onclick="addItem(' + JSON.stringify(section.id) + ')">+ Add item</button>';
+  container.innerHTML = html;
+}
+
+function addItem(sectionId) {
+  showModal(
+    '<h2 style="margin:0 0 1rem;font-size:1.05rem;font-weight:800">Add item</h2>' +
+    '<div class="edit-form">' +
+      '<div><label class="lbl">Name *</label><input id="ei-name" class="field" placeholder="Name" autofocus></div>' +
+      '<div><label class="lbl">Short description</label><input id="ei-desc" class="field" placeholder="Description"></div>' +
+      '<div><label class="lbl">Notes</label><textarea id="ei-notes" class="field" rows="2" placeholder="Notes (optional)" style="resize:vertical"></textarea></div>' +
+    '</div>' +
+    '<div class="edit-form-actions">' +
+      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn-primary" style="flex:2" onclick="saveNewItem(' + JSON.stringify(sectionId) + ')">Add</button>' +
+    '</div>'
+  );
+  setTimeout(function(){var el=document.getElementById("ei-name");if(el)el.focus();},50);
+}
+
+function saveNewItem(sectionId) {
+  var name = (document.getElementById("ei-name").value || "").trim();
+  if (!name) { alert("Name is required."); return; }
+  var dest = getDest();
+  var sd = Object.assign({}, dest.sectionData || {});
+  sd[sectionId] = (sd[sectionId] || []).concat([{
+    id: "item_" + Date.now(),
     name: name,
-    dates: dates,
-    emoji: emoji || "plane",
-    createdAt: new Date().toISOString(),
-    sections: scaffold ? scaffold.sections : DEFAULT_SECTIONS.map(function(s) { return Object.assign({}, s); }),
-    sectionData: scaffold ? (scaffold.sectionData || {}) : {},
+    desc: document.getElementById("ei-desc").value || "",
+    notes: document.getElementById("ei-notes").value || ""
+  }]);
+  updateDest(Object.assign({}, dest, {sectionData: sd}));
+  closeModal();
+  renderSection();
+}
+
+function editItem(sectionId, itemId) {
+  var dest = getDest();
+  var items = (dest.sectionData && dest.sectionData[sectionId]) || [];
+  var item = items.find(function(i){return i.id===itemId;});
+  if (!item) return;
+  showModal(
+    '<h2 style="margin:0 0 1rem;font-size:1.05rem;font-weight:800">Edit item</h2>' +
+    '<div class="edit-form">' +
+      '<div><label class="lbl">Name *</label><input id="ei-name" class="field" value="' + esc(item.name) + '" autofocus></div>' +
+      '<div><label class="lbl">Short description</label><input id="ei-desc" class="field" value="' + esc(item.desc||'') + '"></div>' +
+      '<div><label class="lbl">Notes</label><textarea id="ei-notes" class="field" rows="2" style="resize:vertical">' + esc(item.notes||'') + '</textarea></div>' +
+    '</div>' +
+    '<div class="edit-form-actions">' +
+      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn-primary" style="flex:2" onclick="saveEditItem(' + JSON.stringify(sectionId) + ',' + JSON.stringify(itemId) + ')">Save</button>' +
+    '</div>'
+  );
+  setTimeout(function(){var el=document.getElementById("ei-name");if(el)el.focus();},50);
+}
+
+function saveEditItem(sectionId, itemId) {
+  var name = (document.getElementById("ei-name").value || "").trim();
+  if (!name) { alert("Name is required."); return; }
+  var dest = getDest();
+  var sd = Object.assign({}, dest.sectionData || {});
+  sd[sectionId] = (sd[sectionId] || []).map(function(i) {
+    return i.id === itemId ? Object.assign({}, i, {
+      name: name,
+      desc: document.getElementById("ei-desc").value || "",
+      notes: document.getElementById("ei-notes").value || ""
+    }) : i;
+  });
+  updateDest(Object.assign({}, dest, {sectionData: sd}));
+  closeModal();
+  renderSection();
+}
+
+function deleteItem(sectionId, itemId) {
+  var dest = getDest();
+  var sd = Object.assign({}, dest.sectionData || {});
+  sd[sectionId] = (sd[sectionId] || []).filter(function(i){return i.id!==itemId;});
+  updateDest(Object.assign({}, dest, {sectionData: sd}));
+  renderSection();
+}
+
+// ── Delete destination ────────────────────────────────────────────────
+function confirmDeleteDest() {
+  toggleMenu();
+  var dest = getDest();
+  showModal(
+    '<h2 style="margin:0 0 .6rem;font-size:1.05rem">Delete ' + esc(dest.name) + '?</h2>' +
+    '<p style="margin:0 0 1.2rem;color:#666;font-size:.87rem">This cannot be undone.</p>' +
+    '<div style="display:flex;gap:.6rem">' +
+      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn-danger" style="flex:1" onclick="deleteDest()">Delete</button>' +
+    '</div>'
+  );
+}
+function deleteDest() {
+  destinations = destinations.filter(function(d){return d.id!==activeDestId;});
+  saveDests();
+  closeModal();
+  goHome();
+}
+
+// ── New destination ───────────────────────────────────────────────────
+var EMOJIS = ["✈️","🌍","🏝","🗺","🎒","🏔","🌅","🛳","🌴","🏜","🌋","🗽","⛩","🏯","🎪","🏙","🌃","🗼","🎭","🏕"];
+var selectedEmoji = 0;
+var aiEnabled = true;
+
+function openNewDest() {
+  selectedEmoji = 0;
+  aiEnabled = true;
+  var emojiGrid = EMOJIS.map(function(e, i) {
+    return '<button onclick="selectEmoji(' + i + ')" id="emoji-opt-' + i + '" style="font-size:1.3rem;padding:.28rem .38rem;border:2px solid ' + (i===0?'#2B7A9E':'transparent') + ';border-radius:.45rem;background:' + (i===0?'#E8F4F8':'#f5f5f5') + ';cursor:pointer">' + e + '</button>';
+  }).join("");
+
+  showModal(
+    '<h2 style="margin:0 0 1rem;font-size:1.1rem;font-weight:800">Add a destination</h2>' +
+    '<div style="margin-bottom:.85rem">' +
+      '<label class="lbl">Icon</label>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.3rem">' + emojiGrid + '</div>' +
+    '</div>' +
+    '<div style="margin-bottom:.85rem"><label class="lbl">Destination name *</label>' +
+      '<input id="nd-name" class="field" placeholder="e.g. Lisbon, Portugal" autofocus></div>' +
+    '<div style="margin-bottom:1rem"><label class="lbl">Trip dates (optional)</label>' +
+      '<input id="nd-dates" class="field" placeholder="e.g. Aug 3-10, 2026"></div>' +
+    '<div class="ai-box" style="margin-bottom:1rem">' +
+      '<div class="toggle-wrap">' +
+        '<div class="ai-box-title">Generate guide with AI</div>' +
+        '<button class="toggle on" id="ai-toggle" onclick="toggleAI()"><span class="toggle-knob"></span></button>' +
+      '</div>' +
+      '<div class="ai-box-desc" id="ai-box-desc">Claude will scaffold sections and suggestions for this destination.</div>' +
+    '</div>' +
+    '<div id="nd-error" style="color:#C05C1A;font-size:.81rem;margin-bottom:.6rem;display:none"></div>' +
+    '<div style="display:flex;gap:.6rem">' +
+      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn-primary" style="flex:2" id="nd-create-btn" onclick="createDest()">Create with AI</button>' +
+    '</div>',
+    true
+  );
+  setTimeout(function(){var el=document.getElementById("nd-name");if(el)el.focus();},50);
+}
+
+function selectEmoji(i) {
+  EMOJIS.forEach(function(_, j) {
+    var btn = document.getElementById("emoji-opt-" + j);
+    if (!btn) return;
+    btn.style.borderColor = j === i ? "#2B7A9E" : "transparent";
+    btn.style.background  = j === i ? "#E8F4F8"  : "#f5f5f5";
+  });
+  selectedEmoji = i;
+}
+
+function toggleAI() {
+  aiEnabled = !aiEnabled;
+  var tog = document.getElementById("ai-toggle");
+  var desc = document.getElementById("ai-box-desc");
+  var btn  = document.getElementById("nd-create-btn");
+  if (tog) { tog.className = "toggle" + (aiEnabled ? " on" : ""); }
+  if (desc) { desc.textContent = aiEnabled ? "Claude will scaffold sections and suggestions for this destination." : "A blank guide with default sections will be created."; }
+  if (btn)  { btn.textContent  = aiEnabled ? "Create with AI" : "Create blank guide"; }
+}
+
+async function createDest() {
+  var name = (document.getElementById("nd-name").value || "").trim();
+  if (!name) { alert("Please enter a destination name."); return; }
+  var dates   = document.getElementById("nd-dates").value || "";
+  var emoji   = EMOJIS[selectedEmoji];
+  var errEl   = document.getElementById("nd-error");
+  var createBtn = document.getElementById("nd-create-btn");
+
+  if (!aiEnabled) {
+    addDestination(name, dates, emoji, null);
+    closeModal();
+    return;
+  }
+
+  createBtn.disabled = true;
+  createBtn.textContent = "Generating...";
+  if (errEl) errEl.style.display = "none";
+
+  var sysPrompt = "You are a travel guide generator. Respond ONLY with valid JSON, no markdown fences. Shape: {\"notes\":\"string\",\"sections\":[{\"id\":\"string\",\"label\":\"string\",\"type\":\"static\"}],\"sectionData\":{\"sectionId\":[{\"id\":\"string\",\"name\":\"string\",\"desc\":\"string\",\"notes\":\"string\"}]}}. Include 8-12 sections, always include days (type:dynamic), tips, pack (type:dynamic). 3-6 items per section. Be specific with real place names.";
+
+  var prefLines = [];
+  if (prefs.transport.length)     prefLines.push("Transport restrictions: " + prefs.transport.join(", "));
+  if (prefs.accommodation.length) prefLines.push("Accommodation: " + prefs.accommodation.join(", "));
+  if (prefs.dietary.length)       prefLines.push("Dietary: " + prefs.dietary.join(", "));
+  if (prefs.budget)    prefLines.push("Budget: " + prefs.budget);
+  if (prefs.groupType) prefLines.push("Group: " + prefs.groupType);
+  if (prefs.mobility)  prefLines.push("Mobility: " + prefs.mobility);
+  if (prefs.freetext)  prefLines.push("Notes: " + prefs.freetext);
+  if (prefLines.length) sysPrompt += " USER PREFERENCES (respect strictly): " + prefLines.join("; ");
+
+  try {
+    var resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6", max_tokens: 1000,
+        system: sysPrompt,
+        messages: [{role:"user", content:"Generate a vacation guide scaffold for: " + name + (dates ? " (" + dates + ")" : "")}]
+      })
+    });
+    var data = await resp.json();
+    var raw = "";
+    (data.content||[]).forEach(function(b){if(b.type==="text")raw+=b.text;});
+    raw = raw.replace(/```json|```/g,"").trim();
+    var scaffold = JSON.parse(raw);
+    addDestination(name, dates, emoji, scaffold);
+    closeModal();
+  } catch(e) {
+    if (errEl) { errEl.textContent = "Could not generate AI scaffold. Creating blank guide."; errEl.style.display = "block"; }
+    addDestination(name, dates, emoji, null);
+    closeModal();
+  }
+}
+
+function addDestination(name, dates, emoji, scaffold) {
+  var dest = {
+    id: "dest_" + Date.now(),
+    name: name, dates: dates, emoji: emoji,
     notes: scaffold ? (scaffold.notes || "") : "",
+    sections: scaffold ? scaffold.sections : DEFAULT_SECTIONS.map(function(s){return Object.assign({},s);}),
+    sectionData: scaffold ? (scaffold.sectionData || {}) : {}
   };
+  destinations = destinations.concat([dest]);
+  saveDests();
+  openDest(dest.id);
 }
 
-async function loadDestinations() {
-  try {
-    const r = await window.storage.get("destinations");
-    const dests = r ? JSON.parse(r.value) : [];
-    const hasAnnecy = dests.some(function(d) { return d.id === "dest_annecy_2026"; });
-    return hasAnnecy ? dests : [ANNECY_DEST].concat(dests);
-  } catch(e) {
-    return [ANNECY_DEST];
+// ── Preferences ───────────────────────────────────────────────────────
+function openPrefs() {
+  function chipRow(category, label) {
+    var chips = PREF_OPTIONS[category].map(function(opt) {
+      var on = prefs[category].indexOf(opt.id) !== -1;
+      return '<button class="chip' + (on?' on':'') + '" id="chip-' + category + '-' + opt.id + '" onclick="toggleChip(' + JSON.stringify(category) + ',' + JSON.stringify(opt.id) + ')">' + esc(opt.label) + '</button>';
+    }).join("");
+    return '<div style="margin-bottom:.85rem"><div style="font-size:.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">' + label + '</div><div class="chip-group">' + chips + '</div></div>';
   }
-}
-async function saveDestinations(dests) {
-  try { await window.storage.set("destinations", JSON.stringify(dests)); } catch(e) {}
-}
-async function loadPreferences() {
-  try {
-    const r = await window.storage.get("travel_prefs");
-    return r ? JSON.parse(r.value) : Object.assign({}, DEFAULT_PREFS);
-  } catch(e) {
-    return Object.assign({}, DEFAULT_PREFS);
+  function singleRow(key, label, opts) {
+    var btns = opts.map(function(o) {
+      var on = prefs[key] === o;
+      return '<button class="chip' + (on?' on':'') + '" id="chip-' + key + '-' + o.replace(/[^a-z]/gi,'_') + '" onclick="toggleSingle(' + JSON.stringify(key) + ',' + JSON.stringify(o) + ')">' + esc(o) + '</button>';
+    }).join("");
+    return '<div style="margin-bottom:.85rem"><div style="font-size:.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">' + label + '</div><div class="chip-group">' + btns + '</div></div>';
   }
-}
-async function savePreferences(prefs) {
-  try { await window.storage.set("travel_prefs", JSON.stringify(prefs)); } catch(e) {}
-}
 
-function Modal({ onClose, children, wide }) {
-  return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", overflowY: "auto" }}>
-      <div onClick={function(e) { e.stopPropagation(); }} style={{ background: "#fff", borderRadius: "1.25rem", padding: "1.75rem", width: "100%", maxWidth: wide ? "560px" : "420px", boxShadow: "0 24px 60px rgba(0,0,0,0.2)", margin: "auto" }}>
-        {children}
-      </div>
-    </div>
+  showModal(
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">' +
+      '<h2 style="margin:0;font-size:1.05rem;font-weight:800">Travel Preferences</h2>' +
+      '<button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999">&#10005;</button>' +
+    '</div>' +
+    '<p style="margin:0 0 1rem;font-size:.81rem;color:#666;line-height:1.5">These are passed to Claude when generating guide scaffolds for new destinations.</p>' +
+    chipRow("transport","Transport") +
+    chipRow("accommodation","Accommodation") +
+    chipRow("dietary","Dietary") +
+    singleRow("budget","Budget level",["Budget","Mid-range","Luxury"]) +
+    singleRow("groupType","Travelling as",["Solo","Couple","Family","Friends","Seniors"]) +
+    singleRow("mobility","Mobility",["No restrictions","Limited walking","Wheelchair","No stairs"]) +
+    '<div style="margin-bottom:1.2rem"><label class="lbl">Anything else Claude should know</label>' +
+      '<textarea id="pref-freetext" class="field" rows="3" placeholder="e.g. We travel with a baby. We avoid tourist traps." style="resize:vertical;margin-top:.3rem">' + esc(prefs.freetext||'') + '</textarea></div>' +
+    '<div style="display:flex;gap:.6rem">' +
+      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
+      '<button class="btn-primary" style="flex:2" onclick="savePrefsFromModal()">Save preferences</button>' +
+    '</div>',
+    true
   );
 }
 
-function PreferencesPanel({ prefs, onSave, onClose }) {
-  const [local, setLocal] = useState(Object.assign({}, prefs));
-
-  function toggle(category, id) {
-    setLocal(function(p) {
-      const arr = p[category] || [];
-      const next = arr.includes(id) ? arr.filter(function(x) { return x !== id; }) : arr.concat([id]);
-      return Object.assign({}, p, { [category]: next });
-    });
-  }
-
-  const chipOn  = { background: "#2B7A9E", color: "#fff",  border: "1.5px solid #2B7A9E" };
-  const chipOff = { background: "#f5f5f5", color: "#444",  border: "1.5px solid #e0e0e0" };
-  const baseChip = { padding: "0.4rem 0.8rem", borderRadius: "2rem", fontSize: "0.82rem", cursor: "pointer", fontFamily: "inherit", fontWeight: 500, margin: "0" };
-
-  function ChipGroup({ label, category }) {
-    return (
-      <div style={{ marginBottom: "1rem" }}>
-        <div style={{ fontSize: "0.73rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.4rem" }}>{label}</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-          {PREF_OPTIONS[category].map(function(opt) {
-            const active = (local[category] || []).includes(opt.id);
-            return (
-              <button key={opt.id} onClick={function() { toggle(category, opt.id); }} style={Object.assign({}, baseChip, active ? chipOn : chipOff)}>
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  const budgetOpts = ["Budget", "Mid-range", "Luxury"];
-  const groupOpts  = ["Solo", "Couple", "Family", "Friends", "Seniors"];
-  const mobOpts    = ["No restrictions", "Limited walking", "Wheelchair", "No stairs"];
-
-  return (
-    <Modal onClose={onClose} wide>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        <h2 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800, color: "#111" }}>Travel Preferences</h2>
-        <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "1.4rem", cursor: "pointer", color: "#999", lineHeight: 1 }}>x</button>
-      </div>
-      <p style={{ margin: "0 0 1rem", fontSize: "0.83rem", color: "#666", lineHeight: 1.5 }}>
-        These are passed to Claude when generating guide scaffolds for new destinations.
-      </p>
-      <ChipGroup label="Transport" category="transport" />
-      <ChipGroup label="Accommodation" category="accommodation" />
-      <ChipGroup label="Dietary" category="dietary" />
-      <div style={{ marginBottom: "1rem" }}>
-        <div style={{ fontSize: "0.73rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.4rem" }}>Budget level</div>
-        <div style={{ display: "flex", gap: "0.35rem" }}>
-          {budgetOpts.map(function(b) {
-            const active = local.budget === b;
-            return (
-              <button key={b} onClick={function() { setLocal(function(p) { return Object.assign({}, p, { budget: p.budget === b ? "" : b }); }); }}
-                style={Object.assign({}, baseChip, active ? chipOn : chipOff, { flex: 1 })}>{b}</button>
-            );
-          })}
-        </div>
-      </div>
-      <div style={{ marginBottom: "1rem" }}>
-        <div style={{ fontSize: "0.73rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.4rem" }}>Travelling as</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-          {groupOpts.map(function(g) {
-            const active = local.groupType === g;
-            return (
-              <button key={g} onClick={function() { setLocal(function(p) { return Object.assign({}, p, { groupType: p.groupType === g ? "" : g }); }); }}
-                style={Object.assign({}, baseChip, active ? chipOn : chipOff)}>{g}</button>
-            );
-          })}
-        </div>
-      </div>
-      <div style={{ marginBottom: "1rem" }}>
-        <div style={{ fontSize: "0.73rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.4rem" }}>Mobility</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
-          {mobOpts.map(function(m) {
-            const active = local.mobility === m;
-            return (
-              <button key={m} onClick={function() { setLocal(function(p) { return Object.assign({}, p, { mobility: p.mobility === m ? "" : m }); }); }}
-                style={Object.assign({}, baseChip, active ? chipOn : chipOff)}>{m}</button>
-            );
-          })}
-        </div>
-      </div>
-      <div style={{ marginBottom: "1.4rem" }}>
-        <label style={labelStyle}>Anything else Claude should know</label>
-        <textarea value={local.freetext}
-          onChange={function(e) { var v = e.target.value; setLocal(function(p) { return Object.assign({}, p, { freetext: v }); }); }}
-          rows={3} placeholder="e.g. We travel with a baby. We avoid tourist traps."
-          style={Object.assign({}, inputStyle, { resize: "vertical" })} />
-      </div>
-      <div style={{ display: "flex", gap: "0.75rem" }}>
-        <button onClick={onClose} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
-        <button onClick={function() { onSave(local); onClose(); }} style={Object.assign({}, btnPrimary, { flex: 2 })}>Save preferences</button>
-      </div>
-    </Modal>
-  );
+function toggleChip(category, id) {
+  var idx = prefs[category].indexOf(id);
+  if (idx === -1) prefs[category] = prefs[category].concat([id]);
+  else prefs[category] = prefs[category].filter(function(x){return x!==id;});
+  var btn = document.getElementById("chip-" + category + "-" + id);
+  if (btn) btn.className = "chip" + (prefs[category].indexOf(id) !== -1 ? " on" : "");
+}
+function toggleSingle(key, val) {
+  var old = prefs[key];
+  prefs[key] = old === val ? "" : val;
+  // update all chips for this key
+  var opts = key==="budget" ? ["Budget","Mid-range","Luxury"] :
+             key==="groupType" ? ["Solo","Couple","Family","Friends","Seniors"] :
+             ["No restrictions","Limited walking","Wheelchair","No stairs"];
+  opts.forEach(function(o) {
+    var btn = document.getElementById("chip-" + key + "-" + o.replace(/[^a-z]/gi,'_'));
+    if (btn) btn.className = "chip" + (prefs[key]===o?" on":"");
+  });
+}
+function savePrefsFromModal() {
+  prefs.freetext = document.getElementById("pref-freetext").value || "";
+  savePrefs();
+  closeModal();
+  renderHome();
 }
 
-function buildPrompt(prefs) {
-  var lines = [];
-  if (prefs.transport && prefs.transport.length) lines.push("Transport restrictions: " + prefs.transport.join(", "));
-  if (prefs.accommodation && prefs.accommodation.length) lines.push("Accommodation: " + prefs.accommodation.join(", "));
-  if (prefs.dietary && prefs.dietary.length) lines.push("Dietary: " + prefs.dietary.join(", "));
-  if (prefs.budget) lines.push("Budget: " + prefs.budget);
-  if (prefs.groupType) lines.push("Group: " + prefs.groupType);
-  if (prefs.mobility) lines.push("Mobility: " + prefs.mobility);
-  if (prefs.freetext) lines.push("Notes: " + prefs.freetext);
-  return "You are a travel guide generator. Respond ONLY with valid JSON, no markdown. Shape: {notes: string, sections: [{id,icon,label,type}], sectionData: {sectionId: [{id,name,desc,notes}]}}. Include 8-12 sections. Always include days (type dynamic), tips, pack (type dynamic). 3-6 items per section. Be specific with real place names." +
-    (lines.length ? " USER PREFERENCES (must respect): " + lines.join("; ") : "");
+// ── Modal helpers ─────────────────────────────────────────────────────
+function showModal(html, wide) {
+  var c = document.getElementById("modal-container");
+  c.innerHTML =
+    '<div class="modal-bg" onclick="modalBgClick(event)">' +
+      '<div class="modal-box' + (wide?' wide':'') + '">' + html + '</div>' +
+    '</div>';
+}
+function modalBgClick(e) {
+  if (e.target.classList.contains("modal-bg")) closeModal();
+}
+function closeModal() {
+  document.getElementById("modal-container").innerHTML = "";
 }
 
-const DEST_EMOJIS = ["plane","globe","island","map","pack","mountain","sunset","ship","palm","desert","volcano","statue","temple","castle","festival","city","night","tower","theatre","camp"];
-
-function NewDestModal({ onSave, onClose, prefs }) {
-  const [name, setName]           = useState("");
-  const [dates, setDates]         = useState("");
-  const [emojiIdx, setEmojiIdx]   = useState(0);
-  const [useAI, setUseAI]         = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const [error, setError]         = useState("");
-  const valid = name.trim().length > 0;
-
-  const emojiLabels = ["✈", "🌍", "🏝", "🗺", "🎒", "🏔", "🌅", "🛳", "🌴", "🏜", "🌋", "🗽", "⛩", "🏯", "🎪", "🏙", "🌃", "🗼", "🎭", "🏕"];
-
-  async function handleCreate() {
-    if (!valid) return;
-    if (!useAI) { onSave(makeNewDest(name.trim(), dates.trim(), emojiLabels[emojiIdx], null)); return; }
-    setGenerating(true);
-    setError("");
-    try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          system: buildPrompt(prefs),
-          messages: [{ role: "user", content: "Generate a vacation guide scaffold for: " + name.trim() + (dates.trim() ? " (" + dates.trim() + ")" : "") }],
-        }),
-      });
-      const data = await resp.json();
-      var raw = "";
-      (data.content || []).forEach(function(b) { if (b.type === "text") raw += b.text; });
-      raw = raw.replace(/```json|```/g, "").trim();
-      const scaffold = JSON.parse(raw);
-      onSave(makeNewDest(name.trim(), dates.trim(), emojiLabels[emojiIdx], scaffold));
-    } catch(e) {
-      setError("Could not generate AI scaffold. Creating blank guide.");
-      onSave(makeNewDest(name.trim(), dates.trim(), emojiLabels[emojiIdx], null));
-    }
-  }
-
-  return (
-    <Modal onClose={onClose} wide>
-      <h2 style={{ margin: "0 0 1rem", fontSize: "1.15rem", fontWeight: 800, color: "#111" }}>Add a destination</h2>
-      <div style={{ marginBottom: "0.9rem" }}>
-        <label style={labelStyle}>Icon</label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem", marginTop: "0.3rem" }}>
-          {emojiLabels.map(function(e, i) {
-            return (
-              <button key={i} onClick={function() { setEmojiIdx(i); }}
-                style={{ fontSize: "1.35rem", padding: "0.3rem 0.4rem", border: emojiIdx === i ? "2px solid #2B7A9E" : "2px solid transparent", borderRadius: "0.5rem", background: emojiIdx === i ? "#E8F4F8" : "#f5f5f5", cursor: "pointer", lineHeight: 1 }}>
-                {e}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      <div style={{ marginBottom: "0.9rem" }}>
-        <label style={labelStyle}>Destination name</label>
-        <input autoFocus value={name} onChange={function(e) { setName(e.target.value); }} placeholder="e.g. Lisbon, Portugal" style={inputStyle} />
-      </div>
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={labelStyle}>Trip dates (optional)</label>
-        <input value={dates} onChange={function(e) { setDates(e.target.value); }} placeholder="e.g. Aug 3-10, 2026" style={inputStyle} />
-      </div>
-      <div style={{ background: "#F7F9FC", border: "1.5px solid #dce8f0", borderRadius: "0.85rem", padding: "0.9rem 1rem", marginBottom: "1rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.4rem" }}>
-          <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#1a3a4a" }}>Generate guide with AI</div>
-          <button onClick={function() { setUseAI(function(v) { return !v; }); }}
-            style={{ width: "42px", height: "24px", borderRadius: "12px", border: "none", background: useAI ? "#2B7A9E" : "#ccc", cursor: "pointer", position: "relative", padding: 0 }}>
-            <span style={{ position: "absolute", top: "3px", left: useAI ? "20px" : "3px", width: "18px", height: "18px", borderRadius: "50%", background: "#fff", display: "block", transition: "left 0.15s" }} />
-          </button>
-        </div>
-        <p style={{ margin: 0, fontSize: "0.79rem", color: "#666", lineHeight: 1.45 }}>
-          {useAI ? "Claude will scaffold sections and suggestions for this destination." : "A blank guide with default sections will be created."}
-        </p>
-      </div>
-      {error && <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: "#C05C1A" }}>{error}</p>}
-      <div style={{ display: "flex", gap: "0.75rem" }}>
-        <button onClick={onClose} style={Object.assign({}, btnSecondary, { flex: 1 })} disabled={generating}>Cancel</button>
-        <button disabled={!valid || generating} onClick={handleCreate}
-          style={Object.assign({}, btnPrimary, { flex: 2, opacity: (valid && !generating) ? 1 : 0.6 })}>
-          {generating ? "Generating..." : useAI ? "Create with AI" : "Create blank guide"}
-        </button>
-      </div>
-    </Modal>
-  );
+// ── Escape ────────────────────────────────────────────────────────────
+function esc(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 
-function EditItemForm({ initial, onSave, onCancel, isNew }) {
-  const [name,  setName]  = useState(initial.name  || "");
-  const [desc,  setDesc]  = useState(initial.desc  || "");
-  const [notes, setNotes] = useState(initial.notes || "");
-  const valid = name.trim().length > 0;
-  return (
-    <div>
-      <input autoFocus value={name}  onChange={function(e) { setName(e.target.value); }}  placeholder="Name *"             style={Object.assign({}, inputStyle, { marginBottom: "0.5rem" })} />
-      <input         value={desc}  onChange={function(e) { setDesc(e.target.value); }}  placeholder="Short description"  style={Object.assign({}, inputStyle, { marginBottom: "0.5rem" })} />
-      <textarea      value={notes} onChange={function(e) { setNotes(e.target.value); }} placeholder="Notes (optional)" rows={2} style={Object.assign({}, inputStyle, { resize: "vertical", marginBottom: "0.75rem" })} />
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <button onClick={onCancel} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
-        <button disabled={!valid} onClick={function() { onSave({ name: name.trim(), desc: desc, notes: notes }); }}
-          style={Object.assign({}, btnPrimary, { flex: 2, opacity: valid ? 1 : 0.5 })}>{isNew ? "Add" : "Save"}</button>
-      </div>
-    </div>
-  );
-}
-
-function SectionView({ section, palette, dest, onUpdate }) {
-  const initItems = dest.sectionData && dest.sectionData[section.id] ? dest.sectionData[section.id] : [];
-  const [items,  setItems]  = useState(initItems);
-  const [adding, setAdding] = useState(false);
-  const [editId, setEditId] = useState(null);
-
-  function persist(newItems) {
-    var sd = Object.assign({}, dest.sectionData || {});
-    sd[section.id] = newItems;
-    onUpdate(Object.assign({}, dest, { sectionData: sd }));
-  }
-
-  function addItem(form) {
-    var next = items.concat([Object.assign({}, form, { id: "item_" + Date.now() })]);
-    setItems(next); persist(next); setAdding(false);
-  }
-  function removeItem(id) {
-    var next = items.filter(function(i) { return i.id !== id; });
-    setItems(next); persist(next);
-  }
-  function saveEdit(id, form) {
-    var next = items.map(function(i) { return i.id === id ? Object.assign({}, i, form) : i; });
-    setItems(next); persist(next); setEditId(null);
-  }
-
-  var icon = SECTION_ICONS[section.id] || SECTION_ICONS.default;
-
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.1rem" }}>
-        <span style={{ fontSize: "1.6rem" }}>{icon}</span>
-        <h2 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 800, color: palette.text }}>{section.label}</h2>
-      </div>
-      {items.length === 0 && !adding && (
-        <div style={{ background: "#fff", borderRadius: "1rem", padding: "2rem", textAlign: "center", color: "#aaa", fontSize: "0.88rem", marginBottom: "0.75rem" }}>
-          No items yet. Add one below.
-        </div>
-      )}
-      {items.map(function(item) {
-        return (
-          <div key={item.id} style={{ background: "#fff", borderRadius: "1rem", padding: "1rem 1.1rem", marginBottom: "0.65rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-            {editId === item.id ? (
-              <EditItemForm initial={item} onSave={function(f) { saveEdit(item.id, f); }} onCancel={function() { setEditId(null); }} />
-            ) : (
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, color: "#111", marginBottom: "0.15rem" }}>{item.name}</div>
-                  {item.desc  ? <div style={{ fontSize: "0.84rem", color: "#555" }}>{item.desc}</div> : null}
-                  {item.notes ? <div style={{ fontSize: "0.79rem", color: "#888", fontStyle: "italic", marginTop: "0.2rem" }}>{item.notes}</div> : null}
-                </div>
-                <div style={{ display: "flex", gap: "0.35rem", flexShrink: 0 }}>
-                  <button onClick={function() { setEditId(item.id); }} style={iconBtn}>edit</button>
-                  <button onClick={function() { removeItem(item.id); }} style={Object.assign({}, iconBtn, { color: "#C0392B" })}>x</button>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-      {adding ? (
-        <div style={{ background: "#fff", borderRadius: "1rem", padding: "1.1rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: "0.65rem" }}>
-          <EditItemForm initial={{ name: "", desc: "", notes: "" }} onSave={addItem} onCancel={function() { setAdding(false); }} isNew />
-        </div>
-      ) : (
-        <button onClick={function() { setAdding(true); }}
-          style={{ width: "100%", padding: "0.8rem", border: "2px dashed " + palette.accent + "66", borderRadius: "1rem", background: "transparent", color: palette.accent, cursor: "pointer", fontSize: "0.88rem", fontWeight: 600 }}>
-          + Add item
-        </button>
-      )}
-    </div>
-  );
-}
-
-function DestinationView({ dest, palette, onBack, onUpdate, onDelete }) {
-  const [activeSid,   setActiveSid]   = useState(null);
-  const [menuOpen,    setMenuOpen]    = useState(false);
-  const [editNotes,   setEditNotes]   = useState(false);
-  const [notes,       setNotes]       = useState(dest.notes || "");
-  const [confirmDel,  setConfirmDel]  = useState(false);
-  const menuRef = useRef(null);
-
-  useEffect(function() {
-    function handleClick(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return function() { document.removeEventListener("mousedown", handleClick); };
-  }, []);
-
-  var activeSection = dest.sections.find(function(s) { return s.id === activeSid; });
-
-  return (
-    <div style={{ minHeight: "100vh", background: palette.bg, fontFamily: "system-ui, sans-serif" }}>
-      <div style={{ background: palette.accent, color: "#fff", padding: "0.9rem 1.1rem", display: "flex", alignItems: "center", gap: "0.9rem", position: "sticky", top: 0, zIndex: 100 }}>
-        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.7rem", cursor: "pointer", fontSize: "0.88rem" }}>Back</button>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: "1.1rem", fontWeight: 700 }}>{dest.emoji} {dest.name}</div>
-          {dest.dates ? <div style={{ fontSize: "0.78rem", opacity: 0.8 }}>{dest.dates}</div> : null}
-        </div>
-        <div style={{ position: "relative" }} ref={menuRef}>
-          <button onClick={function() { setMenuOpen(function(v) { return !v; }); }}
-            style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.7rem", cursor: "pointer", fontSize: "1rem" }}>
-            Menu
-          </button>
-          {menuOpen ? (
-            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.4rem)", background: "#fff", borderRadius: "0.75rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: "190px", overflow: "hidden", zIndex: 300, maxHeight: "70vh", overflowY: "auto" }}>
-              <div style={{ padding: "0.4rem 0.75rem", fontSize: "0.68rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sections</div>
-              <button onClick={function() { setActiveSid(null); setMenuOpen(false); }}
-                style={{ display: "flex", alignItems: "center", gap: "0.6rem", width: "100%", padding: "0.55rem 0.9rem", border: "none", background: activeSid === null ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.88rem", color: activeSid === null ? palette.accent : "#222", fontWeight: activeSid === null ? 600 : 400 }}>
-                Overview
-              </button>
-              {dest.sections.map(function(s) {
-                var sicon = SECTION_ICONS[s.id] || SECTION_ICONS.default;
-                return (
-                  <button key={s.id} onClick={function() { setActiveSid(s.id); setMenuOpen(false); }}
-                    style={{ display: "flex", alignItems: "center", gap: "0.6rem", width: "100%", padding: "0.55rem 0.9rem", border: "none", background: activeSid === s.id ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.88rem", color: activeSid === s.id ? palette.accent : "#222", fontWeight: activeSid === s.id ? 600 : 400 }}>
-                    <span>{sicon}</span> {s.label}
-                  </button>
-                );
-              })}
-              <div style={{ height: "1px", background: "#eee", margin: "0.2rem 0" }} />
-              <button onClick={function() { setConfirmDel(true); setMenuOpen(false); }}
-                style={{ display: "flex", alignItems: "center", gap: "0.6rem", width: "100%", padding: "0.55rem 0.9rem", border: "none", background: "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.88rem", color: "#C0392B" }}>
-                Delete destination
-              </button>
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <div style={{ display: "flex", overflowX: "auto", gap: "0.3rem", padding: "0.55rem 0.9rem", background: "#fff", borderBottom: "1px solid #eee" }}>
-        <button onClick={function() { setActiveSid(null); }}
-          style={{ flexShrink: 0, padding: "0.3rem 0.65rem", borderRadius: "2rem", border: "none", background: activeSid === null ? palette.accent : "#f0f0f0", color: activeSid === null ? "#fff" : "#444", fontWeight: activeSid === null ? 600 : 400, cursor: "pointer", fontSize: "0.78rem", whiteSpace: "nowrap" }}>
-          Home
-        </button>
-        {dest.sections.map(function(s) {
-          var sicon = SECTION_ICONS[s.id] || "";
-          return (
-            <button key={s.id} onClick={function() { setActiveSid(s.id); }}
-              style={{ flexShrink: 0, padding: "0.3rem 0.65rem", borderRadius: "2rem", border: "none", background: activeSid === s.id ? palette.accent : "#f0f0f0", color: activeSid === s.id ? "#fff" : "#444", fontWeight: activeSid === s.id ? 600 : 400, cursor: "pointer", fontSize: "0.78rem", whiteSpace: "nowrap" }}>
-              {sicon} {s.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div style={{ padding: "1.1rem", maxWidth: "680px", margin: "0 auto" }}>
-        {activeSid === null ? (
-          <div>
-            <div style={{ background: "#fff", borderRadius: "1.15rem", padding: "1.35rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: "0.9rem" }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.4rem" }}>{dest.emoji}</div>
-              <h1 style={{ margin: "0 0 0.2rem", fontSize: "1.55rem", fontWeight: 800, color: palette.text }}>{dest.name}</h1>
-              {dest.dates ? <p style={{ margin: "0 0 0.65rem", color: "#666", fontSize: "0.9rem" }}>{dest.dates}</p> : null}
-              <p style={{ margin: 0, color: "#888", fontSize: "0.88rem" }}>Select a section from the tabs above or the Menu button.</p>
-            </div>
-            <div style={{ background: "#fff", borderRadius: "1.15rem", padding: "1.35rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.65rem" }}>
-                <h2 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 700, color: palette.text }}>Trip notes</h2>
-                {!editNotes ? <button onClick={function() { setEditNotes(true); }} style={Object.assign({}, btnSecondary, { padding: "0.25rem 0.6rem", fontSize: "0.78rem" })}>Edit</button> : null}
-              </div>
-              {editNotes ? (
-                <div>
-                  <textarea autoFocus value={notes} onChange={function(e) { var v = e.target.value; setNotes(v); }} rows={4} placeholder="Add any notes about this trip..." style={Object.assign({}, inputStyle, { resize: "vertical" })} />
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.65rem" }}>
-                    <button onClick={function() { setNotes(dest.notes || ""); setEditNotes(false); }} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
-                    <button onClick={function() { onUpdate(Object.assign({}, dest, { notes: notes })); setEditNotes(false); }} style={Object.assign({}, btnPrimary, { flex: 2 })}>Save</button>
-                  </div>
-                </div>
-              ) : (
-                <p style={{ margin: 0, color: notes ? "#333" : "#bbb", fontSize: "0.88rem", whiteSpace: "pre-wrap" }}>{notes || "No notes yet."}</p>
-              )}
-            </div>
-          </div>
-        ) : activeSection ? (
-          <SectionView section={activeSection} palette={palette} dest={dest} onUpdate={onUpdate} />
-        ) : null}
-      </div>
-
-      {confirmDel ? (
-        <Modal onClose={function() { setConfirmDel(false); }}>
-          <h2 style={{ margin: "0 0 0.65rem", fontSize: "1.05rem" }}>Delete {dest.name}?</h2>
-          <p style={{ margin: "0 0 1.25rem", color: "#666", fontSize: "0.88rem" }}>This cannot be undone.</p>
-          <div style={{ display: "flex", gap: "0.65rem" }}>
-            <button onClick={function() { setConfirmDel(false); }} style={Object.assign({}, btnSecondary, { flex: 1 })}>Cancel</button>
-            <button onClick={onDelete} style={Object.assign({}, btnPrimary, { flex: 1, background: "#C0392B" })}>Delete</button>
-          </div>
-        </Modal>
-      ) : null}
-    </div>
-  );
-}
-
-function Home({ destinations, prefs, onCreate, onOpen, onOpenPrefs }) {
-  const [showNew, setShowNew] = useState(false);
-  var hasPrefs = prefs && ((prefs.transport && prefs.transport.length) || (prefs.dietary && prefs.dietary.length) || prefs.budget || prefs.groupType || prefs.freetext);
-
-  return (
-    <div style={{ minHeight: "100vh", background: "#F7F8FA", fontFamily: "system-ui, sans-serif" }}>
-      <div style={{ background: "#fff", borderBottom: "1px solid #eee", padding: "1rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div>
-          <div style={{ fontSize: "1.3rem", fontWeight: 800, color: "#111" }}>Vacation Guides</div>
-          <div style={{ fontSize: "0.77rem", color: "#888" }}>{destinations.length} destination{destinations.length !== 1 ? "s" : ""}</div>
-        </div>
-        <div style={{ display: "flex", gap: "0.45rem" }}>
-          <button onClick={onOpenPrefs} style={Object.assign({}, btnSecondary, { padding: "0.45rem 0.75rem", fontSize: "0.82rem" })}>Preferences</button>
-          <button onClick={function() { setShowNew(true); }} style={Object.assign({}, btnPrimary, { padding: "0.45rem 0.85rem", fontSize: "0.82rem" })}>+ New</button>
-        </div>
-      </div>
-      <div style={{ padding: "1.1rem", maxWidth: "720px", margin: "0 auto" }}>
-        {!hasPrefs ? (
-          <div onClick={onOpenPrefs} style={{ background: "#EDF6FB", border: "1.5px dashed #9BC8DC", borderRadius: "0.9rem", padding: "0.8rem 1rem", marginBottom: "1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.65rem" }}>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: "0.85rem", color: "#2B7A9E" }}>Set travel preferences</div>
-              <div style={{ fontSize: "0.77rem", color: "#5a9ab5" }}>Tell Claude about restrictions like no car rental, dietary needs, or budget so new guides are tailored from the start.</div>
-            </div>
-          </div>
-        ) : null}
-        <div style={{ display: "grid", gap: "0.8rem" }}>
-          {destinations.map(function(dest, i) {
-            var pal = PALETTES[i % PALETTES.length];
-            return (
-              <button key={dest.id} onClick={function() { onOpen(dest.id); }}
-                style={{ display: "flex", alignItems: "center", gap: "1rem", background: "#fff", borderRadius: "1.1rem", padding: "1rem 1.15rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", border: "2px solid transparent", cursor: "pointer", textAlign: "left", width: "100%" }}
-                onMouseEnter={function(e) { e.currentTarget.style.borderColor = pal.accent; }}
-                onMouseLeave={function(e) { e.currentTarget.style.borderColor = "transparent"; }}>
-                <div style={{ width: "3rem", height: "3rem", borderRadius: "0.8rem", background: pal.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>
-                  {dest.emoji}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.97rem", color: "#111", marginBottom: "0.12rem" }}>{dest.name}</div>
-                  {dest.dates ? <div style={{ fontSize: "0.78rem", color: "#888" }}>{dest.dates}</div> : null}
-                  <div style={{ fontSize: "0.73rem", color: "#bbb", marginTop: "0.1rem" }}>{dest.sections.length} sections</div>
-                </div>
-                <div style={{ color: pal.accent, fontSize: "1rem", flexShrink: 0 }}>›</div>
-              </button>
-            );
-          })}
-        </div>
-        {destinations.length === 0 ? (
-          <div style={{ background: "#fff", borderRadius: "1.4rem", padding: "3rem 2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", marginTop: "1rem" }}>
-            <h2 style={{ margin: "0 0 0.45rem", fontSize: "1.15rem", fontWeight: 700, color: "#111" }}>No trips yet</h2>
-            <p style={{ margin: "0 0 1.35rem", color: "#888", fontSize: "0.88rem" }}>Add your first destination to start planning.</p>
-            <button onClick={function() { setShowNew(true); }} style={btnPrimary}>+ Add destination</button>
-          </div>
-        ) : null}
-      </div>
-      {showNew ? <NewDestModal prefs={prefs} onSave={function(d) { onCreate(d); setShowNew(false); }} onClose={function() { setShowNew(false); }} /> : null}
-    </div>
-  );
-}
-
-export default function App() {
-  const [destinations, setDestinations] = useState(null);
-  const [prefs,        setPrefs]        = useState(null);
-  const [activeId,     setActiveId]     = useState(null);
-  const [showPrefs,    setShowPrefs]    = useState(false);
-
-  useEffect(function() {
-    Promise.all([loadDestinations(), loadPreferences()]).then(function(results) {
-      setDestinations(results[0]);
-      setPrefs(results[1]);
-    });
-  }, []);
-
-  useEffect(function() { if (destinations !== null) saveDestinations(destinations); }, [destinations]);
-  useEffect(function() { if (prefs !== null) savePreferences(prefs); }, [prefs]);
-
-  if (destinations === null || prefs === null) {
-    return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "system-ui", color: "#888" }}>Loading...</div>;
-  }
-
-  var activeDest = destinations.find(function(d) { return d.id === activeId; });
-  var activeIdx  = destinations.findIndex(function(d) { return d.id === activeId; });
-
-  function updateDest(updated) {
-    setDestinations(function(prev) { return prev.map(function(d) { return d.id === updated.id ? updated : d; }); });
-  }
-  function deleteDest(id) {
-    setDestinations(function(prev) { return prev.filter(function(d) { return d.id !== id; }); });
-    setActiveId(null);
-  }
-
-  if (activeDest) {
-    return (
-      <div>
-        <DestinationView
-          dest={activeDest}
-          palette={PALETTES[activeIdx % PALETTES.length]}
-          onBack={function() { setActiveId(null); }}
-          onUpdate={updateDest}
-          onDelete={function() { deleteDest(activeDest.id); }}
-        />
-        {showPrefs ? (
-          <PreferencesPanel prefs={prefs} onSave={function(p) { setPrefs(p); }} onClose={function() { setShowPrefs(false); }} />
-        ) : null}
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <Home
-        destinations={destinations}
-        prefs={prefs}
-        onCreate={function(d) { setDestinations(function(prev) { return prev.concat([d]); }); setActiveId(d.id); }}
-        onOpen={setActiveId}
-        onOpenPrefs={function() { setShowPrefs(true); }}
-      />
-      {showPrefs ? (
-        <PreferencesPanel prefs={prefs} onSave={function(p) { setPrefs(p); setShowPrefs(false); }} onClose={function() { setShowPrefs(false); }} />
-      ) : null}
-    </div>
-  );
-}
+// ── Init ──────────────────────────────────────────────────────────────
+loadAll().then(function() { renderHome(); });
+</script>
+</body>
+</html>
