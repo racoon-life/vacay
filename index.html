@@ -2,860 +2,3256 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vacation Guides</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Annecy — Vacation Planner · July 9–16, 2026</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #F7F8FA; min-height: 100vh; }
-button { font-family: inherit; cursor: pointer; }
-input, textarea { font-family: inherit; }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=DM+Sans:wght@400;500;600&display=swap');
 
-.btn-primary { padding: .55rem 1.1rem; background: #2B7A9E; color: #fff; border: none; border-radius: .6rem; font-weight: 600; font-size: .88rem; }
-.btn-secondary { padding: .55rem 1.1rem; background: #f0f0f0; color: #333; border: none; border-radius: .6rem; font-weight: 500; font-size: .88rem; }
-.btn-danger { padding: .55rem 1.1rem; background: #C0392B; color: #fff; border: none; border-radius: .6rem; font-weight: 600; font-size: .88rem; }
-.field { display: block; width: 100%; padding: .6rem .8rem; border: 1.5px solid #e0e0e0; border-radius: .55rem; font-size: .93rem; color: #111; background: #fafafa; outline: none; }
-.field:focus { border-color: #2B7A9E; }
-label.lbl { display: block; font-size: .78rem; font-weight: 600; color: #555; margin-bottom: .3rem; }
+  :root {
+    --lake:       #2A6D9E;
+    --lake-mid:   #4A8FBB;
+    --lake-light: #C8E2F4;
+    --alpine:     #3D5448;
+    --sand:       #F5F0E8;
+    --warm:       #E8DFD0;
+    --ink:        #181A1C;
+    --muted:      #6B7280;
+    --accent:     #C47B3A;
+    --white:      #FFFFFF;
+    --green:      #D1FAE5;
+    --green-ink:  #065F46;
+    --amber:      #FEF3C7;
+    --amber-ink:  #92400E;
+    --violet:     #EDE9FE;
+    --violet-ink: #4C1D95;
+    --red:        #FEE2E2;
+    --red-ink:    #991B1B;
+  }
 
-/* Modal */
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.48); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1rem; overflow-y: auto; }
-.modal-box { background: #fff; border-radius: 1.2rem; padding: 1.6rem; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
-.modal-box.wide { max-width: 540px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Home */
-#home-screen { display: block; }
-#dest-screen { display: none; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--sand);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
 
-.header { background: #fff; border-bottom: 1px solid #eee; padding: .9rem 1.2rem; display: flex; align-items: center; justify-content: space-between; }
-.header-title { font-size: 1.25rem; font-weight: 800; color: #111; }
-.header-sub { font-size: .75rem; color: #888; margin-top: .1rem; }
-.header-actions { display: flex; gap: .4rem; }
+  /* ─── HEADER ─── */
+  header {
+    background: var(--lake);
+    color: var(--white);
+    padding: 10px 20px 12px;
+    text-align: center;
+    position: relative;
+  }
+  .header-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    display: block;
+  }
+  .header-dates {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--lake-light);
+    letter-spacing: 0.04em;
+  }
 
-.prefs-hint { background: #EDF6FB; border: 1.5px dashed #9BC8DC; border-radius: .85rem; padding: .75rem 1rem; margin-bottom: .9rem; cursor: pointer; }
-.prefs-hint-title { font-weight: 600; font-size: .83rem; color: #2B7A9E; }
-.prefs-hint-sub { font-size: .75rem; color: #5a9ab5; margin-top: .15rem; }
+  /* ─── NAV TABS ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--lake-light);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav a {
+    flex: 0 0 auto;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 11px 13px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  nav a.active { color: var(--lake); border-bottom-color: var(--lake); }
 
-.dest-list { display: grid; gap: .75rem; padding: 1rem 1.2rem; max-width: 720px; margin: 0 auto; }
-.dest-card { display: flex; align-items: center; gap: .9rem; background: #fff; border-radius: 1rem; padding: .9rem 1.1rem; box-shadow: 0 2px 10px rgba(0,0,0,.07); border: 2px solid transparent; cursor: pointer; text-align: left; width: 100%; transition: border-color .15s; }
-.dest-card:hover { border-color: var(--accent); }
-.dest-icon { width: 2.8rem; height: 2.8rem; border-radius: .75rem; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
-.dest-name { font-weight: 700; font-size: .95rem; color: #111; }
-.dest-dates { font-size: .77rem; color: #888; margin-top: .1rem; }
-.dest-meta { font-size: .72rem; color: #bbb; margin-top: .1rem; }
-.dest-arrow { color: #999; font-size: .95rem; flex-shrink: 0; margin-left: auto; }
+  /* ─── LOADING ─── */
+  #loading-overlay {
+    position: fixed; inset: 0; background: var(--lake);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999; color: #fff; gap: 14px;
+    transition: opacity 0.4s;
+  }
+  #loading-overlay.done { opacity: 0; pointer-events: none; }
+  .loading-title { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; }
+  .loading-sub { font-size: 0.82rem; color: var(--lake-light); }
+  .loading-spinner {
+    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Destination view */
-.dest-header { color: #fff; padding: .85rem 1.1rem; display: flex; align-items: center; gap: .8rem; position: sticky; top: 0; z-index: 100; }
-.dest-header-back { background: rgba(255,255,255,.2); border: none; color: #fff; border-radius: .45rem; padding: .35rem .7rem; font-size: .83rem; }
-.dest-header-title { font-size: 1.05rem; font-weight: 700; flex: 1; }
-.dest-header-dates { font-size: .75rem; opacity: .8; }
-.menu-btn { background: rgba(255,255,255,.2); border: none; color: #fff; border-radius: .45rem; padding: .35rem .7rem; font-size: .85rem; position: relative; }
-.menu-dropdown { position: absolute; right: 0; top: calc(100% + .35rem); background: #fff; border-radius: .7rem; box-shadow: 0 8px 30px rgba(0,0,0,.18); min-width: 185px; overflow: hidden; z-index: 200; max-height: 70vh; overflow-y: auto; display: none; }
-.menu-dropdown.open { display: block; }
-.menu-section-label { padding: .4rem .75rem; font-size: .65rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .08em; }
-.menu-item { display: flex; align-items: center; gap: .55rem; width: 100%; padding: .5rem .85rem; border: none; background: #fff; cursor: pointer; text-align: left; font-size: .85rem; color: #222; }
-.menu-item:hover { background: #f5f5f5; }
-.menu-item.active { background: var(--pal-bg); color: var(--accent); font-weight: 600; }
-.menu-item.danger { color: #C0392B; }
-.menu-divider { height: 1px; background: #eee; margin: .2rem 0; }
+  /* ─── SWIPE LAYOUT ─── */
+  .slides-viewport {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+  }
+  .slides-track {
+    display: flex;
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    align-items: flex-start;
+  }
+  section {
+    flex: 0 0 100%;
+    width: 100%;
+    padding: 22px 16px 24px;
+    box-sizing: border-box;
+    align-self: flex-start;
+  }
 
-.tab-bar { display: flex; overflow-x: auto; gap: .3rem; padding: .5rem .9rem; background: #fff; border-bottom: 1px solid #eee; scrollbar-width: none; }
-.tab-bar::-webkit-scrollbar { display: none; }
-.tab-btn { flex-shrink: 0; padding: .28rem .65rem; border-radius: 2rem; border: none; background: #f0f0f0; color: #444; font-size: .77rem; white-space: nowrap; }
-.tab-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--lake-light);
+  }
+  .section-icon { font-size: 1.25rem; }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--lake);
+  }
 
-.dest-content { padding: 1rem 1.1rem; max-width: 680px; margin: 0 auto; }
+  .sublabel {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 18px 0 10px;
+  }
 
-.card { background: #fff; border-radius: 1rem; padding: 1.1rem; margin-bottom: .7rem; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
-.item-row { display: flex; align-items: flex-start; gap: .7rem; }
-.item-text { flex: 1; }
-.item-name { font-weight: 600; color: #111; font-size: .92rem; }
-.item-desc { font-size: .82rem; color: #555; margin-top: .12rem; }
-.item-notes { font-size: .78rem; color: #888; font-style: italic; margin-top: .18rem; }
-.item-actions { display: flex; gap: .3rem; flex-shrink: 0; }
-.icon-btn { background: #f5f5f5; border: none; border-radius: .35rem; padding: .28rem .5rem; font-size: .82rem; color: #555; }
-.icon-btn.del { color: #C0392B; }
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--lake-light);
+    position: relative;
+  }
+  .card.hike  { border-left-color: var(--alpine); }
+  .card.food  { border-left-color: var(--accent); }
+  .card.sight { border-left-color: var(--lake); }
+  .card.boat  { border-left-color: var(--lake-mid); }
+  .card.fete  { border-left-color: #ED2939; }
 
-.empty-state { background: #fff; border-radius: 1rem; padding: 1.8rem; text-align: center; color: #aaa; font-size: .87rem; margin-bottom: .7rem; }
-.add-btn { width: 100%; padding: .75rem; border: 2px dashed var(--accent-light); border-radius: 1rem; background: transparent; color: var(--accent); font-size: .87rem; font-weight: 600; }
+  /* ─── ACCORDION TRIGGER ROW ─── */
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card-top:active { opacity: 0.75; }
 
-/* Overview */
-.overview-hero { font-size: 2.4rem; margin-bottom: .35rem; }
-.overview-title { font-size: 1.5rem; font-weight: 800; margin-bottom: .15rem; }
-.overview-dates { font-size: .88rem; color: #666; margin-bottom: .55rem; }
-.overview-hint { font-size: .85rem; color: #888; }
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    flex: 1;
+    min-width: 0;
+  }
 
-/* Edit form */
-.edit-form { display: flex; flex-direction: column; gap: .45rem; }
-.edit-form-actions { display: flex; gap: .5rem; margin-top: .2rem; }
+  /* chevron */
+  .card-chevron {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: transform 0.22s ease;
+  }
+  .card-chevron svg {
+    width: 14px; height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .card.open .card-chevron { transform: rotate(180deg); color: var(--lake); }
 
-/* Chips */
-.chip-group { display: flex; flex-wrap: wrap; gap: .32rem; margin-top: .35rem; }
-.chip { padding: .32rem .72rem; border-radius: 2rem; font-size: .8rem; font-weight: 500; border: 1.5px solid #e0e0e0; background: #f5f5f5; color: #444; cursor: pointer; }
-.chip.on { background: #2B7A9E; color: #fff; border-color: #2B7A9E; }
+  /* ─── COLLAPSIBLE BODY ─── */
+  .card-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    opacity: 0;
+  }
+  .card.open .card-body {
+    max-height: 1200px;
+    opacity: 1;
+  }
+  .card-body-inner {
+    padding-top: 10px;
+  }
 
-/* Toggle */
-.toggle-wrap { display: flex; align-items: center; justify-content: space-between; }
-.toggle { width: 40px; height: 22px; border-radius: 11px; border: none; background: #ccc; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; padding: 0; }
-.toggle.on { background: #2B7A9E; }
-.toggle-knob { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
-.toggle.on .toggle-knob { left: 21px; }
+  .card-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
 
-.ai-box { background: #F7F9FC; border: 1.5px solid #dce8f0; border-radius: .8rem; padding: .85rem .95rem; margin-bottom: 1rem; }
-.ai-box-title { font-weight: 600; font-size: .86rem; color: #1a3a4a; }
-.ai-box-desc { font-size: .78rem; color: #666; margin-top: .3rem; line-height: 1.45; }
+  .map-link, .note-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+    border: none;
+  }
+  .map-link {
+    background: var(--lake-light);
+    color: var(--lake);
+  }
+  .map-link:hover { background: var(--lake); color: var(--white); }
+  .map-link svg { width: 10px; height: 10px; fill: currentColor; flex-shrink: 0; }
+
+  .note-btn {
+    background: var(--warm);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 0.68rem;
+  }
+  .note-btn:hover { background: var(--accent); color: var(--white); }
+  .note-btn.has-note { background: #FEF3C7; color: #92400E; }
+
+  .card p {
+    font-size: 0.82rem;
+    color: #444;
+    margin-top: 0;
+  }
+
+  /* ─── INLINE NOTE ─── */
+  .card-note {
+    display: none;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+  .card-note.open { display: block; }
+  .card-note textarea {
+    width: 100%;
+    min-height: 70px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    color: var(--ink);
+    background: #FFFBF5;
+    border: 1px solid #E5D9C5;
+    border-radius: 8px;
+    padding: 8px 10px;
+    resize: vertical;
+    outline: none;
+    line-height: 1.5;
+  }
+  .card-note textarea:focus { border-color: var(--accent); }
+  .note-saved {
+    font-size: 0.7rem;
+    color: var(--green-ink);
+    margin-top: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .note-saved.show { opacity: 1; }
+
+  /* note indicator dot on collapsed card */
+  .card-title-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  .note-dot {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: none;
+  }
+  .note-dot.visible { display: block; }
+
+  /* ─── TAGS ─── */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 7px;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .tag-free     { background: var(--green);  color: var(--green-ink); }
+  .tag-paid     { background: var(--amber);  color: var(--amber-ink); }
+  .tag-nolic    { background: var(--lake-light); color: var(--lake); }
+  .tag-diff     { background: var(--violet); color: var(--violet-ink); }
+  .tag-must     { background: var(--red);    color: var(--red-ink); }
+  .tag-price    { background: var(--warm);   color: #5a4a35; }
+  .tag-duration { background: #F0FDF4; color: #166534; }
+  .tag-fete     { background: #FFF1F2; color: #9F1239; }
+
+  .day-pill {
+    background: var(--lake);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 11px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── TIP BOX ─── */
+  .tip {
+    background: #FFF8F3;
+    border: 1px solid #FDDCBE;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.8rem;
+    color: #7C4A1E;
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+  .tip strong { color: var(--accent); }
+
+  /* ─── INFO BOX ─── */
+  .info-box {
+    background: var(--lake-light);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.8rem;
+    color: #1a3d55;
+    margin-bottom: 16px;
+  }
+
+  /* ─── FÊTE BOX ─── */
+  .fete-banner {
+    background: linear-gradient(135deg, #002395 0%, #002395 33%, #fff 33%, #fff 66%, #ED2939 66%);
+    border-radius: 12px;
+    padding: 3px;
+    margin-bottom: 16px;
+  }
+  .fete-inner {
+    background: #fff9f9;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .fete-inner h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    color: #002395;
+    margin-bottom: 4px;
+  }
+  .fete-inner p {
+    font-size: 0.82rem;
+    color: #444;
+    line-height: 1.5;
+  }
+
+  /* ─── PACK CHECKLIST ─── */
+  .pack-progress {
+    margin-bottom: 14px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 5px;
+    background: var(--warm);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--lake);
+    border-radius: 10px;
+    transition: width 0.3s;
+  }
+
+  /* category group */
+  .pack-category {
+    margin-bottom: 12px;
+  }
+  .pack-cat-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    padding-left: 2px;
+  }
+  .pack-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  /* each item row */
+  .pack-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--white);
+    border-radius: 10px;
+    padding: 9px 10px 9px 12px;
+    transition: background 0.12s;
+  }
+  .pack-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--lake);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .pack-label {
+    font-size: 0.82rem;
+    color: var(--ink);
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .pack-item.checked .pack-label {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+  .pack-delete {
+    flex-shrink: 0;
+    min-width: 34px;
+    height: 34px;
+    border: none;
+    background: #f5f5f5;
+    color: #888;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    transition: color 0.15s, background 0.15s;
+    gap: 2px;
+  }
+  .pack-delete:hover, .pack-delete:active { color: var(--red-ink); background: var(--red); }
+  .pack-delete[data-action="edit"] { background: var(--lake-light); color: var(--lake); }
+  .pack-delete[data-action="edit"]:hover { background: var(--lake); color: #fff; }
+
+  /* Action buttons in day items — styled via CSS instead of inline */
+  .card-actions { gap: 6px; }
+  .day-item-action {
+    flex-shrink: 0;
+    min-width: 34px; height: 34px;
+    border: none; border-radius: 8px;
+    font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .day-item-action.edit { background: var(--lake-light); color: var(--lake); }
+  .day-item-action.edit:hover { background: var(--lake); color: #fff; }
+  .day-item-action.remove { background: #f5f5f5; color: #888; }
+  .day-item-action.remove:hover { background: var(--red); color: var(--red-ink); }
+
+  /* add item row */
+  .pack-add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    align-items: stretch;
+  }
+  .pack-add-input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--white);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .pack-add-input::placeholder { color: #b0b8c1; }
+  .pack-add-input:focus { border-color: var(--lake); }
+
+  .pack-cat-select {
+    font-family: inherit;
+    font-size: 0.75rem;
+    color: var(--ink);
+    background: var(--white);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px;
+    padding: 9px 8px;
+    outline: none;
+    cursor: pointer;
+    min-width: 0;
+    max-width: 110px;
+    transition: border-color 0.15s;
+  }
+  .pack-cat-select:focus { border-color: var(--lake); }
+
+  .pack-add-btn {
+    flex-shrink: 0;
+    background: var(--lake);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    width: 38px;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .pack-add-btn:hover { background: var(--lake-mid); }
+  .pack-add-btn:active { background: var(--alpine); }
+
+  /* ─── GROCERY ─── */
+  .grocery-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 9px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.83rem;
+  }
+  .grocery-item:last-child { border-bottom: none; }
+  .grocery-emoji { font-size: 1.1rem; flex-shrink: 0; }
+  .grocery-name { font-weight: 600; color: var(--ink); }
+  .grocery-desc { color: #555; font-size: 0.78rem; margin-top: 1px; }
+
+  /* ─── DAY PLANNER ─── */
+  .day-card {
+    background: var(--white);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .day-card.open .day-header { border-bottom-color: var(--lake-light); }
+  .day-header:active { background: var(--sand); }
+
+  .day-date-badge {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--lake-light);
+    color: var(--lake);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .day-date-badge .d-num { font-size: 1rem; font-weight: 700; }
+  .day-date-badge .d-mon { font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+
+  .day-card.is-today .day-date-badge { background: var(--lake); color: #fff; }
+  .day-card.is-fete .day-date-badge  { background: #002395; color: #fff; }
+
+  .day-header-info { flex: 1; min-width: 0; }
+  .day-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .day-count {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .day-count.has-items { color: var(--lake); }
+
+  .day-chevron {
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: transform 0.22s;
+  }
+  .day-card.open .day-chevron { transform: rotate(180deg); color: var(--lake); }
+  .day-chevron svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .day-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    opacity: 0;
+  }
+  .day-card.open .day-body { max-height: 1200px; opacity: 1; }
+  .day-body-inner { padding: 12px 14px 14px; }
+
+  /* items inside a day */
+  .day-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--sand);
+    border-radius: 9px;
+    margin-bottom: 6px;
+    font-size: 0.83rem;
+    color: var(--ink);
+  }
+  .day-item-icon { font-size: 1rem; flex-shrink: 0; }
+  .day-item-label { flex: 1; line-height: 1.3; }
+  /* day-item remove/edit buttons → .day-item-action class */
+
+  .day-empty {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+    padding: 4px 2px 8px;
+  }
+
+  .day-add-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+    background: none;
+    border: 1.5px dashed var(--lake-light);
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: var(--lake);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .day-add-btn:hover { border-color: var(--lake); background: var(--lake-light); }
+  .day-add-btn:active { background: var(--lake-light); }
+
+  /* ─── ADD TO DAY MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,20,30,0.45);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-sheet {
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 10px auto 4px;
+    flex-shrink: 0;
+  }
+
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    padding: 8px 18px 4px;
+    flex-shrink: 0;
+  }
+  .modal-day-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0 18px 10px;
+    flex-shrink: 0;
+  }
+
+  /* custom input row */
+  .modal-custom-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 12px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #eee;
+  }
+  .modal-custom-input {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--sand);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .modal-custom-input::placeholder { color: #b0b8c1; }
+  .modal-custom-input:focus { border-color: var(--lake); }
+  .modal-custom-add {
+    flex-shrink: 0;
+    background: var(--lake);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .modal-custom-add:hover { background: var(--lake-mid); }
+
+  /* search + list */
+  .modal-search {
+    flex-shrink: 0;
+    margin: 10px 14px 6px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--sand);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .modal-search::placeholder { color: #b0b8c1; }
+  .modal-search:focus { border-color: var(--lake); }
+
+  .modal-section-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 6px 16px 4px;
+    flex-shrink: 0;
+  }
+
+  .modal-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0 10px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 8px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-size: 0.85rem;
+    color: var(--ink);
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .modal-item:last-child { border-bottom: none; }
+  .modal-item:hover, .modal-item:active { background: var(--lake-light); }
+  .modal-item-icon { font-size: 1rem; flex-shrink: 0; }
+  .modal-item-text { flex: 1; }
+  .modal-item-name { font-weight: 600; }
+  .modal-item.already-added { opacity: 0.5; }
+
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+  }
+
+  /* ─── MENU BUTTON & DROPDOWN ─── */
+  .menu-btn {
+    position: absolute;
+    right: 14px; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 8px;
+    width: 34px; height: 34px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .menu-btn:hover { background: rgba(255,255,255,0.3); }
+
+  .menu-dropdown {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 200;
+    background: rgba(10,20,30,0.4);
+  }
+  .menu-dropdown.open { display: block; }
+  .menu-dropdown-inner {
+    position: absolute;
+    top: 0; right: 0;
+    width: 220px;
+    height: 100%;
+    background: var(--white);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    padding-bottom: 30px;
+  }
+  .menu-heading {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding: 18px 20px 10px;
+    border-bottom: 1px solid var(--lake-light);
+  }
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 20px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.12s;
+  }
+  .menu-item:hover { background: var(--sand); }
+  .menu-item.active { color: var(--lake); font-weight: 600; }
+  .menu-item-icon { font-size: 1rem; }
+
+  /* ─── ITEM EDITOR MODAL ─── */
+  .edit-modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,30,0.45);
+    z-index: 500;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .edit-modal-overlay.open { display: flex; }
+  .edit-modal-sheet {
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px 18px 36px;
+    position: relative;
+    animation: slideUp 0.25s ease;
+  }
+  .edit-modal-handle {
+    width: 36px; height: 4px; background: #ddd;
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .edit-modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--ink); margin-bottom: 16px;
+  }
+  .edit-field { margin-bottom: 12px; }
+  .edit-label {
+    font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 5px; display: block;
+  }
+  .edit-input {
+    width: 100%; font-family: inherit; font-size: 0.88rem;
+    color: var(--ink); background: var(--sand);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px; padding: 9px 12px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .edit-input:focus { border-color: var(--lake); }
+  .edit-textarea {
+    width: 100%; min-height: 80px; font-family: inherit;
+    font-size: 0.88rem; color: var(--ink);
+    background: var(--sand); border: 1.5px solid var(--lake-light);
+    border-radius: 10px; padding: 9px 12px;
+    outline: none; resize: vertical;
+    transition: border-color 0.15s; line-height: 1.5;
+  }
+  .edit-textarea:focus { border-color: var(--lake); }
+  .edit-save-btn {
+    width: 100%; background: var(--lake); color: #fff;
+    border: none; border-radius: 10px; padding: 12px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 4px;
+    transition: background 0.15s;
+  }
+  .edit-save-btn:hover { background: var(--lake-mid); }
+  .edit-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; font-size: 1.4rem;
+    color: var(--muted); cursor: pointer; padding: 4px;
+  }
+
+  /* ─── TRASH SECTION ─── */
+  .trash-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--white); border-radius: 10px;
+    padding: 11px 14px; margin-bottom: 8px;
+    border-left: 3px solid #e5e7eb;
+  }
+  .trash-item-info { flex: 1; min-width: 0; }
+  .trash-item-name { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+  .trash-item-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .trash-restore-btn {
+    flex-shrink: 0; background: var(--green); color: var(--green-ink);
+    border: none; border-radius: 8px; padding: 5px 10px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .trash-restore-btn:hover { background: #a7f3d0; }
+  .trash-empty { font-size: 0.82rem; color: var(--muted); font-style: italic; padding: 8px 2px; }
+
+  /* ─── ICON PICKER ─── */
+  .icon-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin-top: 6px;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+  .icon-opt {
+    font-size: 1.3rem;
+    text-align: center;
+    padding: 5px 2px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.12s, background 0.12s;
+    user-select: none;
+  }
+  .icon-opt:hover { background: var(--lake-light); }
+  .icon-opt.selected { border-color: var(--lake); background: var(--lake-light); }
+  .icon-preview {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 6px;
+    min-height: 36px;
+  }
+
+  /* ─── DRAG & DROP ─── */
+  .drag-handle {
+    cursor: grab;
+    color: #ccc;
+    font-size: 1rem;
+    padding: 0 4px;
+    flex-shrink: 0;
+    user-select: none;
+    touch-action: none;
+  }
+  .drag-handle:active { cursor: grabbing; }
+  .sortable-ghost {
+    opacity: 0.35;
+    background: var(--lake-light) !important;
+    border-radius: 10px;
+  }
+  .sortable-chosen { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--muted);
+    padding: 20px;
+    border-top: 1px solid #E5E7EB;
+  }
+
+  /* ─── BACK BUTTON ─── */
+  .back-btn {
+    position: absolute;
+    left: 14px; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 8px;
+    width: 34px; height: 34px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+  /* ─── HOME SCREEN ─── */
+  #home-screen {
+    display: none;
+    position: fixed; inset: 0;
+    background: var(--sand);
+    z-index: 300;
+    overflow-y: auto;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  #home-screen.open { display: block; }
+  .home-header {
+    background: var(--lake);
+    color: #fff;
+    padding: 16px 20px 18px;
+    text-align: center;
+    position: relative;
+  }
+  .home-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    display: block;
+  }
+  .home-subtitle {
+    font-size: 0.75rem;
+    color: var(--lake-light);
+    margin-top: 3px;
+    display: block;
+    letter-spacing: 0.04em;
+  }
+  .home-settings-btn {
+    position: absolute;
+    right: 14px; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    border-radius: 8px;
+    width: 34px; height: 34px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .home-settings-btn:hover { background: rgba(255,255,255,0.3); }
+
+  .home-body { padding: 20px 16px 40px; }
+  .home-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 12px;
+    margin-top: 22px;
+  }
+  .home-section-label:first-child { margin-top: 0; }
+
+  .destination-card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--lake);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: box-shadow 0.15s, transform 0.12s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .destination-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .destination-card:active { transform: translateY(0); }
+  .destination-card-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .destination-card-info { flex: 1; min-width: 0; }
+  .destination-card-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .destination-card-dates {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .destination-card-arrow {
+    font-size: 1.1rem;
+    color: var(--lake-light);
+    flex-shrink: 0;
+  }
+
+  /* new destination form */
+  .add-destination-box {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 18px 16px;
+    border: 2px dashed var(--lake-light);
+  }
+  .add-dest-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--lake);
+    margin-bottom: 14px;
+  }
+  .add-dest-field { margin-bottom: 12px; }
+  .add-dest-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 5px;
+    display: block;
+  }
+  .add-dest-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--sand);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 10px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+  .add-dest-input:focus { border-color: var(--lake); }
+  .add-dest-row { display: flex; gap: 8px; }
+  .add-dest-row .add-dest-input { flex: 1; }
+  .add-dest-generate-btn {
+    width: 100%;
+    background: var(--lake);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .add-dest-generate-btn:hover { background: var(--lake-mid); }
+  .add-dest-generate-btn:disabled { background: var(--lake-light); color: var(--lake); cursor: not-allowed; }
+  .add-dest-generate-btn .btn-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .add-dest-generate-btn.loading .btn-spinner { display: block; }
+
+  /* ─── SETTINGS PANEL ─── */
+  #settings-panel {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,30,0.45);
+    z-index: 400;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  #settings-panel.open { display: flex; }
+  .settings-sheet {
+    background: var(--white);
+    border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 20px 18px 40px;
+    position: relative;
+    animation: slideUp 0.25s ease;
+  }
+  .settings-handle {
+    width: 36px; height: 4px; background: #ddd;
+    border-radius: 2px; margin: 0 auto 18px;
+  }
+  .settings-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--ink); margin-bottom: 6px;
+  }
+  .settings-subtitle {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .settings-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; font-size: 1.4rem;
+    color: var(--muted); cursor: pointer; padding: 4px;
+  }
+  .settings-field { margin-bottom: 16px; }
+  .settings-label {
+    font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 6px; display: block;
+  }
+  .settings-textarea {
+    width: 100%; min-height: 90px; font-family: inherit;
+    font-size: 0.88rem; color: var(--ink);
+    background: var(--sand); border: 1.5px solid var(--lake-light);
+    border-radius: 10px; padding: 9px 12px;
+    outline: none; resize: vertical;
+    transition: border-color 0.15s; line-height: 1.5;
+    box-sizing: border-box;
+  }
+  .settings-textarea:focus { border-color: var(--lake); }
+  .settings-chips {
+    display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px;
+  }
+  .settings-chip {
+    background: var(--warm);
+    color: var(--ink);
+    border: 1.5px solid var(--lake-light);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    user-select: none;
+  }
+  .settings-chip.active {
+    background: var(--lake);
+    border-color: var(--lake);
+    color: #fff;
+  }
+  .settings-save-btn {
+    width: 100%; background: var(--lake); color: #fff;
+    border: none; border-radius: 10px; padding: 12px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 6px;
+    transition: background 0.15s;
+  }
+  .settings-save-btn:hover { background: var(--lake-mid); }
+  .settings-saved-msg {
+    text-align: center; font-size: 0.8rem; color: var(--green-ink);
+    margin-top: 8px; opacity: 0; transition: opacity 0.3s;
+  }
+  .settings-saved-msg.show { opacity: 1; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
-<!-- HOME SCREEN -->
+<header>
+  <button class="back-btn" id="back-btn" aria-label="All destinations" title="All destinations">←</button>
+  <span class="header-title">🦝 Annecy 🦝</span>
+  <div class="header-dates">July 9–16, 2026</div>
+  <button class="menu-btn" id="menu-btn" aria-label="All sections">☰</button>
+</header>
+
+<div id="menu-dropdown" class="menu-dropdown">
+  <div class="menu-dropdown-inner">
+    <div class="menu-heading">Sections</div>
+  </div>
+</div>
+
+<div id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-title">🦝 Annecy 🦝</div>
+  <div class="loading-sub">Loading your guide…</div>
+</div>
+
+<!-- ── HOME / DESTINATIONS SCREEN ── -->
 <div id="home-screen">
-  <div class="header">
-    <div>
-      <div class="header-title">Vacation Guides</div>
-      <div class="header-sub" id="dest-count">0 destinations</div>
-    </div>
-    <div class="header-actions">
-      <button class="btn-secondary" onclick="openPrefs()">Preferences</button>
-      <button class="btn-primary" onclick="openNewDest()">+ New</button>
-    </div>
+  <div class="home-header">
+    <span class="home-title">✈️ My Trips</span>
+    <span class="home-subtitle">Select a destination or plan a new one</span>
+    <button class="home-settings-btn" id="home-settings-btn" title="Travel preferences">⚙️</button>
   </div>
-  <div class="dest-list" id="dest-list">
-    <div id="prefs-hint" class="prefs-hint" onclick="openPrefs()" style="display:none">
-      <div class="prefs-hint-title">Set travel preferences</div>
-      <div class="prefs-hint-sub">Tell Claude about restrictions like no car rental, dietary needs, or budget so new guides are tailored from the start.</div>
-    </div>
-    <div id="dest-cards"></div>
-    <div id="empty-home" style="display:none">
-      <div class="card" style="text-align:center;padding:2.5rem 1.5rem">
-        <div style="font-size:2.5rem;margin-bottom:.5rem">🗺</div>
-        <div style="font-weight:700;font-size:1.05rem;margin-bottom:.4rem">No trips yet</div>
-        <div style="color:#888;font-size:.87rem;margin-bottom:1.1rem">Add your first destination to start planning.</div>
-        <button class="btn-primary" onclick="openNewDest()">+ Add destination</button>
+  <div class="home-body">
+    <div class="home-section-label">Saved Destinations</div>
+    <div id="destinations-list">
+      <!-- Annecy is always listed as the current guide -->
+      <div class="destination-card" id="dest-annecy">
+        <span class="destination-card-icon">🦝</span>
+        <div class="destination-card-info">
+          <div class="destination-card-name">Annecy</div>
+          <div class="destination-card-dates">July 9–16, 2026</div>
+        </div>
+        <span class="destination-card-arrow">›</span>
       </div>
+    </div>
+
+    <div class="home-section-label" style="margin-top:26px;">Plan a New Destination</div>
+    <div class="add-destination-box">
+      <div class="add-dest-title">✨ Generate a Guide</div>
+      <div class="add-dest-field">
+        <label class="add-dest-label">Destination</label>
+        <input class="add-dest-input" id="new-dest-name" type="text" placeholder="e.g. Lisbon, Kyoto, Dubrovnik…">
+      </div>
+      <div class="add-dest-field">
+        <label class="add-dest-label">Travel Dates</label>
+        <div class="add-dest-row">
+          <input class="add-dest-input" id="new-dest-from" type="date">
+          <input class="add-dest-input" id="new-dest-to" type="date">
+        </div>
+      </div>
+      <div class="add-dest-field">
+        <label class="add-dest-label">Notes / Context (optional)</label>
+        <input class="add-dest-input" id="new-dest-notes" type="text" placeholder="e.g. family trip, first visit, budget travel…">
+      </div>
+      <div id="settings-preview-bar" style="display:none;background:var(--lake-light);border-radius:8px;padding:8px 12px;font-size:0.78rem;color:var(--lake);margin-bottom:10px;line-height:1.5;"></div>
+      <button class="add-dest-generate-btn" id="generate-guide-btn">
+        <span class="btn-spinner"></span>
+        <span class="btn-label">Generate Guide with AI</span>
+      </button>
+      <div id="generate-status" style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:8px;min-height:18px;"></div>
     </div>
   </div>
 </div>
 
-<!-- DESTINATION SCREEN -->
-<div id="dest-screen">
-  <div class="dest-header" id="dest-header">
-    <button class="dest-header-back" onclick="goHome()">&#8592; Back</button>
-    <div style="flex:1">
-      <div class="dest-header-title" id="dest-header-title"></div>
-      <div class="dest-header-dates" id="dest-header-dates"></div>
-    </div>
-    <div style="position:relative">
-      <button class="menu-btn" id="menu-btn" onclick="toggleMenu()">Menu &#9660;</button>
-      <div class="menu-dropdown" id="menu-dropdown">
-        <div class="menu-section-label">Sections</div>
-        <div id="menu-items"></div>
-        <div class="menu-divider"></div>
-        <button class="menu-item danger" onclick="confirmDeleteDest()">Delete destination</button>
+<!-- ── SETTINGS PANEL ── -->
+<div id="settings-panel">
+  <div class="settings-sheet">
+    <div class="settings-handle"></div>
+    <button class="settings-close" id="settings-close">×</button>
+    <div class="settings-title">⚙️ Travel Preferences</div>
+    <div class="settings-subtitle">Claude will use these when generating any new destination guide — so you only get suggestions that actually fit your trip.</div>
+
+    <div class="settings-field">
+      <label class="settings-label">Transport</label>
+      <div class="settings-chips" id="chips-transport">
+        <span class="settings-chip" data-val="no-car">🚫 No rental car</span>
+        <span class="settings-chip" data-val="public-transit">🚌 Public transit only</span>
+        <span class="settings-chip" data-val="walking">🚶 Walking-focused</span>
+        <span class="settings-chip" data-val="cycling">🚲 Cycling-friendly</span>
+        <span class="settings-chip" data-val="car-ok">🚗 Car is fine</span>
       </div>
     </div>
+
+    <div class="settings-field">
+      <label class="settings-label">Budget</label>
+      <div class="settings-chips" id="chips-budget">
+        <span class="settings-chip" data-val="budget">💸 Budget / backpacker</span>
+        <span class="settings-chip" data-val="mid-range">💳 Mid-range</span>
+        <span class="settings-chip" data-val="splurge">💎 Splurge-worthy ok</span>
+        <span class="settings-chip" data-val="free-first">🆓 Free activities first</span>
+      </div>
+    </div>
+
+    <div class="settings-field">
+      <label class="settings-label">Diet / Food</label>
+      <div class="settings-chips" id="chips-diet">
+        <span class="settings-chip" data-val="vegetarian">🥦 Vegetarian</span>
+        <span class="settings-chip" data-val="vegan">🌱 Vegan</span>
+        <span class="settings-chip" data-val="halal">☪️ Halal</span>
+        <span class="settings-chip" data-val="kosher">✡️ Kosher</span>
+        <span class="settings-chip" data-val="gluten-free">🌾 Gluten-free</span>
+        <span class="settings-chip" data-val="no-seafood">🐟 No seafood</span>
+      </div>
+    </div>
+
+    <div class="settings-field">
+      <label class="settings-label">Trip Style</label>
+      <div class="settings-chips" id="chips-style">
+        <span class="settings-chip" data-val="family-kids">👨‍👩‍👧 Family with kids</span>
+        <span class="settings-chip" data-val="accessibility">♿ Accessibility needed</span>
+        <span class="settings-chip" data-val="solo">🧍 Solo traveler</span>
+        <span class="settings-chip" data-val="couple">💑 Couple</span>
+        <span class="settings-chip" data-val="group">👥 Group</span>
+        <span class="settings-chip" data-val="slow-travel">🐢 Slow travel</span>
+        <span class="settings-chip" data-val="adventure">⚡ Adventure / active</span>
+      </div>
+    </div>
+
+    <div class="settings-field">
+      <label class="settings-label">Anything else Claude should know</label>
+      <textarea class="settings-textarea" id="settings-freetext" placeholder="e.g. we have a dog, traveling with elderly parents, avoid tourist traps, interested in local art…"></textarea>
+    </div>
+
+    <button class="settings-save-btn" id="settings-save-btn">Save Preferences</button>
+    <div class="settings-saved-msg" id="settings-saved-msg">✓ Preferences saved</div>
   </div>
-  <div class="tab-bar" id="tab-bar"></div>
-  <div class="dest-content" id="dest-content"></div>
 </div>
 
-<!-- MODALS -->
-<div id="modal-container"></div>
+<nav>
+  <a href="#days">📅 Days</a>
+  <a href="#fete">🇫🇷 14 Juillet</a>
+  <a href="#sights">🏛 Sights</a>
+  <a href="#hiking">🥾 Hiking</a>
+  <a href="#beaches">🏖 Beaches</a>
+  <a href="#boats">⛵ Boats</a>
+  <a href="#food">🍽 Eat</a>
+  <a href="#grocery">🛒 Shop</a>
+  <a href="#market">🧺 Market</a>
+  <a href="#activities">🎯 Do</a>
+  <a href="#tips">💡 Tips</a>
+  <a href="#pack">🎒 Pack</a>
+  <a href="#trash">🗑 Removed</a>
+</nav>
 
-<script>
-// ── Data ──────────────────────────────────────────────────────────────
-var PALETTES = [
-  {bg:"#E8F4F8",accent:"#2B7A9E",text:"#1a3a4a"},
-  {bg:"#F0EBF8",accent:"#6B3FA0",text:"#2d1a45"},
-  {bg:"#FFF0E6",accent:"#C05C1A",text:"#3d1f0a"},
-  {bg:"#E6F7EE",accent:"#1A8C4E",text:"#0c3020"},
-  {bg:"#FDF0F0",accent:"#B52B2B",text:"#3d0a0a"},
-  {bg:"#F5F5E8",accent:"#7A6B1A",text:"#2a240a"},
+<main>
+<div class="slides-viewport">
+<div class="slides-track" id="slides-track">
+  <section id="days">
+    <div class="section-head">
+      <span class="section-icon">📅</span>
+      <h2>Trip Days</h2>
+    </div>
+    <div id="days-list"></div>
+  </section>
+
+  <!-- ── 14 JUILLET ── -->
+  <section id="fete">
+    <div class="section-head">
+      <span class="section-icon">🇫🇷</span>
+      <h2>14 Juillet — Bastille Day</h2>
+    </div>
+
+    <div class="fete-banner">
+      <div class="fete-inner">
+        <h3>Fête Nationale in Annecy</h3>
+        <p>July 14th is France's biggest national holiday. Annecy celebrates with the full programme — expect crowds, festivity, and a spectacular setting over the lake.</p>
+      </div>
+    </div>
+
+    <div class="card fete">
+      <div class="card-top">
+        <span class="card-title">Fireworks over the Lake</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Lac+d%27Annecy+fireworks+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span><span class="tag tag-must">Don't Miss</span></div>
+      <p>The fireworks display over Lac d'Annecy is one of the most beautiful in France. Best viewing spots: Jardins de l'Europe, Pâquier, and the hillside above town. Arrive early (by 9pm) to get a lakeside spot — it fills up completely. Show typically starts around 10:30pm.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card fete">
+      <div class="card-top">
+        <span class="card-title">Military Parade — Old Town</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Vieille+Ville+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>A traditional morning parade through the old town with local bands, municipal guards, and civic associations. Starts around 10am. The narrow streets of the Vieille Ville make for a very atmospheric setting.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card fete">
+      <div class="card-top">
+        <span class="card-title">Bal Populaire (Street Dancing)</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Place+de+l%27Hotel+de+Ville+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Open-air dancing in the town squares and around the lake — a tradition on Bastille night. Live music, outdoor bars, and the whole town in celebration mode from the evening until after midnight.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card fete">
+      <div class="card-top">
+        <span class="card-title">Boat on the Lake for Fireworks</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Les+Marquisats+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Book far ahead</span><span class="tag tag-must">Special</span></div>
+      <p>Watching the 14 Juillet fireworks from a boat on the lake is extraordinary — reflected colours on the water with the mountains as backdrop. FAM BOAT and local operators run special evening cruises. These sell out weeks in advance — book immediately.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card fete">
+      <div class="card-top">
+        <span class="card-title">Lake Cruise Special — Compagnie des Bateaux</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Compagnie+des+Bateaux+du+Lac+d%27Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid ~€25–40</span></div>
+      <p>The official lake company runs a special Bastille Day evening cruise with on-board dinner option. Tickets include a prime position for the fireworks. Check their website for the 2025 programme — usually released a month in advance.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>⚠️ 14 Juillet tips:</strong> Most shops and some restaurants close on the 14th. Stock up on food the day before. Roads around the lake get extremely congested — arrive on foot or by bike. The morning of the 14th is a great time to hike (quieter trails, festive atmosphere in town when you return).
+    </div>
+
+    <div id="fete-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('fete')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── SIGHTS ── -->
+  <section id="sights">
+    <div class="section-head">
+      <span class="section-icon">🏛</span>
+      <h2>Must-See Sights</h2>
+    </div>
+
+    <div class="card sight">
+      <div class="card-top">
+        <span class="card-title">Vieille Ville (Old Town)</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Vieille+Ville+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span><span class="tag tag-must">Must See</span></div>
+      <p>Pastel-painted arcaded streets, canals, and flower-covered bridges. The heart of Annecy — magical at sunrise before the crowds arrive.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card sight">
+      <div class="card-top">
+        <span class="card-title">Palais de l'Île</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Palais+de+l%27Ile+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid ~€4</span></div>
+      <p>12th-century island fortress in the middle of the Thiou canal — Annecy's most photographed landmark. Best viewed from the bridges at golden hour.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card sight">
+      <div class="card-top">
+        <span class="card-title">Château d'Annecy</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Chateau+d%27Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid ~€6</span></div>
+      <p>Medieval castle overlooking the old town and lake. Now a regional museum of art and Alpine history. The terrace view alone is worth the entrance fee.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card sight">
+      <div class="card-top">
+        <span class="card-title">Jardins de l'Europe &amp; Pâquier</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Jardins+de+l%27Europe+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Large lakeside park perfect for an evening stroll. Swans, mountain views, and the best vantage point for sunsets over the lake.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card sight">
+      <div class="card-top">
+        <span class="card-title">Pont des Amours</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Pont+des+Amours+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Iconic white footbridge connecting the canal district to the lakeside. Beautiful views in both directions. Legend: couples who kiss here will be together forever.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card sight">
+      <div class="card-top">
+        <span class="card-title">Gorges du Fier</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Gorges+du+Fier+Lovagny+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid ~€6.50</span><span class="tag tag-duration">~1.5 hrs</span></div>
+      <p>Dramatic river gorge 10 km from Annecy with walkways suspended over rushing water. The labyrinthe de rochers (boulder maze) at the exit is a bonus. Bus accessible.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div id="sights-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('sights')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── HIKING ── -->
+  <section id="hiking">
+    <div class="section-head">
+      <span class="section-icon">🥾</span>
+      <h2>Hiking (no car needed)</h2>
+    </div>
+
+    <div class="info-box">Bus or boat shuttle connects all trailheads. Start early — trails get hot by midday in summer.</div>
+
+    <div class="card hike">
+      <div class="card-top">
+        <span class="card-title">Mont Veyrier / Mont Baron Loop</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Mont+Veyrier+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-diff">Medium–Hard</span><span class="tag tag-free">Free</span><span class="tag tag-duration">4–5 hrs</span></div>
+      <p>Walk or bus to the trailhead (1hr on foot from centre). Loop via Col des Sauts, Mont Veyrier, Mont Baron, and old cable car ruins. Panoramic lake views. Rocky sections — proper shoes and poles recommended.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card hike">
+      <div class="card-top">
+        <span class="card-title">Sentier de la Crête</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Sentier+de+la+Crete+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-diff">Easy–Moderate</span><span class="tag tag-free">Free</span><span class="tag tag-duration">2.5–3 hrs</span></div>
+      <p>Starts near Annecy train station. Loop through Massif des Bauges Regional Natural Park. Mostly shaded — ideal in summer heat. Several viewpoints over the lake.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card hike">
+      <div class="card-top">
+        <span class="card-title">Angon Waterfall (from Talloires)</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Cascade+d%27Angon+Talloires+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-diff">Easy</span><span class="tag tag-free">Free</span><span class="tag tag-duration">1–1.5 hrs</span></div>
+      <p>Bus or boat to Talloires. Short, shaded trail carved into rock leading to a spectacular waterfall. Can be slippery near the end — watch your step. Great for a half-day trip combined with a swim at Talloires beach.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card hike">
+      <div class="card-top">
+        <span class="card-title">Laudon Circuit (from Saint-Jorioz)</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Saint-Jorioz+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-diff">Moderate</span><span class="tag tag-free">Free</span><span class="tag tag-duration">3.5–4 hrs</span></div>
+      <p>Bus to Saint-Jorioz. Beautiful alpine pasture, forest, and mountain villages. One of the most scenic bus-accessible hikes around the lake.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>⏰ Tip:</strong> In peak summer, start at sunrise and aim to be off exposed trails by early afternoon. The shuttle boat connects villages so you're not limited to trails starting in Annecy.
+    </div>
+
+    <div id="hiking-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('hiking')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── BEACHES ── -->
+  <section id="beaches">
+    <div class="section-head">
+      <span class="section-icon">🏖</span>
+      <h2>Beaches</h2>
+    </div>
+
+    <div class="info-box">Water reaches 23–24°C in summer. All beaches reachable by bike or bus. Weekdays much quieter than weekends.</div>
+
+    <p class="sublabel">Near Town — Free</p>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Plage Impériale</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Plage+Imperiale+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free since 2022</span></div>
+      <p>Closest to Old Town. Diving boards, slide, sports fields, bar with terrace. Chic atmosphere.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Plage d'Albigny</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Plage+d%27Albigny+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Vast grassy beach in Annecy-le-Vieux. Volleyball, table tennis, kids play area, kayak/pedalo hire. Gently sloping sandy bottom.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Plage des Marquisats</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Plage+des+Marquisats+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Most natural of the city beaches. Shaded in mornings, gently sloping. Canoe, kayak, and rowing hire nearby at the sailing club.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <p class="sublabel">By Bus or Bike</p>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Plage d'Angon — Talloires</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Plage+d%27Angon+Talloires+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Shaded picnic spots, lifeguards in season. One of the most scenic spots on the lake. Quiet atmosphere.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Plage de Talloires</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Plage+de+Talloires+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free</span></div>
+      <p>Spacious lawn, children's pool, diving boards, volleyball. Nautical centre with paddleboard and kayak hire. Free parking.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Saint-Jorioz — Sandy Beach</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Plage+Saint-Jorioz+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid in summer ~€2.60</span></div>
+      <p>The only true sandy beach on the lake. Blue Flag certified. Diving boards, pontoons, paddling pool. Two small free beaches just north of the paid entrance offer the same water.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>🚲 Getting there:</strong> Vélonecy e-bikes are free for the first 30 min (app required, re-dock every 30 min). Buses run around the lake for ~€2.
+    </div>
+
+    <div id="beaches-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('beaches')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── BOATS ── -->
+  <section id="boats">
+    <div class="section-head">
+      <span class="section-icon">⛵</span>
+      <h2>Renting a Boat</h2>
+    </div>
+
+    <div class="card boat">
+      <div class="card-top">
+        <span class="card-title">GoBoat (electric) — Le Deck de Veyrier</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Le+Deck+de+Veyrier+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-nolic">No Licence</span></div>
+      <p>Up to 8 people. Central table — perfect for a picnic or apéritif on the water. Silent, zero emissions, swim ladder. 1.5, 2, or 3-hour slots. Book in advance in summer.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card boat">
+      <div class="card-top">
+        <span class="card-title">FAM BOAT — Les Marquisats</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Les+Marquisats+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-nolic">No Licence</span></div>
+      <p>Up to 6 people, departing from central Annecy. Fuel + briefing included. Bring a picnic, swim from the boat, explore freely. April–September. Free cancellation in bad weather.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card boat">
+      <div class="card-top">
+        <span class="card-title">Pedal Boats — all around the lake</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Lac+d%27Annecy+Annecy+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-nolic">No Licence</span></div>
+      <p>Available at Annecy-le-Vieux, Sévrier, Saint-Jorioz, Duingt, Talloires, and more. Some models have a slide. ID required as deposit. Open spring – end September.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>⚠️ Tip:</strong> Pedal boats at the Pâquier sell out fast in peak summer — book ahead or arrive early. All electric boat operators require a €1,000 deposit (credit card).
+    </div>
+
+    <div id="boats-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('boats')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── EAT & DRINK ── -->
+  <section id="food">
+    <div class="section-head">
+      <span class="section-icon">🍽</span>
+      <h2>Where to Eat &amp; Drink</h2>
+    </div>
+    <div id="food-list"></div>
+    <div class="pack-add-row" style="margin-top:14px;">
+      <input class="pack-add-input" id="food-input" type="text" placeholder="Add a place…" maxlength="60">
+      <select class="pack-cat-select" id="food-cat-select">
+        <option value="🍽 Savoyard">🍽 Savoyard</option>
+        <option value="☕ Café &amp; Sweets">☕ Café &amp; Sweets</option>
+        <option value="🧀 Provisions">🧀 Provisions</option>
+        <option value="🥖 Bakery">🥖 Bakery</option>
+        <option value="🍺 Bar">🍺 Bar</option>
+        <option value="✨ Other">✨ Other</option>
+      </select>
+      <button class="pack-add-btn" id="food-add-btn" aria-label="Add place">+</button>
+    </div>
+  </section>
+
+  <!-- ── GROCERY SPECIALTIES ── -->
+  <section id="grocery">
+    <div class="section-head">
+      <span class="section-icon">🛒</span>
+      <h2>Savoyard Specialties to Buy</h2>
+    </div>
+    <div class="info-box">Found in any supermarché or at the market. Great to bring home as gifts — or eat on the spot.</div>
+    <div id="grocery-list"></div>
+    <div class="pack-add-row" style="margin-top:12px;">
+      <input class="pack-add-input" id="grocery-input" type="text" placeholder="Add a specialty…" maxlength="60">
+      <button class="pack-add-btn" id="grocery-add-btn" aria-label="Add">+</button>
+    </div>
+    <div class="tip" style="margin-top:12px;">
+      <strong>📦 Taking cheese home?</strong> Vacuum-pack it at the shop. Reblochon and Beaufort travel well for 2–3 days unrefrigerated if vacuum-packed.
+    </div>
+  </section>
+
+  <!-- ── MARKET ── -->
+  <section id="market">
+    <div class="section-head">
+      <span class="section-icon">🧺</span>
+      <h2>Market</h2>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Old Town Market</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=March%C3%A9+Annecy+Vieille+Ville" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="day-pill">Tuesday</span>
+        <span class="day-pill">Friday</span>
+        <span class="day-pill">Sunday</span>
+      </div>
+      <p style="margin-top:10px;">Runs until 1:30pm. Takes over the old town with meats, cheeses, fresh produce, and street food. Highlights: potato pancakes, diot sausages, bakery goods. During your trip: Tue Jul 9, Fri Jul 11, Sun Jul 13, Fri Jul 16.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>🧀 Don't miss:</strong> Pierre Gay fromagerie for aged reblochon, beaufort, tomme de Savoie · Le Glacier des Alpes for Alpine ice cream · Boulangerie Aristide for sourdough on the canal.
+    </div>
+
+    <div id="market-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('market')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── ACTIVITIES ── -->
+  <section id="activities">
+    <div class="section-head">
+      <span class="section-icon">🎯</span>
+      <h2>Other Activities</h2>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Lake Cruise — Compagnie des Bateaux</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Compagnie+des+Bateaux+du+Lac+d%27Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid ~€15–25</span><span class="tag tag-duration">1–3 hrs</span></div>
+      <p>Official boat tours on the lake. From 1-hour panoramic loops to full-day circuits stopping at village piers. Doubles as transport between lake villages in summer.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Cycling the Lake Circuit (43 km)</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Lac+d%27Annecy+cycling+circuit" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free (bike hire needed)</span><span class="tag tag-duration">Full day</span></div>
+      <p>The full lake circuit is doable in a day. Mix of dedicated cycle paths and quiet roads. Stops at Duingt castle, Talloires bay, and village cafés. Rent e-bikes in town.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Duingt Castle &amp; Village</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Chateau+de+Duingt+France" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-free">Free (exterior)</span></div>
+      <p>A fairytale medieval castle on a tiny peninsula at the lake's narrowest point. Best viewed from the water or the opposite shore. The village behind it is quiet and lovely.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Stand-Up Paddleboarding</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=stand+up+paddle+Annecy+lake" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-paid">Paid ~€15/hr</span></div>
+      <p>Available from most beaches. The crystal-clear water makes SUP here especially stunning — you can see the bottom clearly in calm conditions. Lessons available for beginners.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Via Ferrata du Roc de Chère</span>
+        <div class="card-actions">
+          <a class="map-link" href="https://maps.google.com/?q=Via+Ferrata+Roc+de+Chere+Talloires+Annecy" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Map
+          </a>
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+        </div>
+      </div>
+      <div class="tags"><span class="tag tag-diff">Experienced only</span><span class="tag tag-free">Free (gear not incl.)</span><span class="tag tag-duration">2–3 hrs</span></div>
+      <p>Rock-face climbing route above the lake near Talloires. Spectacular views over the water. Requires a harness and via ferrata set — hire available locally.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div id="activities-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('activities')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── TIPS ── -->
+  <section id="tips">
+    <div class="section-head">
+      <span class="section-icon">💡</span>
+      <h2>Planning Tips</h2>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Getting Around</span>
+        <button class="note-btn" onclick="toggleNote(this)">📝</button>
+      </div>
+      <p>Buses run all around the lake for ~€2. The Vélonecy e-bike scheme covers most city routes — free first 30 min, re-dock to reset. Boat shuttles connect villages in summer (check Compagnie des Bateaux schedule). A car is only needed for more remote trails.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Beat the Crowds</span>
+        <button class="note-btn" onclick="toggleNote(this)">📝</button>
+      </div>
+      <p>Old town and Palais de l'Île: visit before 9am or after 7pm. Beaches: arrive before 10am on weekends. Market: get there early for the best produce before the crowds (and the sun) peak.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Weather &amp; Mountains</span>
+        <button class="note-btn" onclick="toggleNote(this)">📝</button>
+      </div>
+      <p>Mountain weather can change quickly. On hikes, check the forecast the night before — afternoon thunderstorms are common in summer. The lake surface is calm most mornings, choppier in the afternoon wind.</p>
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
+    </div>
+
+    <div class="tip">
+      <strong>📲 Useful apps:</strong> Vélonecy (e-bikes) · Compagnie des Bateaux (lake shuttles) · SIBRA (local buses) · IGNrando or Komoot (trails) · Google Maps offline download covers the whole area well.
+    </div>
+
+    <div id="tips-custom"></div>
+    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('tips')">
+      <span>＋</span> Add item
+    </button>
+  </section>
+
+  <!-- ── PACK LIST ── -->
+  <section id="pack">
+    <div class="section-head">
+      <span class="section-icon">🎒</span>
+      <h2>What to Pack</h2>
+    </div>
+    <div class="pack-progress">
+      <span id="pack-count">0 / 0 packed</span>
+      <div class="progress-bar"><div class="progress-fill" id="pack-bar" style="width:0%"></div></div>
+    </div>
+    <div id="pack-list"></div>
+    <div class="pack-add-row">
+      <input class="pack-add-input" id="pack-input" type="text" placeholder="Add an item…" maxlength="50">
+      <select class="pack-cat-select" id="pack-cat-select"></select>
+      <button class="pack-add-btn" id="pack-add-btn" aria-label="Add item">+</button>
+    </div>
+  </section>
+
+  <!-- ── RECENTLY REMOVED ── -->
+  <section id="trash">
+    <div class="section-head">
+      <span class="section-icon">🗑</span>
+      <h2>Recently Removed</h2>
+    </div>
+    <div class="info-box">Items removed from any section are kept here for 30 days. Tap to restore.</div>
+    <div id="trash-list"></div>
+  </section>
+
+</div><!-- end slides-track -->
+</div><!-- end slides-viewport -->
+</main>
+
+<footer>
+  Annecy · July 9–16, 2026 · tap 📝 to add notes · tap Map to open in Google Maps
+</footer>
+
+<!-- ── ADD TO DAY MODAL ── -->
+<div class="modal-overlay" id="day-modal" onclick="handleModalOverlayClick(event)">
+  <div class="modal-sheet" style="position:relative;">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add to day</div>
+    <div class="modal-day-label" id="modal-day-label"></div>
+    <div class="modal-custom-row">
+      <input class="modal-custom-input" id="modal-custom-input" type="text" placeholder="Type a custom item…" maxlength="60">
+      <button class="modal-custom-add" id="modal-custom-add-btn">Add</button>
+    </div>
+    <input class="modal-search" id="modal-search" type="text" placeholder="Search guide items…">
+    <div class="modal-section-label">From the guide</div>
+    <div class="modal-list" id="modal-list"></div>
+  </div>
+</div>
+
+<!-- ── ITEM EDITOR MODAL ── -->
+<div class="edit-modal-overlay" id="edit-modal">
+  <div class="edit-modal-sheet">
+    <button class="edit-close" id="edit-modal-close">×</button>
+    <div class="edit-modal-handle"></div>
+    <div class="edit-modal-title">Edit item</div>
+    <div class="edit-field">
+      <label class="edit-label">Icon</label>
+      <div class="icon-preview" id="edit-icon-preview">📌</div>
+      <div class="icon-picker-grid" id="edit-icon-grid"></div>
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Name</label>
+      <input class="edit-input" id="edit-name" type="text" maxlength="80" placeholder="Item name">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Description</label>
+      <input class="edit-input" id="edit-desc" type="text" maxlength="160" placeholder="Short description (optional)">
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Notes</label>
+      <textarea class="edit-textarea" id="edit-notes" placeholder="Add notes, details, tips…"></textarea>
+    </div>
+    <div class="edit-field">
+      <label class="edit-label">Google Maps link (optional)</label>
+      <input class="edit-input" id="edit-map" type="url" placeholder="https://maps.google.com/?q=…">
+    </div>
+    <button class="edit-save-btn" id="edit-save-btn">Save</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCt87vFA29sfRz73Zq7keQX-Z-8JqX-GqI",
+  authDomain: "vacation-planner-1b81b.firebaseapp.com",
+  projectId: "vacation-planner-1b81b",
+  storageBucket: "vacation-planner-1b81b.firebasestorage.app",
+  messagingSenderId: "203127956357",
+  appId: "1:203127956357:web:bbfe4a1a1e81e2c0165aec"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ── WRITE LOCK ──────────────────────────────────────────────────
+const _writeLock = {};
+function lockWrite(key,ms=2000){ _writeLock[key]=Date.now()+ms; }
+function isLocked(key){ return _writeLock[key]&&Date.now()<_writeLock[key]; }
+async function fbGet(id){ try{ const s=await getDoc(doc(db,'guide',id)); return s.exists()?s.data().value:null; }catch{ return null; } }
+async function fbSet(id,v){ lockWrite(id); try{ await setDoc(doc(db,'guide',id),{value:v}); }catch(e){ console.warn(e); } }
+function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()&&!isLocked(id)) cb(s.data().value); }); }
+
+// ── CONSTANTS ────────────────────────────────────────────────────
+const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+
+const SECTION_META={
+  fete:      {label:'14 Juillet',  icon:'🇫🇷', cardClass:'fete'},
+  sights:    {label:'Sights',      icon:'🏛',  cardClass:'sight'},
+  hiking:    {label:'Hiking',      icon:'🥾',  cardClass:'hike'},
+  beaches:   {label:'Beaches',     icon:'🏖',  cardClass:''},
+  boats:     {label:'Boats',       icon:'⛵',  cardClass:'boat'},
+  market:    {label:'Market',      icon:'🧺',  cardClass:''},
+  activities:{label:'Activities',  icon:'🎯',  cardClass:''},
+  tips:      {label:'Tips',        icon:'💡',  cardClass:''},
+};
+
+const TRIP_DAYS=[
+  {date:'2026-07-09',name:'Thu, 9 Jul — Arrival Day'},
+  {date:'2026-07-10',name:'Fri, 10 Jul — Market Day 🧺'},
+  {date:'2026-07-11',name:'Sat, 11 Jul'},
+  {date:'2026-07-12',name:'Sun, 12 Jul — Market Day 🧺'},
+  {date:'2026-07-13',name:'Mon, 13 Jul'},
+  {date:'2026-07-14',name:'Tue, 14 Jul — 🇫🇷 Bastille Day'},
+  {date:'2026-07-15',name:'Wed, 15 Jul — Market Day 🧺'},
+  {date:'2026-07-16',name:'Thu, 16 Jul — Departure Day'},
 ];
 
-var SECTION_ICONS = {
-  days:"📅",fete:"🎆",sights:"🏛",hiking:"🥾",beaches:"🏖",boats:"⛵",
-  eat:"🍽",grocery:"🛒",market:"🧺",activities:"🎯",tips:"💡",pack:"🎒"
-};
-
-var DEFAULT_SECTIONS = [
-  {id:"days",label:"Days",type:"dynamic"},
-  {id:"sights",label:"Sights",type:"static"},
-  {id:"eat",label:"Eat & Drink",type:"dynamic"},
-  {id:"activities",label:"Activities",type:"static"},
-  {id:"tips",label:"Tips",type:"static"},
-  {id:"pack",label:"Pack",type:"dynamic"},
+// ── ICON PICKER ─────────────────────────────────────────────────
+const ICONS = [
+  // Nature & outdoors
+  '🏔','🌊','🌅','🌄','🗻','🌸','🌿','🌲','🌴','🍃','🌾','🦅','🦆','🐾','🦝','🐻','🦌','🌺','🌻','🌈',
+  // Activities
+  '🥾','🚴','🚶','🎿','🛶','🎣','🏊','🚣','🧗','🏄','🤿','⛷','🧘','🏋',
+  // Food & drink
+  '🍽','🍷','🍕','☕','🍦','🥐','🧀','🥗','🍺','🥂','🍰','🧁','🥩','🥘','🫕','🧆','🥪',
+  // Sights & places
+  '🏛','🏰','⛪','🗼','🎪','🎭','🛍','💈','🗽','🎡','🎢','🏟','🕌','⛩','🏯',
+  // Transport
+  '🚂','✈️','🚁','⛵','🛥','🚌','🚗','🚲','🛵','🛳',
+  // Essentials & misc
+  '📌','📍','⭐','❤️','🔥','✅','🎵','🛒','🧺','🎒','🗺','💡','🎯','📸','🎬','📖','💬','🗓','💊','🩹','🏥','💳','💰','🔑','🧲','📞','🌐','🔔','⚡','🎁','🎉','🎀','🏆','🥇','🎖','💎','🌙','☀️','❄️','🍀',
 ];
+let _selectedIcon = '📌';
 
-var ANNECY = {
-  id:"dest_annecy_2026", name:"Annecy, France", dates:"July 9-16, 2026", emoji:"🇫🇷",
-  notes:"Mobile-first vacation guide. Firebase for real-time sync.",
-  sections:[
-    {id:"days",label:"Days",type:"dynamic"},
-    {id:"fete",label:"14 Juillet",type:"static"},
-    {id:"sights",label:"Sights",type:"static"},
-    {id:"hiking",label:"Hiking",type:"static"},
-    {id:"beaches",label:"Beaches",type:"static"},
-    {id:"boats",label:"Boats",type:"static"},
-    {id:"eat",label:"Eat & Drink",type:"dynamic"},
-    {id:"grocery",label:"Grocery",type:"dynamic"},
-    {id:"market",label:"Market",type:"static"},
-    {id:"activities",label:"Activities",type:"static"},
-    {id:"tips",label:"Tips",type:"static"},
-    {id:"pack",label:"Pack",type:"dynamic"},
-  ],
-  sectionData:{
-    sights:[
-      {id:"s1",name:"Palais de l'Ile",desc:"12th-century island prison, most photographed in Annecy",notes:"Visit at golden hour. Free to walk around, fee to enter."},
-      {id:"s2",name:"Chateau d'Annecy",desc:"Medieval castle overlooking the old town and lake",notes:"4.50 entry. Museum inside. Great views from the ramparts."},
-      {id:"s3",name:"Old Town (Vieille Ville)",desc:"Pastel arcaded streets along canals",notes:"Busiest on market days (Tue/Fri/Sun). Mornings quieter."},
-      {id:"s4",name:"Jardins de l'Europe",desc:"Lakeside gardens with swans and mountain views",notes:"Free. Perfect for an evening stroll."},
-    ],
-    hiking:[
-      {id:"h1",name:"Mont Veyrier",desc:"3.5h round trip, panoramic lake views",notes:"Start from Veyrier-du-Lac. Moderate. Take water."},
-      {id:"h2",name:"La Tournette",desc:"Annecy's highest peak — strenuous day hike",notes:"Start early. Snow possible into July near summit."},
-      {id:"h3",name:"Gorges du Fier",desc:"Easy canyon walkway 10km from Annecy",notes:"6.50 entry. 45-min loop. Impressive even in low water."},
-      {id:"h4",name:"Semnoz Plateau",desc:"Drive or hike to the ridge above town",notes:"Reachable by car. Paragliding site. Epic 360 views."},
-    ],
-    beaches:[
-      {id:"b1",name:"Plage d'Albigny",desc:"Largest free beach, grass and shingle, north end",notes:"Gets crowded by 11am. Arrive early."},
-      {id:"b2",name:"Plage des Marquisats",desc:"Close to town, lido-style with diving boards",notes:"5 entry for lido. Great for kids."},
-      {id:"b3",name:"Plage de Doussard",desc:"Quieter beach at the south end of the lake",notes:"Worth the 20-min drive. Much less crowded."},
-    ],
-    boats:[
-      {id:"bo1",name:"Compagnie des Bateaux du Lac d'Annecy",desc:"Scheduled boat tours around the full lake",notes:"Book online. 1h or 2h15 options."},
-      {id:"bo2",name:"Pedalo / rowboat rental",desc:"Self-hire from the dock near Champ de Mars",notes:"~15-20/hr. No reservation needed."},
-      {id:"bo3",name:"Kayak / SUP rental",desc:"Available at several beaches",notes:"Albigny and Marquisats both have hire stands."},
-    ],
-    eat:[
-      {id:"e1",name:"Le Freti",desc:"Classic Savoyard — fondue, raclette, tartiflette",notes:"Book ahead in summer. Cosy cave-like room."},
-      {id:"e2",name:"Brasserie Saint-Maurice",desc:"Local institution, good for lunch with lake-view terrace",notes:""},
-      {id:"e3",name:"L'Esquisse",desc:"One Michelin star. Tasting menus only.",notes:"Book weeks ahead. Lunch menu ~55pp."},
-      {id:"e4",name:"Cafe de la Bonbonniere",desc:"Best crepes in old town, always a queue",notes:"Worth the wait. Try the Savoyard (reblochon + lardons)."},
-    ],
-    market:[
-      {id:"m1",name:"Old Town Market",desc:"Tue, Fri, Sun 7am-1pm — Annecy's main market",notes:"Huge. Get there before 9am for parking."},
-      {id:"m2",name:"Organic Market",desc:"Saturday mornings at Paquier meadow",notes:"Artisan producers. Good for cheese and charcuterie."},
-    ],
-    activities:[
-      {id:"a1",name:"Paragliding from Planfait",desc:"Tandem flights, 20-30 min in the air",notes:"Summum Parapente and Air et Sens well reviewed. Book ahead."},
-      {id:"a2",name:"Bastille Day (14 Juillet)",desc:"Fireworks over the lake — July 14th",notes:"Arrive by 9pm. Fireworks at 11pm."},
-      {id:"a3",name:"Annecy Animation Festival",desc:"World-renowned animation festival",notes:"June dates only — check annecy.org."},
-    ],
-    tips:[
-      {id:"t1",name:"Getting around",desc:"Old town is tiny and walkable. Rent bikes for the lakeside path.",notes:"Velo'Annecy bike share is cheap. Lake loop is 37km."},
-      {id:"t2",name:"Parking",desc:"Expensive and scarce in summer.",notes:"Park at Parking Courier and walk. Don't move the car mid-day."},
-      {id:"t3",name:"Weather",desc:"July is hot (25-30C). Afternoon thunderstorms are common.",notes:"Do outdoor activities in the morning."},
-      {id:"t4",name:"Language",desc:"French only in most restaurants and shops.",notes:"Basic French phrases go a long way."},
-    ],
-    fete:[
-      {id:"f1",name:"Fireworks — July 14th",desc:"Biggest display of the year over the lake",notes:"Paquier meadow and Albigny beach are best spots."},
-      {id:"f2",name:"Bal des Pompiers",desc:"Free street dancing on July 13th evening",notes:"Starts ~9pm near the fire station. Very local."},
-      {id:"f3",name:"Military parade",desc:"Morning of July 14th in the town centre",notes:"Starts 10am."},
-    ],
-    grocery:[
-      {id:"g1",name:"Reblochon",desc:"The Savoyard cheese — buy at the market",notes:""},
-      {id:"g2",name:"Genepi",desc:"Local alpine liqueur",notes:"Good souvenir. Available at most caves a vins."},
-      {id:"g3",name:"Diots sausages",desc:"Smoked pork sausages, cook in white wine",notes:"Buy at the charcuterie in the market."},
-      {id:"g4",name:"Blueberries / raspberries",desc:"In season July — Sunday organic market",notes:""},
-    ],
-    pack:[
-      {id:"p1",name:"Sunscreen SPF 50+",desc:"Lake reflection + altitude = intense sun",notes:""},
-      {id:"p2",name:"Light rain jacket",desc:"Afternoon thunderstorms are likely",notes:""},
-      {id:"p3",name:"Hiking shoes",desc:"Essential even for moderate trails",notes:""},
-      {id:"p4",name:"Swimwear x2",desc:"You'll be in the lake daily",notes:""},
-      {id:"p5",name:"Reusable water bottle",desc:"Tap water is excellent. Fountains everywhere.",notes:""},
-      {id:"p6",name:"European power adapter",desc:"Type E/F plug",notes:""},
-      {id:"p7",name:"Cash (euros)",desc:"Many market stalls cash only",notes:""},
-      {id:"p8",name:"French phrasebook / app",desc:"Even basic phrases help a lot",notes:""},
-    ],
-  }
-};
-
-var PREF_OPTIONS = {
-  transport:[
-    {id:"no_car",label:"No car rental"},
-    {id:"public_transit",label:"Public transit only"},
-    {id:"walking",label:"Walking-focused"},
-    {id:"cycling",label:"Cycling-friendly"},
-    {id:"no_flights",label:"No domestic flights"},
-    {id:"taxi_ok",label:"Taxis/rideshare OK"},
-  ],
-  accommodation:[
-    {id:"hotel",label:"Hotels"},
-    {id:"airbnb",label:"Apartments/Airbnb"},
-    {id:"hostel",label:"Hostels OK"},
-    {id:"no_resort",label:"No all-inclusives"},
-    {id:"central",label:"Must be central"},
-  ],
-  dietary:[
-    {id:"vegetarian",label:"Vegetarian"},
-    {id:"vegan",label:"Vegan"},
-    {id:"gluten_free",label:"Gluten-free"},
-    {id:"halal",label:"Halal"},
-    {id:"kosher",label:"Kosher"},
-    {id:"no_seafood",label:"No seafood"},
-    {id:"allergies",label:"Severe allergies"},
-  ],
-};
-
-// ── State ─────────────────────────────────────────────────────────────
-var destinations = [];
-var prefs = {transport:[],accommodation:[],dietary:[],budget:"",groupType:"",mobility:"",freetext:""};
-var activeDestId = null;
-var activeSectionId = null;
-
-// ── Storage ───────────────────────────────────────────────────────────
-async function loadAll() {
-  try {
-    var dr = await window.storage.get("vg_destinations");
-    var dests = dr ? JSON.parse(dr.value) : [];
-    if (!dests.some(function(d){return d.id==="dest_annecy_2026";})) {
-      dests = [ANNECY].concat(dests);
-    }
-    destinations = dests;
-  } catch(e) { destinations = [ANNECY]; }
-  try {
-    var pr = await window.storage.get("vg_prefs");
-    if (pr) prefs = JSON.parse(pr.value);
-  } catch(e) {}
-}
-async function saveDests() {
-  try { await window.storage.set("vg_destinations", JSON.stringify(destinations)); } catch(e) {}
-}
-async function savePrefs() {
-  try { await window.storage.set("vg_prefs", JSON.stringify(prefs)); } catch(e) {}
-}
-
-// ── Render home ───────────────────────────────────────────────────────
-function renderHome() {
-  document.getElementById("home-screen").style.display = "block";
-  document.getElementById("dest-screen").style.display = "none";
-
-  var hasPrefs = (prefs.transport.length || prefs.dietary.length || prefs.budget || prefs.groupType || prefs.freetext);
-  document.getElementById("prefs-hint").style.display = hasPrefs ? "none" : "block";
-  document.getElementById("dest-count").textContent = destinations.length + " destination" + (destinations.length !== 1 ? "s" : "");
-  document.getElementById("empty-home").style.display = destinations.length === 0 ? "block" : "none";
-
-  var container = document.getElementById("dest-cards");
-  container.innerHTML = "";
-  destinations.forEach(function(dest, i) {
-    var pal = PALETTES[i % PALETTES.length];
-    var btn = document.createElement("button");
-    btn.className = "dest-card";
-    btn.style.setProperty("--accent", pal.accent);
-    btn.innerHTML =
-      '<div class="dest-icon" style="background:' + pal.bg + '">' + dest.emoji + '</div>' +
-      '<div style="flex:1">' +
-        '<div class="dest-name">' + esc(dest.name) + '</div>' +
-        (dest.dates ? '<div class="dest-dates">' + esc(dest.dates) + '</div>' : '') +
-        '<div class="dest-meta">' + dest.sections.length + ' sections</div>' +
-      '</div>' +
-      '<div class="dest-arrow" style="color:' + pal.accent + '">&#8250;</div>';
-    btn.onclick = function() { openDest(dest.id); };
-    container.appendChild(btn);
+function buildIconGrid(){
+  const grid = document.getElementById('edit-icon-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  ICONS.forEach(ic => {
+    const el = document.createElement('div');
+    el.className = 'icon-opt' + (ic === _selectedIcon ? ' selected' : '');
+    el.textContent = ic;
+    el.addEventListener('click', () => {
+      _selectedIcon = ic;
+      document.getElementById('edit-icon-preview').textContent = ic;
+      grid.querySelectorAll('.icon-opt').forEach(o => o.classList.toggle('selected', o.textContent === ic));
+    });
+    grid.appendChild(el);
   });
 }
 
-// ── Open destination ──────────────────────────────────────────────────
-function openDest(id) {
-  activeDestId = id;
-  activeSectionId = null;
-  var dest = getDest();
-  var idx = destinations.findIndex(function(d){return d.id===id;});
-  var pal = PALETTES[idx % PALETTES.length];
-
-  document.getElementById("home-screen").style.display = "none";
-  document.getElementById("dest-screen").style.display = "block";
-
-  var hdr = document.getElementById("dest-header");
-  hdr.style.background = pal.accent;
-  document.getElementById("dest-header-title").textContent = dest.emoji + " " + dest.name;
-  var datesEl = document.getElementById("dest-header-dates");
-  datesEl.textContent = dest.dates || "";
-  datesEl.style.display = dest.dates ? "block" : "none";
-
-  // CSS vars for this dest
-  document.documentElement.style.setProperty("--accent", pal.accent);
-  document.documentElement.style.setProperty("--accent-light", pal.accent + "55");
-  document.documentElement.style.setProperty("--pal-bg", pal.bg);
-  document.getElementById("dest-screen").style.background = pal.bg;
-
-  renderMenu();
-  renderTabs();
-  renderSection();
+// ── ACCORDION ───────────────────────────────────────────────────
+function initAccordionCard(card){
+  const top=card.querySelector('.card-top');
+  if(!top||top.dataset.ai) return; top.dataset.ai='1';
+  const titleEl=top.querySelector('.card-title');
+  if(titleEl&&!titleEl.closest('.card-title-wrap')){
+    const wrap=document.createElement('span'); wrap.className='card-title-wrap';
+    const dot=document.createElement('span'); dot.className='note-dot';
+    titleEl.parentNode.insertBefore(wrap,titleEl); wrap.appendChild(titleEl); wrap.appendChild(dot);
+  }
+  const acts=top.querySelector('.card-actions');
+  if(acts) top.removeChild(acts);
+  if(!top.querySelector('.card-chevron')){
+    const ch=document.createElement('span'); ch.className='card-chevron';
+    ch.innerHTML=`<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`; top.appendChild(ch);
+  }
+  const body=document.createElement('div'); body.className='card-body';
+  const inner=document.createElement('div'); inner.className='card-body-inner'; body.appendChild(inner);
+  const sibs=[]; let s=top.nextSibling; while(s){sibs.push(s);s=s.nextSibling;}
+  sibs.forEach(x=>inner.appendChild(x));
+  if(acts) inner.insertBefore(acts,inner.firstChild);
+  card.appendChild(body);
+  top.addEventListener('click',e=>{ if(!e.target.closest('a,button')) card.classList.toggle('open'); });
 }
 
-function goHome() {
-  activeDestId = null;
-  activeSectionId = null;
-  renderHome();
+// ── DRAG & DROP helper ──────────────────────────────────────────
+function makeSortable(el, onEnd){
+  if(!el||!window.Sortable) return;
+  Sortable.create(el,{
+    handle:'.drag-handle',
+    animation:150,
+    ghostClass:'sortable-ghost',
+    chosenClass:'sortable-chosen',
+    onEnd
+  });
+}
+function dragHandle(){ return '<span class="drag-handle" title="Drag to reorder">⠿</span>'; }
+
+// ── MENU DROPDOWN ───────────────────────────────────────────────
+const NAV_SECTIONS=[
+  {id:'days',icon:'📅',label:'Days'},{id:'fete',icon:'🇫🇷',label:'14 Juillet'},
+  {id:'sights',icon:'🏛',label:'Sights'},{id:'hiking',icon:'🥾',label:'Hiking'},
+  {id:'beaches',icon:'🏖',label:'Beaches'},{id:'boats',icon:'⛵',label:'Boats'},
+  {id:'food',icon:'🍽',label:'Eat & Drink'},{id:'grocery',icon:'🛒',label:'Shop'},
+  {id:'market',icon:'🧺',label:'Market'},{id:'activities',icon:'🎯',label:'Activities'},
+  {id:'tips',icon:'💡',label:'Tips'},{id:'pack',icon:'🎒',label:'Pack'},
+  {id:'trash',icon:'🗑',label:'Recently Removed'},
+];
+(function(){
+  const btn=document.getElementById('menu-btn');
+  const dropdown=document.getElementById('menu-dropdown');
+  const inner=dropdown.querySelector('.menu-dropdown-inner');
+  NAV_SECTIONS.forEach((sec,i)=>{
+    const el=document.createElement('div'); el.className='menu-item'; el.dataset.idx=i;
+    el.innerHTML=`<span class="menu-item-icon">${sec.icon}</span><span>${sec.label}</span>`;
+    el.addEventListener('click',()=>{ goTo(i); closeMenuDropdown(); });
+    inner.appendChild(el);
+  });
+  btn.addEventListener('click',e=>{ e.stopPropagation(); dropdown.classList.toggle('open'); });
+  dropdown.addEventListener('click',e=>{ if(e.target===dropdown) closeMenuDropdown(); });
+  function closeMenuDropdown(){ dropdown.classList.remove('open'); }
+  window._closeMenuDropdown=closeMenuDropdown;
+  window._updateMenuActive=function(i){ inner.querySelectorAll('.menu-item').forEach((el,j)=>el.classList.toggle('active',j===i)); };
+})();
+
+// ── SWIPE NAV ───────────────────────────────────────────────────
+(function(){
+  const track=document.getElementById('slides-track');
+  const navLinks=Array.from(document.querySelectorAll('nav a'));
+  const sections=Array.from(document.querySelectorAll('#slides-track > section'));
+  let cur=0,tx0=0,ty0=0,tdx=0,dragging=false,locked=false;
+  window.goTo=function(i,anim=true){
+    i=Math.max(0,Math.min(sections.length-1,i)); cur=i;
+    if(!anim) track.style.transition='none';
+    track.style.transform=`translateX(-${i*100}%)`;
+    if(!anim) requestAnimationFrame(()=>{track.style.transition='';});
+    navLinks.forEach((a,j)=>a.classList.toggle('active',j===i));
+    navLinks[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    if(window._updateMenuActive) window._updateMenuActive(i);
+  };
+  navLinks.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();window.goTo(i);}));
+  const vp=document.querySelector('.slides-viewport');
+  vp.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx0=e.touches[0].clientX;ty0=e.touches[0].clientY;tdx=0;dragging=false;locked=false;},{passive:true});
+  vp.addEventListener('touchmove',e=>{
+    if(e.touches.length!==1)return;
+    const dx=e.touches[0].clientX-tx0,dy=e.touches[0].clientY-ty0;
+    if(!locked){if(Math.abs(dy)>Math.abs(dx)+4){locked=true;dragging=false;return;}if(Math.abs(dx)>6){locked=true;dragging=true;}}
+    if(!dragging)return; tdx=dx;
+    track.style.transition='none';
+    track.style.transform=`translateX(calc(${-cur*100}% + ${dx}px))`;
+  },{passive:true});
+  vp.addEventListener('touchend',()=>{
+    if(!dragging)return;
+    const th=vp.offsetWidth*0.2;
+    if(tdx<-th)window.goTo(cur+1); else if(tdx>th)window.goTo(cur-1); else window.goTo(cur);
+    dragging=false;
+  });
+  let md=false,mx0=0,mdx=0;
+  vp.addEventListener('mousedown',e=>{md=true;mx0=e.clientX;mdx=0;track.style.transition='none';});
+  window.addEventListener('mousemove',e=>{if(!md)return;mdx=e.clientX-mx0;track.style.transform=`translateX(calc(${-cur*100}% + ${mdx}px))`;});
+  window.addEventListener('mouseup',()=>{if(!md)return;md=false;const th=vp.offsetWidth*0.2;if(mdx<-th)window.goTo(cur+1);else if(mdx>th)window.goTo(cur-1);else window.goTo(cur);});
+  window.goTo(0,false);
+})();
+
+// ── TRASH ───────────────────────────────────────────────────────
+const THIRTY_DAYS=30*24*60*60*1000;
+let _trash=[];
+async function loadTrash(){ const v=await fbGet('trash'); _trash=(v||[]).filter(i=>Date.now()-i.removedAt<THIRTY_DAYS); }
+async function saveTrash(){ await fbSet('trash',_trash); }
+async function addToTrash(item,section){
+  _trash.unshift({...item,section,removedAt:Date.now()});
+  _trash=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
+  await saveTrash(); buildTrashUI();
+}
+async function restoreFromTrash(idx){
+  const item=_trash[idx]; if(!item) return;
+  _trash.splice(idx,1); await saveTrash();
+  if(item.section==='food'){ _foodItems.push({name:item.name,cat:item.cat||'✨ Other',desc:item.desc||'',tag:item.tag||'',tagClass:item.tagClass||'',mapUrl:item.mapUrl||'',notes:item.notes||'',icon:item.icon||'🍽'}); await saveFood(); buildFoodUI(); }
+  else if(item.section==='grocery'){ _groceryItems.push({emoji:item.emoji||item.icon||'🛒',name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''}); await saveGrocery(); buildGroceryUI(); }
+  else if(item.section==='pack'){ _packItems.push({label:item.name,cat:item.cat||'🎒 Essentials',checked:false,icon:item.icon||'📌'}); await savePack(); buildPackUI(); }
+  else if(item.section==='days'&&item.date){ await addDayItem(item.date,{name:item.name,icon:item.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''}); }
+  else if(SECTION_META[item.section]){ if(!_sectionItems[item.section])_sectionItems[item.section]=[]; _sectionItems[item.section].push({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'}); await saveSectionItems(); buildSectionCustomUI(item.section); }
+  buildTrashUI();
+}
+function buildTrashUI(){
+  const container=document.getElementById('trash-list'); container.innerHTML='';
+  const active=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
+  if(!active.length){ container.innerHTML='<div class="trash-empty">No recently removed items.</div>'; return; }
+  active.forEach((item,idx)=>{
+    const daysLeft=Math.ceil((THIRTY_DAYS-(Date.now()-item.removedAt))/(24*60*60*1000));
+    let lbl=item.section;
+    if(item.section==='days'&&item.date){ const d=TRIP_DAYS.find(t=>t.date===item.date); lbl=d?d.name:item.date; }
+    else if(SECTION_META[item.section]) lbl=SECTION_META[item.section].label;
+    else if(item.section==='food') lbl='Eat & Drink';
+    else if(item.section==='grocery') lbl='Shop';
+    else if(item.section==='pack') lbl='Pack';
+    const row=document.createElement('div'); row.className='trash-item';
+    row.innerHTML=`<div class="trash-item-info">
+      <div class="trash-item-name">${item.icon||item.emoji||''} ${item.name}</div>
+      <div class="trash-item-meta">${lbl} · expires in ${daysLeft}d</div>
+    </div><button class="trash-restore-btn">Restore</button>`;
+    row.querySelector('.trash-restore-btn').addEventListener('click',()=>restoreFromTrash(idx));
+    container.appendChild(row);
+  });
 }
 
-function getDest() {
-  return destinations.find(function(d){return d.id===activeDestId;});
+// ── EDIT MODAL ──────────────────────────────────────────────────
+let _editCallback=null;
+function openEditModal({name='',desc='',notes='',mapUrl='',icon='📌'},onSave){
+  _editCallback=onSave;
+  _selectedIcon=icon||'📌';
+  document.getElementById('edit-icon-preview').textContent=_selectedIcon;
+  buildIconGrid();
+  document.getElementById('edit-name').value=name;
+  document.getElementById('edit-desc').value=desc;
+  document.getElementById('edit-notes').value=notes;
+  document.getElementById('edit-map').value=mapUrl;
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('edit-name').focus(),100);
+}
+function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); _editCallback=null; }
+document.getElementById('edit-modal-close').addEventListener('click',closeEditModal);
+document.getElementById('edit-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('edit-modal')) closeEditModal(); });
+document.getElementById('edit-save-btn').addEventListener('click',()=>{
+  if(!_editCallback) return;
+  _editCallback({
+    icon: _selectedIcon,
+    name: document.getElementById('edit-name').value.trim(),
+    desc: document.getElementById('edit-desc').value.trim(),
+    notes: document.getElementById('edit-notes').value.trim(),
+    mapUrl: document.getElementById('edit-map').value.trim(),
+  });
+  closeEditModal();
+});
+
+// ── TRIP DAYS ───────────────────────────────────────────────────
+let _dayPlans={};
+async function loadDayPlans(){ const v=await fbGet('dayPlans'); _dayPlans=v||{}; }
+async function saveDayPlans(){ await fbSet('dayPlans',_dayPlans); }
+
+function getGuideItems(){
+  const items=[],seen=new Set();
+  document.querySelectorAll('section:not(#days):not(#pack):not(#trash):not(#food):not(#grocery) .card-title').forEach(el=>{
+    const sec=el.closest('section'),icon=sec?.querySelector('.section-icon')?.textContent?.trim()||'',name=el.textContent.trim();
+    if(!name||seen.has(name))return; seen.add(name); items.push({name,icon});
+  });
+  return items;
+}
+let _activeDay=null;
+
+function buildDaysUI(){
+  const container=document.getElementById('days-list'); container.innerHTML='';
+  const today=new Date().toISOString().slice(0,10);
+  TRIP_DAYS.forEach(day=>{
+    const items=_dayPlans[day.date]||[];
+    const isFete=day.date==='2026-07-14',isToday=day.date===today;
+    const card=document.createElement('div'); card.className='day-card'+(isFete?' is-fete':'')+(isToday?' is-today':'');
+    card.dataset.date=day.date;
+    const mn=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    card.innerHTML=`<div class="day-header">
+      <div class="day-date-badge"><span class="d-num">${day.date.slice(8)}</span><span class="d-mon">${mn[+day.date.slice(5,7)]}</span></div>
+      <div class="day-header-info">
+        <div class="day-name">${day.name}</div>
+        <div class="day-count ${items.length?'has-items':''}">${items.length?items.length+' item'+(items.length>1?'s':'')+' planned':'Nothing planned yet'}</div>
+      </div>
+      <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+    </div>
+    <div class="day-body"><div class="day-body-inner">
+      <div class="day-items-list"></div>
+      <button class="day-add-btn"><span>＋</span> Add activity or note</button>
+    </div></div>`;
+    card.querySelector('.day-header').addEventListener('click',e=>{ if(!e.target.closest('.day-add-btn')) card.classList.toggle('open'); });
+    card.querySelector('.day-add-btn').addEventListener('click',()=>openDayModal(day.date,day.name));
+    renderDayItems(card,day.date,items);
+    container.appendChild(card);
+  });
 }
 
-function updateDest(updated) {
-  destinations = destinations.map(function(d){return d.id===updated.id?updated:d;});
-  saveDests();
+function renderDayItems(card,date,items){
+  const list=card.querySelector('.day-items-list'); list.innerHTML='';
+  if(!items.length){ list.innerHTML='<div class="day-empty">Tap + to start planning this day.</div>'; return; }
+  const snapshot=[...items]; // freeze order at render time for sortable
+  items.forEach((item,idx)=>{
+    const row=document.createElement('div'); row.className='day-item';
+    row.dataset.idx=String(idx);
+    row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;';
+    const href=item.mapUrl||'';
+    const mapBtn=href?`<a href="${href}" target="_blank" class="map-link" style="font-size:0.65rem;padding:3px 7px">${MAP_SVG} Map</a>`:'';
+    const topRow=document.createElement('div');
+    topRow.style.cssText='display:flex;align-items:center;gap:6px;width:100%';
+    topRow.innerHTML=`${dragHandle()}<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label" style="flex:1;font-weight:600">${item.name}</span>${mapBtn}<button class="day-item-action edit" title="Edit">✎</button><button class="day-item-action remove">×</button>`;
+    row.appendChild(topRow);
+    if(item.desc){ const d=document.createElement('div'); d.style.cssText='font-size:0.78rem;color:#555;padding-left:26px;line-height:1.4'; d.textContent=item.desc; row.appendChild(d); }
+    if(item.notes){ const n=document.createElement('div'); n.style.cssText='font-size:0.75rem;color:var(--muted);font-style:italic;padding-left:26px'; n.textContent='📝 '+item.notes; row.appendChild(n); }
+    topRow.querySelector('.day-item-action.remove').addEventListener('click',()=>removeDayItem(date,idx));
+    topRow.querySelector('.day-item-action.edit').addEventListener('click',()=>{
+      openEditModal({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'},async({icon,name,desc,notes,mapUrl})=>{
+        if(!name) return;
+        _dayPlans[date][idx]={..._dayPlans[date][idx],icon,name,desc,notes,mapUrl};
+        await saveDayPlans(); buildDaysUI();
+        document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+      });
+    });
+    list.appendChild(row);
+  });
+  // sortable — use data-idx into snapshot so name-matching can't drop items
+  makeSortable(list, async()=>{
+    const reordered=[...list.querySelectorAll('.day-item')]
+      .map(row=>snapshot[parseInt(row.dataset.idx,10)])
+      .filter(Boolean);
+    _dayPlans[date]=reordered;
+    await saveDayPlans();
+    buildDaysUI();
+    document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+  });
+}
+async function removeDayItem(date,idx){
+  const items=_dayPlans[date]||[]; const removed=items[idx];
+  items.splice(idx,1); _dayPlans[date]=items; await saveDayPlans();
+  if(removed) await addToTrash({...removed,name:removed.name,icon:removed.icon||'📌',date},'days');
+  buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+}
+async function addDayItem(date,item){
+  if(!_dayPlans[date]) _dayPlans[date]=[];
+  // always push — allow multiple items with same name, use _id to distinguish
+  _dayPlans[date].push({...item, _id: Date.now()+Math.random()});
+  await saveDayPlans();
+  buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
 }
 
-// ── Menu ──────────────────────────────────────────────────────────────
-function toggleMenu() {
-  var dd = document.getElementById("menu-dropdown");
-  dd.classList.toggle("open");
+// ── DAY MODAL ───────────────────────────────────────────────────
+let _guideItems=[];
+function openDayModal(date,dayName){
+  _activeDay=date; _guideItems=getGuideItems();
+  document.getElementById('modal-day-label').textContent=dayName;
+  document.getElementById('modal-custom-input').value='';
+  document.getElementById('modal-search').value='';
+  renderModalList('');
+  document.getElementById('day-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-search').focus(),100);
 }
-document.addEventListener("click", function(e) {
-  var mb = document.getElementById("menu-btn");
-  var dd = document.getElementById("menu-dropdown");
-  if (mb && dd && !mb.contains(e.target) && !dd.contains(e.target)) {
-    dd.classList.remove("open");
+window.closeModal=function(){ document.getElementById('day-modal').classList.remove('open'); _activeDay=null; };
+window.handleModalOverlayClick=function(e){ if(e.target===document.getElementById('day-modal')) window.closeModal(); };
+function renderModalList(q){
+  const existing=(_dayPlans[_activeDay]||[]).map(i=>i.name);
+  const list=document.getElementById('modal-list');
+  const filtered=_guideItems.filter(i=>!q||i.name.toLowerCase().includes(q.toLowerCase()));
+  list.innerHTML='';
+  if(!filtered.length){list.innerHTML='<div style="padding:14px 8px;font-size:0.82rem;color:var(--muted);">No matches.</div>';return;}
+  filtered.forEach(item=>{
+    const el=document.createElement('div'); el.className='modal-item'+(existing.includes(item.name)?' already-added':'');
+    el.innerHTML=`<span class="modal-item-icon">${item.icon}</span><div class="modal-item-text"><div class="modal-item-name">${item.name}</div></div>`;
+    el.addEventListener('click',()=>{ addDayItem(_activeDay,{name:item.name,icon:item.icon}); window.closeModal(); });
+    list.appendChild(el);
+  });
+}
+document.getElementById('modal-search').addEventListener('input',function(){ renderModalList(this.value); });
+async function addCustomItemToDay(){
+  const input=document.getElementById('modal-custom-input'),name=input.value.trim();
+  if(!name||!_activeDay) return;
+  const date=_activeDay; // capture before closeModal nulls it
+  window.closeModal(); input.value='';
+  openEditModal({name,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
+    if(!n) return;
+    await addDayItem(date,{name:n,icon,desc,notes,mapUrl});
+  });
+}
+document.getElementById('modal-custom-add-btn').addEventListener('click',addCustomItemToDay);
+document.getElementById('modal-custom-input').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomItemToDay();});
+
+// ── PACK ────────────────────────────────────────────────────────
+const DEFAULT_PACK=[
+  {label:"Hiking boots",cat:"👟 Footwear"},{label:"Sandals / flip-flops",cat:"👟 Footwear"},{label:"Light trainers",cat:"👟 Footwear"},
+  {label:"Swimsuit ×2",cat:"👙 Beach"},{label:"Beach towel",cat:"👙 Beach"},{label:"Waterproof dry bag",cat:"👙 Beach"},
+  {label:"Sunscreen SPF 50+",cat:"☀️ Sun"},{label:"Sunglasses",cat:"☀️ Sun"},{label:"Sun hat / cap",cat:"☀️ Sun"},
+  {label:"Light rain jacket",cat:"🏔 Mountain"},{label:"Trekking poles",cat:"🏔 Mountain"},{label:"Hiking socks ×3",cat:"🏔 Mountain"},{label:"Headlamp",cat:"🏔 Mountain"},
+  {label:"Reusable water bottle",cat:"🎒 Essentials"},{label:"Snacks / trail mix",cat:"🎒 Essentials"},{label:"Small backpack (daypack)",cat:"🎒 Essentials"},{label:"Portable charger",cat:"🎒 Essentials"},{label:"EU power adaptor",cat:"🎒 Essentials"},
+  {label:"Travel insurance docs",cat:"📋 Docs"},{label:"Passport / ID",cat:"📋 Docs"},{label:"Euros (cash)",cat:"📋 Docs"},
+  {label:"Blister plasters",cat:"💊 Health"},{label:"Ibuprofen / paracetamol",cat:"💊 Health"},{label:"Insect repellent",cat:"💊 Health"},
+  {label:"Light dinner outfit",cat:"👗 Clothes"},{label:"T-shirts ×4",cat:"👗 Clothes"},{label:"Shorts / light trousers",cat:"👗 Clothes"},
+  {label:"Picnic blanket",cat:"🧺 Picnic"},{label:"Reusable bag / tote",cat:"🧺 Picnic"},
+];
+let _packItems=[];
+async function loadPack(){ const v=await fbGet('packItems'); _packItems=v||DEFAULT_PACK.map(i=>({...i,checked:false})); }
+async function savePack(){ await fbSet('packItems',_packItems); }
+function getCats(items){ const s=new Set(),c=[]; items.forEach(i=>{if(!s.has(i.cat)){s.add(i.cat);c.push(i.cat);}}); return c; }
+function buildPackUI(){
+  const container=document.getElementById('pack-list'); container.innerHTML='';
+  getCats(_packItems).forEach(cat=>{
+    const group=document.createElement('div'); group.className='pack-category';
+    const lbl=document.createElement('div'); lbl.className='pack-cat-label'; lbl.textContent=cat; group.appendChild(lbl);
+    const grid=document.createElement('div'); grid.className='pack-grid';
+    const catItems=_packItems.filter(it=>it.cat===cat);
+    catItems.forEach(item=>{
+      const idx=_packItems.indexOf(item);
+      const el=document.createElement('div'); el.className='pack-item'+(item.checked?' checked':'');
+      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!item.checked;
+      cb.addEventListener('change',async()=>{ _packItems[idx].checked=cb.checked; await savePack(); el.classList.toggle('checked',cb.checked); updatePackProgress(); });
+      const lbl2=document.createElement('span'); lbl2.className='pack-label';
+      lbl2.textContent=(item.icon?item.icon+' ':'')+item.label;
+      lbl2.addEventListener('click',()=>cb.click());
+      const editBtn=document.createElement('button'); editBtn.className='pack-delete'; editBtn.innerHTML=dragHandle()+'✎'; editBtn.style.color='var(--lake)'; editBtn.title='Edit';
+      editBtn.addEventListener('click',e=>{ e.stopPropagation();
+        openEditModal({name:item.label,icon:item.icon||'📌',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,notes,mapUrl})=>{
+          if(name){ _packItems[idx]={..._packItems[idx],label:name,icon,notes,mapUrl}; savePack(); buildPackUI(); }
+        });
+      });
+      const del=document.createElement('button'); del.className='pack-delete'; del.innerHTML='×';
+      del.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({name:item.label,icon:item.icon||'📌',cat:item.cat,notes:item.notes||'',mapUrl:item.mapUrl||''},'pack'); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
+      el.appendChild(cb); el.appendChild(lbl2); el.appendChild(editBtn); el.appendChild(del); grid.appendChild(el);
+    });
+    group.appendChild(grid); container.appendChild(group);
+    makeSortable(grid,async()=>{
+      const els=[...grid.querySelectorAll('.pack-item')];
+      const reordered=els.map(el=>{ const t=el.querySelector('.pack-label')?.textContent||''; return _packItems.find(it=>(it.icon?it.icon+' ':'')+it.label===t)||null; }).filter(Boolean);
+      const rest=_packItems.filter(it=>it.cat!==cat);
+      _packItems=[...rest,...reordered];
+      await savePack();
+    });
+  });
+  updatePackProgress();
+  const sel=document.getElementById('pack-cat-select'); const cur=sel.value; sel.innerHTML='';
+  getCats(_packItems).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+  if(cur&&[...sel.options].some(o=>o.value===cur)) sel.value=cur;
+}
+function updatePackProgress(){
+  const total=_packItems.length,done=_packItems.filter(i=>i.checked).length;
+  document.getElementById('pack-count').textContent=`${done} / ${total} packed`;
+  document.getElementById('pack-bar').style.width=total?`${(done/total)*100}%`:'0%';
+}
+async function addPackItem(){
+  const input=document.getElementById('pack-input'),sel=document.getElementById('pack-cat-select'),label=input.value.trim();
+  if(!label){input.focus();return;}
+  input.value='';
+  openEditModal({name:label,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name,notes,mapUrl})=>{
+    if(!name) return;
+    _packItems.push({label:name,cat:sel.value,checked:false,icon,notes,mapUrl}); await savePack(); buildPackUI();
+  });
+  input.focus();
+}
+document.getElementById('pack-add-btn').addEventListener('click',addPackItem);
+document.getElementById('pack-input').addEventListener('keydown',e=>{if(e.key==='Enter')addPackItem();});
+
+// ── FOOD ────────────────────────────────────────────────────────
+const DEFAULT_FOOD=[
+  {name:'Le Freti',cat:'🍽 Savoyard',desc:'Fondue, raclette, and tartiflette in a charming timber interior. Book ahead.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Le+Freti+Annecy+France',icon:'🍽'},
+  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace. Local fish (perch, char), Savoyard meat dishes.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy',icon:'🍽'},
+  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Moules-frites, steak, local wine.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Brasserie+des+Europeens+Annecy',icon:'🍽'},
+  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Alpine ice cream — génépi, mountain honey, wild blueberry.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Le+Glacier+des+Alpes+Annecy',icon:'🍦'},
+  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough on the canal. Arrive early.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Boulangerie+Aristide+Annecy',icon:'🥐'},
+  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Aged reblochon, beaufort, tomme de Savoie. Best cheesemonger in Annecy.',tag:"Don't Miss",tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Pierre+Gay+Fromagerie+Annecy',icon:'🧀'},
+  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, baked goods. Until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapUrl:'https://maps.google.com/?q=March%C3%A9+Annecy+Old+Town',icon:'🧺'},
+];
+let _foodItems=[];
+async function loadFood(){ const v=await fbGet('foodItems'); _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); }
+async function saveFood(){ await fbSet('foodItems',_foodItems); }
+function buildFoodUI(){
+  const container=document.getElementById('food-list'); container.innerHTML='';
+  const cats=[],map={};
+  _foodItems.forEach(item=>{ if(!map[item.cat]){map[item.cat]=[];cats.push(item.cat);} map[item.cat].push(item); });
+  cats.forEach(cat=>{
+    const lbl=document.createElement('p'); lbl.className='sublabel'; lbl.textContent=cat; container.appendChild(lbl);
+    const catContainer=document.createElement('div'); catContainer.dataset.cat=cat; container.appendChild(catContainer);
+    const catItems=map[cat];
+    const catSnapshot=[...catItems]; // freeze for this category's sortable
+    catItems.forEach((item,catIdx)=>{
+      const idx=_foodItems.indexOf(item);
+      const card=document.createElement('div'); card.className='card food';
+      card.dataset.idx=String(catIdx); // index into catSnapshot
+      const href=item.mapUrl||(item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`);
+      card.innerHTML=`
+        <div class="card-top">
+          <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||'🍽'}</span>
+          <span class="card-title">${item.name}</span>
+          <div class="card-actions">
+            ${dragHandle()}
+            <a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>
+            <button class="note-btn" onclick="toggleNote(this)">📝</button>
+            <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+            <button data-action="del" class="pack-delete" title="Remove">×</button>
+          </div>
+        </div>
+        ${item.tag?`<div class="tags"><span class="tag ${item.tagClass||'tag-price'}">${item.tag}</span></div>`:''}
+        ${item.desc?`<p>${item.desc}</p>`:''}
+        ${item.notes?`<p style="font-style:italic;color:var(--muted);margin-top:6px;font-size:0.8rem;">📝 ${item.notes}</p>`:''}
+        <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
+      card.querySelector('[data-action="edit"]').addEventListener('click',e=>{ e.stopPropagation();
+        openEditModal({name:item.name,icon:item.icon||'🍽',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
+          if(name){ _foodItems[idx]={..._foodItems[idx],icon,name,desc,notes,mapUrl}; saveFood(); buildFoodUI(); }
+        });
+      });
+      card.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item},'food'); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
+      catContainer.appendChild(card); initAccordionCard(card); initNoteCard(card);
+    });
+    makeSortable(catContainer,async()=>{
+      const reordered=[...catContainer.querySelectorAll('.card[data-idx]')]
+        .map(card=>catSnapshot[parseInt(card.dataset.idx,10)])
+        .filter(Boolean);
+      const rest=_foodItems.filter(it=>it.cat!==cat);
+      _foodItems=[...rest,...reordered];
+      await saveFood();
+    });
+  });
+}
+async function addFoodItem(){
+  const input=document.getElementById('food-input'),sel=document.getElementById('food-cat-select'),name=input.value.trim();
+  if(!name){input.focus();return;}
+  input.value='';
+  openEditModal({name,icon:'🍽',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
+    if(!n) return;
+    _foodItems.push({name:n,cat:sel.value,desc,tag:'',tagClass:'',mapUrl,notes,icon}); await saveFood(); buildFoodUI();
+  });
+  input.focus();
+}
+document.getElementById('food-add-btn').addEventListener('click',addFoodItem);
+document.getElementById('food-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFoodItem();});
+
+// ── GROCERY ─────────────────────────────────────────────────────
+const DEFAULT_GROCERY=[
+  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty. Buy vacuum-packed. Essential for tartiflette.',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese — the "Prince of Gruyères."',notes:'',mapUrl:''},
+  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, grey rind. Very affordable.',notes:'',mapUrl:''},
+  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Pairs with cheese and fish.',notes:'',mapUrl:''},
+  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur. Small bottles travel well.',notes:'',mapUrl:''},
+  {emoji:'🍯',name:'Miel de Savoie (Mountain Honey)',desc:'Floral, complex honey. Sold in small jars at the market.',notes:'',mapUrl:''},
+  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages.',notes:'',mapUrl:''},
+  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style.',notes:'',mapUrl:''},
+  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates.',notes:'',mapUrl:''},
+  {emoji:'🧂',name:"Sel de l'Alpe / Herbes de Savoie",desc:'Local spice blends. Compact souvenirs.',notes:'',mapUrl:''},
+];
+let _groceryItems=[];
+async function loadGrocery(){ const v=await fbGet('groceryItems'); _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); }
+async function saveGrocery(){ await fbSet('groceryItems',_groceryItems); }
+function buildGroceryUI(){
+  const container=document.getElementById('grocery-list'); container.innerHTML='';
+  const snapshot=[..._groceryItems];
+  _groceryItems.forEach((item,idx)=>{
+    const row=document.createElement('div'); row.className='grocery-item';
+    row.dataset.idx=String(idx);
+    const mapPart=item.mapUrl?`<a href="${item.mapUrl}" target="_blank" class="map-link" style="margin-top:4px;display:inline-flex">${MAP_SVG} Map</a>`:'';
+    const notesPart=item.notes?`<div class="grocery-desc" style="font-style:italic;margin-top:2px;">📝 ${item.notes}</div>`:'';
+    row.innerHTML=`${dragHandle()}<span class="grocery-emoji">${item.emoji||'🛒'}</span>
+      <div style="flex:1;min-width:0">
+        <div class="grocery-name">${item.name}</div>
+        ${item.desc?`<div class="grocery-desc">${item.desc}</div>`:''}
+        ${notesPart}${mapPart}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+        <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+        <button data-action="del" class="pack-delete" title="Remove">×</button>
+      </div>`;
+    row.querySelector('[data-action="edit"]').addEventListener('click',async e=>{ e.stopPropagation();
+      openEditModal({name:item.name,icon:item.emoji||'🛒',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
+        if(name){ _groceryItems[idx]={..._groceryItems[idx],emoji:icon,name,desc,notes,mapUrl}; saveGrocery(); buildGroceryUI(); }
+      });
+    });
+    row.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item,icon:item.emoji||'🛒'},'grocery'); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
+    container.appendChild(row);
+  });
+  makeSortable(container,async()=>{
+    const reordered=[...container.querySelectorAll('.grocery-item[data-idx]')]
+      .map(row=>snapshot[parseInt(row.dataset.idx,10)])
+      .filter(Boolean);
+    _groceryItems=reordered; await saveGrocery();
+  });
+}
+async function addGroceryItem(){
+  const input=document.getElementById('grocery-input'),name=input.value.trim();
+  if(!name){input.focus();return;}
+  input.value='';
+  openEditModal({name,icon:'🛒',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
+    if(!n) return;
+    _groceryItems.push({emoji:icon,name:n,desc,notes,mapUrl}); await saveGrocery(); buildGroceryUI();
+  });
+  input.focus();
+}
+document.getElementById('grocery-add-btn').addEventListener('click',addGroceryItem);
+document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
+
+// ── SECTION CUSTOM ITEMS ────────────────────────────────────────
+let _sectionItems={};
+async function loadSectionItems(){ const v=await fbGet('sectionItems'); _sectionItems=v||{}; }
+async function saveSectionItems(){ await fbSet('sectionItems',_sectionItems); }
+
+function buildSectionCustomUI(sid){
+  const container=document.getElementById(sid+'-custom'); if(!container) return;
+  container.innerHTML='';
+  const items=_sectionItems[sid]||[];
+  const meta=SECTION_META[sid]||{icon:'📌',cardClass:''};
+  const snapshot=[...items]; // freeze for sortable
+  items.forEach((item,idx)=>{
+    const card=document.createElement('div');
+    card.className='card '+meta.cardClass;
+    card.dataset.idx=String(idx); // stable index into snapshot
+    const href=item.mapUrl||'';
+    const mapBtn=href?`<a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>`:'';
+    card.innerHTML=`
+      <div class="card-top">
+        <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||meta.icon||'📌'}</span>
+        <span class="card-title">${item.name}</span>
+        <div class="card-actions">
+          ${dragHandle()}
+          ${mapBtn}
+          <button class="note-btn" onclick="toggleNote(this)">📝</button>
+          <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
+          <button data-action="del" class="pack-delete" title="Remove">×</button>
+        </div>
+      </div>
+      ${item.desc?`<p>${item.desc}</p>`:''}
+      ${item.notes?`<p style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:5px;">📝 ${item.notes}</p>`:''}
+      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
+    card.querySelector('[data-action="edit"]').addEventListener('click',e=>{ e.stopPropagation();
+      openEditModal({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
+        if(!name) return;
+        _sectionItems[sid][idx]={...item,icon,name,desc,notes,mapUrl};
+        saveSectionItems(); buildSectionCustomUI(sid);
+      });
+    });
+    card.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation();
+      await addToTrash({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},sid);
+      _sectionItems[sid].splice(idx,1); await saveSectionItems(); buildSectionCustomUI(sid);
+    });
+    container.appendChild(card);
+    initAccordionCard(card);
+    initNoteCard(card);
+  });
+  // Reorder using data-idx into snapshot — never match by name
+  makeSortable(container,async()=>{
+    const reordered=[...container.querySelectorAll('.card[data-idx]')]
+      .map(card=>snapshot[parseInt(card.dataset.idx,10)])
+      .filter(Boolean);
+    _sectionItems[sid]=reordered;
+    await saveSectionItems();
+  });
+}
+function buildAllSectionCustomUI(){ Object.keys(SECTION_META).forEach(sid=>buildSectionCustomUI(sid)); }
+window.openSectionAdd=function(sid){
+  const meta=SECTION_META[sid]||{icon:'📌'};
+  openEditModal({name:'',icon:meta.icon,desc:'',notes:'',mapUrl:''},async({icon,name,desc,notes,mapUrl})=>{
+    if(!name) return;
+    if(!_sectionItems[sid]) _sectionItems[sid]=[];
+    // add unique _id so items are always distinguishable
+    _sectionItems[sid].push({name,icon,desc:desc||'',notes:notes||'',mapUrl:mapUrl||'',_id:Date.now()+Math.random()});
+    await saveSectionItems(); buildSectionCustomUI(sid);
+  });
+};
+
+// ── NOTES ───────────────────────────────────────────────────────
+let _notes={};
+async function loadNotesFb(){ const v=await fbGet('notes'); _notes=v||{}; }
+async function saveNotesFb(){ await fbSet('notes',_notes); }
+window.toggleNote=function(btn){
+  const card=btn.closest('.card');
+  if(card&&!card.classList.contains('open')) card.classList.add('open');
+  const noteDiv=btn.closest('.card-body-inner,.card')?.querySelector('.card-note');
+  if(!noteDiv) return;
+  noteDiv.classList.toggle('open');
+  if(noteDiv.classList.contains('open')) noteDiv.querySelector('textarea')?.focus();
+};
+function initNoteCard(card){
+  const titleEl=card.querySelector('.card-title');
+  const key=titleEl?'note_'+titleEl.textContent.trim():null; if(!key) return;
+  const ta=card.querySelector('textarea'); if(!ta) return;
+  const dot=card.querySelector('.note-dot');
+  if(_notes[key]){ ta.value=_notes[key]; card.querySelector('.note-btn')?.classList.add('has-note'); dot?.classList.add('visible'); }
+  let timer;
+  ta.addEventListener('input',()=>{
+    _notes[key]=ta.value;
+    const has=ta.value.trim().length>0;
+    card.querySelector('.note-btn')?.classList.toggle('has-note',has);
+    dot?.classList.toggle('visible',has);
+    const saved=card.querySelector('.note-saved');
+    if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1500);}
+    clearTimeout(timer); timer=setTimeout(()=>saveNotesFb(),800);
+  });
+}
+function initAllNotes(){ document.querySelectorAll('.card').forEach(card=>initNoteCard(card)); }
+
+// ── REAL-TIME LISTENERS ─────────────────────────────────────────
+fbListen('dayPlans',v=>{ _dayPlans=v||{}; buildDaysUI(); });
+fbListen('packItems',v=>{ if(v){_packItems=v; buildPackUI();} });
+fbListen('foodItems',v=>{ if(v){_foodItems=v; buildFoodUI();} });
+fbListen('groceryItems',v=>{ if(v){_groceryItems=v; buildGroceryUI();} });
+fbListen('trash',v=>{ if(v){_trash=v; buildTrashUI();} });
+fbListen('sectionItems',v=>{ if(v){_sectionItems=v; buildAllSectionCustomUI();} });
+fbListen('notes',v=>{ if(v){_notes=v; initAllNotes();} });
+
+// ── INIT ────────────────────────────────────────────────────────
+async function init(){
+  try{ await Promise.all([loadDayPlans(),loadPack(),loadFood(),loadGrocery(),loadNotesFb(),loadTrash(),loadSectionItems(),loadPrefs()]); }
+  catch(e){ console.warn('Firebase load error',e); }
+  document.querySelectorAll('.card').forEach(initAccordionCard);
+  buildDaysUI(); buildPackUI(); buildFoodUI(); buildGroceryUI(); buildTrashUI(); buildAllSectionCustomUI(); initAllNotes();
+  const overlay=document.getElementById('loading-overlay');
+  overlay.classList.add('done'); setTimeout(()=>overlay.remove(),500);
+}
+// ── HOME SCREEN & BACK BUTTON ───────────────────────────────────
+const homeScreen = document.getElementById('home-screen');
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  homeScreen.classList.add('open');
+  updateSettingsPreviewBar();
+});
+
+document.getElementById('dest-annecy').addEventListener('click', () => {
+  homeScreen.classList.remove('open');
+});
+
+// ── SETTINGS PANEL ──────────────────────────────────────────────
+const settingsPanel = document.getElementById('settings-panel');
+const SETTINGS_KEY = 'travelPreferences';
+
+let _prefs = { chips: [], freetext: '' };
+
+async function loadPrefs() {
+  const v = await fbGet(SETTINGS_KEY);
+  if (v) _prefs = v;
+  applyPrefsToUI();
+}
+async function savePrefs() {
+  const chips = [...document.querySelectorAll('.settings-chip.active')].map(c => c.dataset.val);
+  const freetext = document.getElementById('settings-freetext').value.trim();
+  _prefs = { chips, freetext };
+  await fbSet(SETTINGS_KEY, _prefs);
+}
+function applyPrefsToUI() {
+  document.querySelectorAll('.settings-chip').forEach(chip => {
+    chip.classList.toggle('active', (_prefs.chips || []).includes(chip.dataset.val));
+  });
+  const ft = document.getElementById('settings-freetext');
+  if (ft) ft.value = _prefs.freetext || '';
+}
+
+document.querySelectorAll('.settings-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('active'));
+});
+
+document.getElementById('home-settings-btn').addEventListener('click', () => {
+  applyPrefsToUI();
+  settingsPanel.classList.add('open');
+});
+document.getElementById('settings-close').addEventListener('click', () => {
+  settingsPanel.classList.remove('open');
+});
+settingsPanel.addEventListener('click', e => {
+  if (e.target === settingsPanel) settingsPanel.classList.remove('open');
+});
+document.getElementById('settings-save-btn').addEventListener('click', async () => {
+  await savePrefs();
+  const msg = document.getElementById('settings-saved-msg');
+  msg.classList.add('show');
+  setTimeout(() => { msg.classList.remove('show'); settingsPanel.classList.remove('open'); }, 1200);
+  updateSettingsPreviewBar();
+});
+
+function buildPrefsPrompt() {
+  const lines = [];
+  const chipLabels = {
+    'no-car': 'no rental car — suggest walking, public transit, cycling only',
+    'public-transit': 'public transit only',
+    'walking': 'walking-focused itineraries',
+    'cycling': 'cycling-friendly activities',
+    'car-ok': 'car travel is acceptable',
+    'budget': 'budget/backpacker travel — prioritise free & cheap options',
+    'mid-range': 'mid-range budget',
+    'splurge': 'occasional splurges are fine',
+    'free-first': 'prioritise free activities',
+    'vegetarian': 'vegetarian food',
+    'vegan': 'vegan food',
+    'halal': 'halal food',
+    'kosher': 'kosher food',
+    'gluten-free': 'gluten-free options',
+    'no-seafood': 'no seafood',
+    'family-kids': 'family travel with young children — include kid-friendly activities',
+    'accessibility': 'accessibility needs — avoid steep terrain, stairs; prefer accessible venues',
+    'solo': 'solo traveler',
+    'couple': 'couple trip — include romantic spots',
+    'group': 'group travel',
+    'slow-travel': 'slow travel — fewer activities, more immersion',
+    'adventure': 'adventure/active travel — include hikes, sports, outdoor activities',
+  };
+  (_prefs.chips || []).forEach(v => { if (chipLabels[v]) lines.push('- ' + chipLabels[v]); });
+  if (_prefs.freetext) lines.push('- ' + _prefs.freetext);
+  return lines.length ? '\n\nTravel preferences to incorporate:\n' + lines.join('\n') : '';
+}
+
+function updateSettingsPreviewBar() {
+  const bar = document.getElementById('settings-preview-bar');
+  const chips = _prefs.chips || [];
+  const ft = _prefs.freetext || '';
+  if (chips.length === 0 && !ft) { bar.style.display = 'none'; return; }
+  const chipLabels = [...document.querySelectorAll('.settings-chip')]
+    .filter(c => chips.includes(c.dataset.val))
+    .map(c => c.textContent.trim());
+  let text = '⚙️ Preferences active: ' + [...chipLabels, ft ? ft : null].filter(Boolean).join(' · ');
+  bar.textContent = text;
+  bar.style.display = 'block';
+}
+
+// ── AI GUIDE GENERATOR ──────────────────────────────────────────
+document.getElementById('generate-guide-btn').addEventListener('click', async () => {
+  const dest = document.getElementById('new-dest-name').value.trim();
+  const from = document.getElementById('new-dest-from').value;
+  const to   = document.getElementById('new-dest-to').value;
+  const notes = document.getElementById('new-dest-notes').value.trim();
+  if (!dest) { document.getElementById('new-dest-name').focus(); return; }
+
+  const btn   = document.getElementById('generate-guide-btn');
+  const label = btn.querySelector('.btn-label');
+  const status = document.getElementById('generate-status');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  label.textContent = 'Generating…';
+  status.textContent = 'Asking Claude to build your guide…';
+
+  const dateStr = (from && to) ? `${from} to ${to}` : (from || to || 'dates TBD');
+  const prefsPrompt = buildPrefsPrompt();
+
+  const prompt = `You are a travel guide expert. Generate a comprehensive vacation guide scaffold for: ${dest} (${dateStr}).${notes ? ' Trip context: ' + notes : ''}${prefsPrompt}
+
+Return ONLY valid JSON (no markdown, no code fences) with this structure:
+{
+  "destination": "City Name",
+  "emoji": "one emoji representing the destination",
+  "dates": "human-readable date range",
+  "sections": {
+    "sights": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "tag":"free|paid|must-see", "mapQuery":"google maps search string"}],
+    "hiking": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "tag":"easy|moderate|hard", "mapQuery":"..."}],
+    "food": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "category":"restaurant|cafe|bar|street food", "mapQuery":"..."}],
+    "activities": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "mapQuery":"..."}],
+    "tips": [{"name":"...", "icon":"emoji", "desc":"practical tip 1-2 sentences"}]
+  },
+  "grocery": [{"emoji":"emoji", "name":"local product", "desc":"why buy it"}],
+  "days": ["label for day 1", "label for day 2"]
+}
+
+Include 4-6 items per section. Make tips practical and specific. Grocery list should be local specialties worth bringing home.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    let guide;
+    try {
+      guide = JSON.parse(text.replace(/```json|```/g, '').trim());
+    } catch(e) {
+      throw new Error('Could not parse response');
+    }
+
+    status.textContent = 'Guide ready! Building HTML…';
+
+    // Build a minimal new guide HTML based on the scaffold
+    const newHtml = buildGuideHtml(guide);
+    const blob = new Blob([newHtml], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+
+    // Add destination card to home screen
+    const list = document.getElementById('destinations-list');
+    const card = document.createElement('div');
+    card.className = 'destination-card';
+    card.innerHTML = `<span class="destination-card-icon">${guide.emoji||'🗺'}</span>
+      <div class="destination-card-info">
+        <div class="destination-card-name">${guide.destination}</div>
+        <div class="destination-card-dates">${guide.dates||dateStr}</div>
+      </div>
+      <span class="destination-card-arrow">↓ Download</span>`;
+    card.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = guide.destination.toLowerCase().replace(/\s+/g,'-') + '-guide.html';
+      a.click();
+    });
+    list.appendChild(card);
+
+    status.textContent = '✓ Done! Scroll up to download your new guide.';
+    document.getElementById('new-dest-name').value = '';
+    document.getElementById('new-dest-from').value = '';
+    document.getElementById('new-dest-to').value = '';
+    document.getElementById('new-dest-notes').value = '';
+  } catch(err) {
+    status.textContent = '⚠️ Something went wrong. Please try again.';
+    console.error(err);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    label.textContent = 'Generate Guide with AI';
   }
 });
 
-function renderMenu() {
-  var dest = getDest();
-  var container = document.getElementById("menu-items");
-  container.innerHTML = "";
+function buildGuideHtml(g) {
+  const sectionHtml = (items, cardClass) => items.map(item => `
+    <div class="card ${cardClass||''}">
+      <div class="card-top">
+        <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||'📌'}</span>
+        <span class="card-title">${item.name}</span>
+      </div>
+      <p>${item.desc||''}</p>
+      ${item.mapQuery ? `<div class="card-actions"><a class="map-link" href="https://maps.google.com/?q=${encodeURIComponent(item.mapQuery)}" target="_blank">📍 Map</a></div>` : ''}
+    </div>`).join('');
 
-  // Overview
-  var ov = document.createElement("button");
-  ov.className = "menu-item" + (activeSectionId === null ? " active" : "");
-  ov.textContent = "Overview";
-  ov.onclick = function() { activeSectionId = null; renderTabs(); renderSection(); toggleMenu(); };
-  container.appendChild(ov);
+  const sections = g.sections || {};
+  const daysHtml = (g.days||[]).map((d,i) => `<div style="background:var(--white);border-radius:12px;padding:14px 16px;margin-bottom:8px;"><strong>Day ${i+1}:</strong> ${d}</div>`).join('');
+  const groceryHtml = (g.grocery||[]).map(item => `<div class="grocery-item"><span class="grocery-emoji">${item.emoji||'🛒'}</span><div><div class="grocery-name">${item.name}</div><div class="grocery-desc">${item.desc||''}</div></div></div>`).join('');
 
-  dest.sections.forEach(function(s) {
-    var btn = document.createElement("button");
-    btn.className = "menu-item" + (activeSectionId === s.id ? " active" : "");
-    var icon = SECTION_ICONS[s.id] || "📌";
-    btn.innerHTML = '<span>' + icon + '</span> ' + esc(s.label);
-    btn.onclick = function() { activeSectionId = s.id; renderTabs(); renderSection(); toggleMenu(); };
-    container.appendChild(btn);
-  });
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>${g.destination} — Vacation Guide · ${g.dates||''}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=DM+Sans:wght@400;500;600&display=swap');
+  :root{--lake:#2A6D9E;--lake-mid:#4A8FBB;--lake-light:#C8E2F4;--alpine:#3D5448;--sand:#F5F0E8;--warm:#E8DFD0;--ink:#181A1C;--muted:#6B7280;--accent:#C47B3A;--white:#FFFFFF;--green:#D1FAE5;--green-ink:#065F46;--amber:#FEF3C7;--amber-ink:#92400E;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--sand);color:var(--ink);line-height:1.55;font-size:15px;max-width:480px;margin:0 auto;}
+  header{background:var(--lake);color:#fff;padding:14px 20px 16px;text-align:center;}
+  .header-title{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;color:#fff;display:block;}
+  .header-dates{display:block;margin-top:3px;font-size:0.72rem;font-weight:500;color:var(--lake-light);letter-spacing:.04em;}
+  nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--lake-light);display:flex;overflow-x:auto;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav a{flex:0 0 auto;text-decoration:none;color:var(--muted);font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:11px 13px;white-space:nowrap;border-bottom:2px solid transparent;}
+  nav a.active{color:var(--lake);border-bottom-color:var(--lake);}
+  section{padding:22px 16px 24px;}
+  .section-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--lake-light);}
+  .section-icon{font-size:1.25rem;}
+  h2{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:700;color:var(--lake);}
+  .card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--lake-light);}
+  .card.hike{border-left-color:var(--alpine);}
+  .card.food{border-left-color:var(--accent);}
+  .card.sight{border-left-color:var(--lake);}
+  .card-top{display:flex;align-items:center;gap:8px;}
+  .card-title{font-size:.9rem;font-weight:600;color:var(--ink);flex:1;}
+  .card p{font-size:.82rem;color:#444;margin-top:6px;}
+  .card-actions{display:flex;gap:5px;margin-top:8px;}
+  .map-link{display:inline-flex;align-items:center;gap:3px;text-decoration:none;font-size:.68rem;font-weight:600;padding:4px 8px;border-radius:20px;background:var(--lake-light);color:var(--lake);white-space:nowrap;}
+  .grocery-item{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid #eee;font-size:.83rem;}
+  .grocery-item:last-child{border-bottom:none;}
+  .grocery-emoji{font-size:1.1rem;flex-shrink:0;}
+  .grocery-name{font-weight:600;color:var(--ink);}
+  .grocery-desc{color:#555;font-size:.78rem;margin-top:1px;}
+  footer{text-align:center;font-size:.72rem;color:var(--muted);padding:20px;border-top:1px solid #E5E7EB;}
+</style>
+</head>
+<body>
+<header>
+  <span class="header-title">${g.emoji||'🗺'} ${g.destination} ${g.emoji||'🗺'}</span>
+  <div class="header-dates">${g.dates||''}</div>
+</header>
+<nav>
+  ${sections.sights?.length ? '<a href="#sights">🏛 Sights</a>' : ''}
+  ${sections.hiking?.length ? '<a href="#hiking">🥾 Hiking</a>' : ''}
+  ${sections.food?.length ? '<a href="#food">🍽 Eat</a>' : ''}
+  ${sections.activities?.length ? '<a href="#activities">🎯 Do</a>' : ''}
+  ${sections.tips?.length ? '<a href="#tips">💡 Tips</a>' : ''}
+  ${g.grocery?.length ? '<a href="#grocery">🛒 Shop</a>' : ''}
+  ${g.days?.length ? '<a href="#days">📅 Days</a>' : ''}
+</nav>
+<main>
+${sections.sights?.length ? `<section id="sights"><div class="section-head"><span class="section-icon">🏛</span><h2>Sights</h2></div>${sectionHtml(sections.sights,'sight')}</section>` : ''}
+${sections.hiking?.length ? `<section id="hiking"><div class="section-head"><span class="section-icon">🥾</span><h2>Hiking</h2></div>${sectionHtml(sections.hiking,'hike')}</section>` : ''}
+${sections.food?.length ? `<section id="food"><div class="section-head"><span class="section-icon">🍽</span><h2>Where to Eat</h2></div>${sectionHtml(sections.food,'food')}</section>` : ''}
+${sections.activities?.length ? `<section id="activities"><div class="section-head"><span class="section-icon">🎯</span><h2>Activities</h2></div>${sectionHtml(sections.activities,'')}</section>` : ''}
+${sections.tips?.length ? `<section id="tips"><div class="section-head"><span class="section-icon">💡</span><h2>Tips</h2></div>${sectionHtml(sections.tips,'')}</section>` : ''}
+${g.grocery?.length ? `<section id="grocery"><div class="section-head"><span class="section-icon">🛒</span><h2>What to Buy</h2></div><div>${groceryHtml}</div></section>` : ''}
+${g.days?.length ? `<section id="days"><div class="section-head"><span class="section-icon">📅</span><h2>Day Planner</h2></div>${daysHtml}</section>` : ''}
+</main>
+<footer>Generated by Vacation Planner · ${g.destination}</footer>
+</body></html>`;
 }
 
-// ── Tabs ──────────────────────────────────────────────────────────────
-function renderTabs() {
-  var dest = getDest();
-  var bar = document.getElementById("tab-bar");
-  bar.innerHTML = "";
-
-  var ov = document.createElement("button");
-  ov.className = "tab-btn" + (activeSectionId === null ? " active" : "");
-  ov.textContent = "Home";
-  ov.onclick = function() { activeSectionId = null; renderMenu(); renderSection(); };
-  bar.appendChild(ov);
-
-  dest.sections.forEach(function(s) {
-    var btn = document.createElement("button");
-    btn.className = "tab-btn" + (activeSectionId === s.id ? " active" : "");
-    var icon = SECTION_ICONS[s.id] || "📌";
-    btn.innerHTML = icon + " " + esc(s.label);
-    btn.onclick = function() { activeSectionId = s.id; renderMenu(); renderSection(); };
-    bar.appendChild(btn);
-  });
-}
-
-// ── Section content ───────────────────────────────────────────────────
-function renderSection() {
-  var dest = getDest();
-  var container = document.getElementById("dest-content");
-  container.innerHTML = "";
-
-  if (activeSectionId === null) {
-    renderOverview(dest, container);
-    return;
-  }
-  var section = dest.sections.find(function(s){return s.id===activeSectionId;});
-  if (!section) return;
-  renderSectionItems(dest, section, container);
-}
-
-function renderOverview(dest, container) {
-  var notesId = "notes_" + dest.id;
-  container.innerHTML =
-    '<div class="card">' +
-      '<div class="overview-hero">' + dest.emoji + '</div>' +
-      '<div class="overview-title" style="color:var(--accent)">' + esc(dest.name) + '</div>' +
-      (dest.dates ? '<div class="overview-dates">' + esc(dest.dates) + '</div>' : '') +
-      '<div class="overview-hint">Select a section from the tabs above or the Menu button.</div>' +
-    '</div>' +
-    '<div class="card">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">' +
-        '<div style="font-weight:700;font-size:.93rem">Trip notes</div>' +
-        '<button class="btn-secondary" style="padding:.25rem .6rem;font-size:.76rem" onclick="editNotes()">Edit</button>' +
-      '</div>' +
-      '<p id="notes-display" style="font-size:.87rem;color:' + (dest.notes ? '#333' : '#bbb') + ';white-space:pre-wrap">' +
-        (dest.notes ? esc(dest.notes) : 'No notes yet.') + '</p>' +
-    '</div>';
-}
-
-function editNotes() {
-  var dest = getDest();
-  showModal(
-    '<h2 style="margin:0 0 1rem;font-size:1.05rem;font-weight:800">Trip notes</h2>' +
-    '<textarea id="modal-notes" class="field" rows="6" style="resize:vertical;margin-bottom:1rem" placeholder="Add any notes...">' + esc(dest.notes||'') + '</textarea>' +
-    '<div style="display:flex;gap:.6rem">' +
-      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
-      '<button class="btn-primary" style="flex:2" onclick="saveNotes()">Save</button>' +
-    '</div>'
-  );
-}
-function saveNotes() {
-  var dest = getDest();
-  var v = document.getElementById("modal-notes").value;
-  updateDest(Object.assign({}, dest, {notes: v}));
-  closeModal();
-  renderSection();
-}
-
-function renderSectionItems(dest, section, container) {
-  var items = (dest.sectionData && dest.sectionData[section.id]) ? dest.sectionData[section.id] : [];
-  var icon = SECTION_ICONS[section.id] || "📌";
-
-  var html = '<div style="display:flex;align-items:center;gap:.65rem;margin-bottom:1rem">' +
-    '<span style="font-size:1.5rem">' + icon + '</span>' +
-    '<h2 style="font-size:1.1rem;font-weight:800;color:var(--accent)">' + esc(section.label) + '</h2>' +
-    '</div>';
-
-  if (items.length === 0) {
-    html += '<div class="empty-state">No items yet. Add one below.</div>';
-  } else {
-    items.forEach(function(item, idx) {
-      html +=
-        '<div class="card" id="item-card-' + esc(item.id) + '">' +
-          '<div class="item-row">' +
-            '<div class="item-text">' +
-              '<div class="item-name">' + esc(item.name) + '</div>' +
-              (item.desc  ? '<div class="item-desc">'  + esc(item.desc)  + '</div>' : '') +
-              (item.notes ? '<div class="item-notes">' + esc(item.notes) + '</div>' : '') +
-            '</div>' +
-            '<div class="item-actions">' +
-              '<button class="icon-btn" onclick="editItem(' + JSON.stringify(section.id) + ',' + JSON.stringify(item.id) + ')">&#9998;</button>' +
-              '<button class="icon-btn del" onclick="deleteItem(' + JSON.stringify(section.id) + ',' + JSON.stringify(item.id) + ')">&#10005;</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    });
-  }
-
-  html += '<button class="add-btn" onclick="addItem(' + JSON.stringify(section.id) + ')">+ Add item</button>';
-  container.innerHTML = html;
-}
-
-function addItem(sectionId) {
-  showModal(
-    '<h2 style="margin:0 0 1rem;font-size:1.05rem;font-weight:800">Add item</h2>' +
-    '<div class="edit-form">' +
-      '<div><label class="lbl">Name *</label><input id="ei-name" class="field" placeholder="Name" autofocus></div>' +
-      '<div><label class="lbl">Short description</label><input id="ei-desc" class="field" placeholder="Description"></div>' +
-      '<div><label class="lbl">Notes</label><textarea id="ei-notes" class="field" rows="2" placeholder="Notes (optional)" style="resize:vertical"></textarea></div>' +
-    '</div>' +
-    '<div class="edit-form-actions">' +
-      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
-      '<button class="btn-primary" style="flex:2" onclick="saveNewItem(' + JSON.stringify(sectionId) + ')">Add</button>' +
-    '</div>'
-  );
-  setTimeout(function(){var el=document.getElementById("ei-name");if(el)el.focus();},50);
-}
-
-function saveNewItem(sectionId) {
-  var name = (document.getElementById("ei-name").value || "").trim();
-  if (!name) { alert("Name is required."); return; }
-  var dest = getDest();
-  var sd = Object.assign({}, dest.sectionData || {});
-  sd[sectionId] = (sd[sectionId] || []).concat([{
-    id: "item_" + Date.now(),
-    name: name,
-    desc: document.getElementById("ei-desc").value || "",
-    notes: document.getElementById("ei-notes").value || ""
-  }]);
-  updateDest(Object.assign({}, dest, {sectionData: sd}));
-  closeModal();
-  renderSection();
-}
-
-function editItem(sectionId, itemId) {
-  var dest = getDest();
-  var items = (dest.sectionData && dest.sectionData[sectionId]) || [];
-  var item = items.find(function(i){return i.id===itemId;});
-  if (!item) return;
-  showModal(
-    '<h2 style="margin:0 0 1rem;font-size:1.05rem;font-weight:800">Edit item</h2>' +
-    '<div class="edit-form">' +
-      '<div><label class="lbl">Name *</label><input id="ei-name" class="field" value="' + esc(item.name) + '" autofocus></div>' +
-      '<div><label class="lbl">Short description</label><input id="ei-desc" class="field" value="' + esc(item.desc||'') + '"></div>' +
-      '<div><label class="lbl">Notes</label><textarea id="ei-notes" class="field" rows="2" style="resize:vertical">' + esc(item.notes||'') + '</textarea></div>' +
-    '</div>' +
-    '<div class="edit-form-actions">' +
-      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
-      '<button class="btn-primary" style="flex:2" onclick="saveEditItem(' + JSON.stringify(sectionId) + ',' + JSON.stringify(itemId) + ')">Save</button>' +
-    '</div>'
-  );
-  setTimeout(function(){var el=document.getElementById("ei-name");if(el)el.focus();},50);
-}
-
-function saveEditItem(sectionId, itemId) {
-  var name = (document.getElementById("ei-name").value || "").trim();
-  if (!name) { alert("Name is required."); return; }
-  var dest = getDest();
-  var sd = Object.assign({}, dest.sectionData || {});
-  sd[sectionId] = (sd[sectionId] || []).map(function(i) {
-    return i.id === itemId ? Object.assign({}, i, {
-      name: name,
-      desc: document.getElementById("ei-desc").value || "",
-      notes: document.getElementById("ei-notes").value || ""
-    }) : i;
-  });
-  updateDest(Object.assign({}, dest, {sectionData: sd}));
-  closeModal();
-  renderSection();
-}
-
-function deleteItem(sectionId, itemId) {
-  var dest = getDest();
-  var sd = Object.assign({}, dest.sectionData || {});
-  sd[sectionId] = (sd[sectionId] || []).filter(function(i){return i.id!==itemId;});
-  updateDest(Object.assign({}, dest, {sectionData: sd}));
-  renderSection();
-}
-
-// ── Delete destination ────────────────────────────────────────────────
-function confirmDeleteDest() {
-  toggleMenu();
-  var dest = getDest();
-  showModal(
-    '<h2 style="margin:0 0 .6rem;font-size:1.05rem">Delete ' + esc(dest.name) + '?</h2>' +
-    '<p style="margin:0 0 1.2rem;color:#666;font-size:.87rem">This cannot be undone.</p>' +
-    '<div style="display:flex;gap:.6rem">' +
-      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
-      '<button class="btn-danger" style="flex:1" onclick="deleteDest()">Delete</button>' +
-    '</div>'
-  );
-}
-function deleteDest() {
-  destinations = destinations.filter(function(d){return d.id!==activeDestId;});
-  saveDests();
-  closeModal();
-  goHome();
-}
-
-// ── New destination ───────────────────────────────────────────────────
-var EMOJIS = ["✈️","🌍","🏝","🗺","🎒","🏔","🌅","🛳","🌴","🏜","🌋","🗽","⛩","🏯","🎪","🏙","🌃","🗼","🎭","🏕"];
-var selectedEmoji = 0;
-var aiEnabled = true;
-
-function openNewDest() {
-  selectedEmoji = 0;
-  aiEnabled = true;
-  var emojiGrid = EMOJIS.map(function(e, i) {
-    return '<button onclick="selectEmoji(' + i + ')" id="emoji-opt-' + i + '" style="font-size:1.3rem;padding:.28rem .38rem;border:2px solid ' + (i===0?'#2B7A9E':'transparent') + ';border-radius:.45rem;background:' + (i===0?'#E8F4F8':'#f5f5f5') + ';cursor:pointer">' + e + '</button>';
-  }).join("");
-
-  showModal(
-    '<h2 style="margin:0 0 1rem;font-size:1.1rem;font-weight:800">Add a destination</h2>' +
-    '<div style="margin-bottom:.85rem">' +
-      '<label class="lbl">Icon</label>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.3rem">' + emojiGrid + '</div>' +
-    '</div>' +
-    '<div style="margin-bottom:.85rem"><label class="lbl">Destination name *</label>' +
-      '<input id="nd-name" class="field" placeholder="e.g. Lisbon, Portugal" autofocus></div>' +
-    '<div style="margin-bottom:1rem"><label class="lbl">Trip dates (optional)</label>' +
-      '<input id="nd-dates" class="field" placeholder="e.g. Aug 3-10, 2026"></div>' +
-    '<div class="ai-box" style="margin-bottom:1rem">' +
-      '<div class="toggle-wrap">' +
-        '<div class="ai-box-title">Generate guide with AI</div>' +
-        '<button class="toggle on" id="ai-toggle" onclick="toggleAI()"><span class="toggle-knob"></span></button>' +
-      '</div>' +
-      '<div class="ai-box-desc" id="ai-box-desc">Claude will scaffold sections and suggestions for this destination.</div>' +
-    '</div>' +
-    '<div id="nd-error" style="color:#C05C1A;font-size:.81rem;margin-bottom:.6rem;display:none"></div>' +
-    '<div style="display:flex;gap:.6rem">' +
-      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
-      '<button class="btn-primary" style="flex:2" id="nd-create-btn" onclick="createDest()">Create with AI</button>' +
-    '</div>',
-    true
-  );
-  setTimeout(function(){var el=document.getElementById("nd-name");if(el)el.focus();},50);
-}
-
-function selectEmoji(i) {
-  EMOJIS.forEach(function(_, j) {
-    var btn = document.getElementById("emoji-opt-" + j);
-    if (!btn) return;
-    btn.style.borderColor = j === i ? "#2B7A9E" : "transparent";
-    btn.style.background  = j === i ? "#E8F4F8"  : "#f5f5f5";
-  });
-  selectedEmoji = i;
-}
-
-function toggleAI() {
-  aiEnabled = !aiEnabled;
-  var tog = document.getElementById("ai-toggle");
-  var desc = document.getElementById("ai-box-desc");
-  var btn  = document.getElementById("nd-create-btn");
-  if (tog) { tog.className = "toggle" + (aiEnabled ? " on" : ""); }
-  if (desc) { desc.textContent = aiEnabled ? "Claude will scaffold sections and suggestions for this destination." : "A blank guide with default sections will be created."; }
-  if (btn)  { btn.textContent  = aiEnabled ? "Create with AI" : "Create blank guide"; }
-}
-
-async function createDest() {
-  var name = (document.getElementById("nd-name").value || "").trim();
-  if (!name) { alert("Please enter a destination name."); return; }
-  var dates   = document.getElementById("nd-dates").value || "";
-  var emoji   = EMOJIS[selectedEmoji];
-  var errEl   = document.getElementById("nd-error");
-  var createBtn = document.getElementById("nd-create-btn");
-
-  if (!aiEnabled) {
-    addDestination(name, dates, emoji, null);
-    closeModal();
-    return;
-  }
-
-  createBtn.disabled = true;
-  createBtn.textContent = "Generating...";
-  if (errEl) errEl.style.display = "none";
-
-  var sysPrompt = "You are a travel guide generator. Respond ONLY with valid JSON, no markdown fences. Shape: {\"notes\":\"string\",\"sections\":[{\"id\":\"string\",\"label\":\"string\",\"type\":\"static\"}],\"sectionData\":{\"sectionId\":[{\"id\":\"string\",\"name\":\"string\",\"desc\":\"string\",\"notes\":\"string\"}]}}. Include 8-12 sections, always include days (type:dynamic), tips, pack (type:dynamic). 3-6 items per section. Be specific with real place names.";
-
-  var prefLines = [];
-  if (prefs.transport.length)     prefLines.push("Transport restrictions: " + prefs.transport.join(", "));
-  if (prefs.accommodation.length) prefLines.push("Accommodation: " + prefs.accommodation.join(", "));
-  if (prefs.dietary.length)       prefLines.push("Dietary: " + prefs.dietary.join(", "));
-  if (prefs.budget)    prefLines.push("Budget: " + prefs.budget);
-  if (prefs.groupType) prefLines.push("Group: " + prefs.groupType);
-  if (prefs.mobility)  prefLines.push("Mobility: " + prefs.mobility);
-  if (prefs.freetext)  prefLines.push("Notes: " + prefs.freetext);
-  if (prefLines.length) sysPrompt += " USER PREFERENCES (respect strictly): " + prefLines.join("; ");
-
-  try {
-    var resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6", max_tokens: 1000,
-        system: sysPrompt,
-        messages: [{role:"user", content:"Generate a vacation guide scaffold for: " + name + (dates ? " (" + dates + ")" : "")}]
-      })
-    });
-    var data = await resp.json();
-    var raw = "";
-    (data.content||[]).forEach(function(b){if(b.type==="text")raw+=b.text;});
-    raw = raw.replace(/```json|```/g,"").trim();
-    var scaffold = JSON.parse(raw);
-    addDestination(name, dates, emoji, scaffold);
-    closeModal();
-  } catch(e) {
-    if (errEl) { errEl.textContent = "Could not generate AI scaffold. Creating blank guide."; errEl.style.display = "block"; }
-    addDestination(name, dates, emoji, null);
-    closeModal();
-  }
-}
-
-function addDestination(name, dates, emoji, scaffold) {
-  var dest = {
-    id: "dest_" + Date.now(),
-    name: name, dates: dates, emoji: emoji,
-    notes: scaffold ? (scaffold.notes || "") : "",
-    sections: scaffold ? scaffold.sections : DEFAULT_SECTIONS.map(function(s){return Object.assign({},s);}),
-    sectionData: scaffold ? (scaffold.sectionData || {}) : {}
-  };
-  destinations = destinations.concat([dest]);
-  saveDests();
-  openDest(dest.id);
-}
-
-// ── Preferences ───────────────────────────────────────────────────────
-function openPrefs() {
-  function chipRow(category, label) {
-    var chips = PREF_OPTIONS[category].map(function(opt) {
-      var on = prefs[category].indexOf(opt.id) !== -1;
-      return '<button class="chip' + (on?' on':'') + '" id="chip-' + category + '-' + opt.id + '" onclick="toggleChip(' + JSON.stringify(category) + ',' + JSON.stringify(opt.id) + ')">' + esc(opt.label) + '</button>';
-    }).join("");
-    return '<div style="margin-bottom:.85rem"><div style="font-size:.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">' + label + '</div><div class="chip-group">' + chips + '</div></div>';
-  }
-  function singleRow(key, label, opts) {
-    var btns = opts.map(function(o) {
-      var on = prefs[key] === o;
-      return '<button class="chip' + (on?' on':'') + '" id="chip-' + key + '-' + o.replace(/[^a-z]/gi,'_') + '" onclick="toggleSingle(' + JSON.stringify(key) + ',' + JSON.stringify(o) + ')">' + esc(o) + '</button>';
-    }).join("");
-    return '<div style="margin-bottom:.85rem"><div style="font-size:.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">' + label + '</div><div class="chip-group">' + btns + '</div></div>';
-  }
-
-  showModal(
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">' +
-      '<h2 style="margin:0;font-size:1.05rem;font-weight:800">Travel Preferences</h2>' +
-      '<button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999">&#10005;</button>' +
-    '</div>' +
-    '<p style="margin:0 0 1rem;font-size:.81rem;color:#666;line-height:1.5">These are passed to Claude when generating guide scaffolds for new destinations.</p>' +
-    chipRow("transport","Transport") +
-    chipRow("accommodation","Accommodation") +
-    chipRow("dietary","Dietary") +
-    singleRow("budget","Budget level",["Budget","Mid-range","Luxury"]) +
-    singleRow("groupType","Travelling as",["Solo","Couple","Family","Friends","Seniors"]) +
-    singleRow("mobility","Mobility",["No restrictions","Limited walking","Wheelchair","No stairs"]) +
-    '<div style="margin-bottom:1.2rem"><label class="lbl">Anything else Claude should know</label>' +
-      '<textarea id="pref-freetext" class="field" rows="3" placeholder="e.g. We travel with a baby. We avoid tourist traps." style="resize:vertical;margin-top:.3rem">' + esc(prefs.freetext||'') + '</textarea></div>' +
-    '<div style="display:flex;gap:.6rem">' +
-      '<button class="btn-secondary" style="flex:1" onclick="closeModal()">Cancel</button>' +
-      '<button class="btn-primary" style="flex:2" onclick="savePrefsFromModal()">Save preferences</button>' +
-    '</div>',
-    true
-  );
-}
-
-function toggleChip(category, id) {
-  var idx = prefs[category].indexOf(id);
-  if (idx === -1) prefs[category] = prefs[category].concat([id]);
-  else prefs[category] = prefs[category].filter(function(x){return x!==id;});
-  var btn = document.getElementById("chip-" + category + "-" + id);
-  if (btn) btn.className = "chip" + (prefs[category].indexOf(id) !== -1 ? " on" : "");
-}
-function toggleSingle(key, val) {
-  var old = prefs[key];
-  prefs[key] = old === val ? "" : val;
-  // update all chips for this key
-  var opts = key==="budget" ? ["Budget","Mid-range","Luxury"] :
-             key==="groupType" ? ["Solo","Couple","Family","Friends","Seniors"] :
-             ["No restrictions","Limited walking","Wheelchair","No stairs"];
-  opts.forEach(function(o) {
-    var btn = document.getElementById("chip-" + key + "-" + o.replace(/[^a-z]/gi,'_'));
-    if (btn) btn.className = "chip" + (prefs[key]===o?" on":"");
-  });
-}
-function savePrefsFromModal() {
-  prefs.freetext = document.getElementById("pref-freetext").value || "";
-  savePrefs();
-  closeModal();
-  renderHome();
-}
-
-// ── Modal helpers ─────────────────────────────────────────────────────
-function showModal(html, wide) {
-  var c = document.getElementById("modal-container");
-  c.innerHTML =
-    '<div class="modal-bg" onclick="modalBgClick(event)">' +
-      '<div class="modal-box' + (wide?' wide':'') + '">' + html + '</div>' +
-    '</div>';
-}
-function modalBgClick(e) {
-  if (e.target.classList.contains("modal-bg")) closeModal();
-}
-function closeModal() {
-  document.getElementById("modal-container").innerHTML = "";
-}
-
-// ── Escape ────────────────────────────────────────────────────────────
-function esc(s) {
-  if (!s) return "";
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-}
-
-// ── Init ──────────────────────────────────────────────────────────────
-loadAll().then(function() { renderHome(); });
+init();
 </script>
 </body>
 </html>
