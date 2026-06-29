@@ -1,2591 +1,815 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Annecy — Vacation Planner · July 9–16, 2026</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,300&family=DM+Sans:wght@400;500;600&display=swap');
-
-  :root {
-    --lake:       #2A6D9E;
-    --lake-mid:   #4A8FBB;
-    --lake-light: #C8E2F4;
-    --alpine:     #3D5448;
-    --sand:       #F5F0E8;
-    --warm:       #E8DFD0;
-    --ink:        #181A1C;
-    --muted:      #6B7280;
-    --accent:     #C47B3A;
-    --white:      #FFFFFF;
-    --green:      #D1FAE5;
-    --green-ink:  #065F46;
-    --amber:      #FEF3C7;
-    --amber-ink:  #92400E;
-    --violet:     #EDE9FE;
-    --violet-ink: #4C1D95;
-    --red:        #FEE2E2;
-    --red-ink:    #991B1B;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--sand);
-    color: var(--ink);
-    line-height: 1.55;
-    font-size: 15px;
-    max-width: 480px;
-    margin: 0 auto;
-  }
-
-  /* ─── HEADER ─── */
-  header {
-    background: var(--lake);
-    color: var(--white);
-    padding: 10px 20px 12px;
-    text-align: center;
-    position: relative;
-  }
-  .header-title {
-    font-family: 'Fraunces', serif;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-    display: block;
-  }
-  .header-dates {
-    display: block;
-    margin-top: 3px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: var(--lake-light);
-    letter-spacing: 0.04em;
-  }
-
-  /* ─── NAV TABS ─── */
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--white);
-    border-bottom: 1px solid var(--lake-light);
-    display: flex;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  nav::-webkit-scrollbar { display: none; }
-  nav a {
-    flex: 0 0 auto;
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 11px 13px;
-    white-space: nowrap;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-  }
-  nav a.active { color: var(--lake); border-bottom-color: var(--lake); }
-
-  /* ─── LOADING ─── */
-  #loading-overlay {
-    position: fixed; inset: 0; background: var(--lake);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 9999; color: #fff; gap: 14px;
-    transition: opacity 0.4s;
-  }
-  #loading-overlay.done { opacity: 0; pointer-events: none; }
-  .loading-title { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; }
-  .loading-sub { font-size: 0.82rem; color: var(--lake-light); }
-  .loading-spinner {
-    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: #fff; border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ─── SWIPE LAYOUT ─── */
-  .slides-viewport {
-    overflow: hidden;
-    width: 100%;
-    position: relative;
-  }
-  .slides-track {
-    display: flex;
-    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-    align-items: flex-start;
-  }
-  section {
-    flex: 0 0 100%;
-    width: 100%;
-    padding: 22px 16px 24px;
-    box-sizing: border-box;
-    align-self: flex-start;
-  }
-
-  .section-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--lake-light);
-  }
-  .section-icon { font-size: 1.25rem; }
-  h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--lake);
-  }
-
-  .sublabel {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin: 18px 0 10px;
-  }
-
-  /* ─── CARDS ─── */
-  .card {
-    background: var(--white);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    border-left: 3px solid var(--lake-light);
-    position: relative;
-  }
-  .card.hike  { border-left-color: var(--alpine); }
-  .card.food  { border-left-color: var(--accent); }
-  .card.sight { border-left-color: var(--lake); }
-  .card.boat  { border-left-color: var(--lake-mid); }
-  .card.fete  { border-left-color: #ED2939; }
-
-  /* ─── ACCORDION TRIGGER ROW ─── */
-  .card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .card-top:active { opacity: 0.75; }
-
-  .card-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--ink);
-    flex: 1;
-    min-width: 0;
-  }
-
-  /* chevron */
-  .card-chevron {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    transition: transform 0.22s ease;
-  }
-  .card-chevron svg {
-    width: 14px; height: 14px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .card.open .card-chevron { transform: rotate(180deg); color: var(--lake); }
-
-  /* ─── COLLAPSIBLE BODY ─── */
-  .card-body {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease, opacity 0.25s ease;
-    opacity: 0;
-  }
-  .card.open .card-body {
-    max-height: 1200px;
-    opacity: 1;
-  }
-  .card-body-inner {
-    padding-top: 10px;
-  }
-
-  .card-actions {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-  }
-
-  .map-link, .note-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    text-decoration: none;
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 20px;
-    white-space: nowrap;
-    transition: background 0.15s, color 0.15s;
-    cursor: pointer;
-    border: none;
-  }
-  .map-link {
-    background: var(--lake-light);
-    color: var(--lake);
-  }
-  .map-link:hover { background: var(--lake); color: var(--white); }
-  .map-link svg { width: 10px; height: 10px; fill: currentColor; flex-shrink: 0; }
-
-  .note-btn {
-    background: var(--warm);
-    color: var(--accent);
-    font-family: inherit;
-    font-size: 0.68rem;
-  }
-  .note-btn:hover { background: var(--accent); color: var(--white); }
-  .note-btn.has-note { background: #FEF3C7; color: #92400E; }
-
-  .card p {
-    font-size: 0.82rem;
-    color: #444;
-    margin-top: 0;
-  }
-
-  /* ─── INLINE NOTE ─── */
-  .card-note {
-    display: none;
-    margin-top: 10px;
-    border-top: 1px solid #eee;
-    padding-top: 10px;
-  }
-  .card-note.open { display: block; }
-  .card-note textarea {
-    width: 100%;
-    min-height: 70px;
-    font-family: inherit;
-    font-size: 0.82rem;
-    color: var(--ink);
-    background: #FFFBF5;
-    border: 1px solid #E5D9C5;
-    border-radius: 8px;
-    padding: 8px 10px;
-    resize: vertical;
-    outline: none;
-    line-height: 1.5;
-  }
-  .card-note textarea:focus { border-color: var(--accent); }
-  .note-saved {
-    font-size: 0.7rem;
-    color: var(--green-ink);
-    margin-top: 4px;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .note-saved.show { opacity: 1; }
-
-  /* note indicator dot on collapsed card */
-  .card-title-wrap { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
-  .note-dot {
-    width: 7px; height: 7px;
-    background: var(--accent);
-    border-radius: 50%;
-    flex-shrink: 0;
-    display: none;
-  }
-  .note-dot.visible { display: block; }
-
-  /* ─── TAGS ─── */
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 7px;
-  }
-  .tag {
-    display: inline-block;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-  .tag-free     { background: var(--green);  color: var(--green-ink); }
-  .tag-paid     { background: var(--amber);  color: var(--amber-ink); }
-  .tag-nolic    { background: var(--lake-light); color: var(--lake); }
-  .tag-diff     { background: var(--violet); color: var(--violet-ink); }
-  .tag-must     { background: var(--red);    color: var(--red-ink); }
-  .tag-price    { background: var(--warm);   color: #5a4a35; }
-  .tag-duration { background: #F0FDF4; color: #166534; }
-  .tag-fete     { background: #FFF1F2; color: #9F1239; }
-
-  .day-pill {
-    background: var(--lake);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 2px 11px;
-    border-radius: 20px;
-    letter-spacing: 0.04em;
-  }
-
-  /* ─── TIP BOX ─── */
-  .tip {
-    background: #FFF8F3;
-    border: 1px solid #FDDCBE;
-    border-radius: 10px;
-    padding: 11px 14px;
-    font-size: 0.8rem;
-    color: #7C4A1E;
-    margin-top: 14px;
-    line-height: 1.5;
-  }
-  .tip strong { color: var(--accent); }
-
-  /* ─── INFO BOX ─── */
-  .info-box {
-    background: var(--lake-light);
-    border-radius: 10px;
-    padding: 11px 14px;
-    font-size: 0.8rem;
-    color: #1a3d55;
-    margin-bottom: 16px;
-  }
-
-  /* ─── FÊTE BOX ─── */
-  .fete-banner {
-    background: linear-gradient(135deg, #002395 0%, #002395 33%, #fff 33%, #fff 66%, #ED2939 66%);
-    border-radius: 12px;
-    padding: 3px;
-    margin-bottom: 16px;
-  }
-  .fete-inner {
-    background: #fff9f9;
-    border-radius: 10px;
-    padding: 14px 16px;
-  }
-  .fete-inner h3 {
-    font-family: 'Fraunces', serif;
-    font-size: 1.05rem;
-    color: #002395;
-    margin-bottom: 4px;
-  }
-  .fete-inner p {
-    font-size: 0.82rem;
-    color: #444;
-    line-height: 1.5;
-  }
-
-  /* ─── PACK CHECKLIST ─── */
-  .pack-progress {
-    margin-bottom: 14px;
-    font-size: 0.75rem;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .progress-bar {
-    flex: 1;
-    height: 5px;
-    background: var(--warm);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--lake);
-    border-radius: 10px;
-    transition: width 0.3s;
-  }
-
-  /* category group */
-  .pack-category {
-    margin-bottom: 12px;
-  }
-  .pack-cat-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    margin-bottom: 6px;
-    padding-left: 2px;
-  }
-  .pack-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-
-  /* each item row */
-  .pack-item {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--white);
-    border-radius: 10px;
-    padding: 9px 10px 9px 12px;
-    transition: background 0.12s;
-  }
-  .pack-item input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--lake);
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-  .pack-label {
-    font-size: 0.82rem;
-    color: var(--ink);
-    line-height: 1.3;
-    flex: 1;
-    min-width: 0;
-    cursor: pointer;
-    user-select: none;
-  }
-  .pack-item.checked .pack-label {
-    text-decoration: line-through;
-    color: var(--muted);
-  }
-  .pack-delete {
-    flex-shrink: 0;
-    min-width: 34px;
-    height: 34px;
-    border: none;
-    background: #f5f5f5;
-    color: #888;
-    font-size: 1rem;
-    line-height: 1;
-    cursor: pointer;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-    transition: color 0.15s, background 0.15s;
-    gap: 2px;
-  }
-  .pack-delete:hover, .pack-delete:active { color: var(--red-ink); background: var(--red); }
-  .pack-delete[data-action="edit"] { background: var(--lake-light); color: var(--lake); }
-  .pack-delete[data-action="edit"]:hover { background: var(--lake); color: #fff; }
-
-  /* Action buttons in day items — styled via CSS instead of inline */
-  .card-actions { gap: 6px; }
-  .day-item-action {
-    flex-shrink: 0;
-    min-width: 34px; height: 34px;
-    border: none; border-radius: 8px;
-    font-size: 0.9rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, color 0.15s;
-  }
-  .day-item-action.edit { background: var(--lake-light); color: var(--lake); }
-  .day-item-action.edit:hover { background: var(--lake); color: #fff; }
-  .day-item-action.remove { background: #f5f5f5; color: #888; }
-  .day-item-action.remove:hover { background: var(--red); color: var(--red-ink); }
-
-  /* add item row */
-  .pack-add-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-    align-items: stretch;
-  }
-  .pack-add-input {
-    flex: 1;
-    font-family: inherit;
-    font-size: 0.85rem;
-    color: var(--ink);
-    background: var(--white);
-    border: 1.5px solid var(--lake-light);
-    border-radius: 10px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .pack-add-input::placeholder { color: #b0b8c1; }
-  .pack-add-input:focus { border-color: var(--lake); }
-
-  .pack-cat-select {
-    font-family: inherit;
-    font-size: 0.75rem;
-    color: var(--ink);
-    background: var(--white);
-    border: 1.5px solid var(--lake-light);
-    border-radius: 10px;
-    padding: 9px 8px;
-    outline: none;
-    cursor: pointer;
-    min-width: 0;
-    max-width: 110px;
-    transition: border-color 0.15s;
-  }
-  .pack-cat-select:focus { border-color: var(--lake); }
-
-  .pack-add-btn {
-    flex-shrink: 0;
-    background: var(--lake);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    width: 38px;
-    font-size: 1.3rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s;
-  }
-  .pack-add-btn:hover { background: var(--lake-mid); }
-  .pack-add-btn:active { background: var(--alpine); }
-
-  /* ─── GROCERY ─── */
-  .grocery-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 9px 0;
-    border-bottom: 1px solid #eee;
-    font-size: 0.83rem;
-  }
-  .grocery-item:last-child { border-bottom: none; }
-  .grocery-emoji { font-size: 1.1rem; flex-shrink: 0; }
-  .grocery-name { font-weight: 600; color: var(--ink); }
-  .grocery-desc { color: #555; font-size: 0.78rem; margin-top: 1px; }
-
-  /* ─── DAY PLANNER ─── */
-  .day-card {
-    background: var(--white);
-    border-radius: 14px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .day-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 13px 16px;
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.15s;
-  }
-  .day-card.open .day-header { border-bottom-color: var(--lake-light); }
-  .day-header:active { background: var(--sand); }
-
-  .day-date-badge {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--lake-light);
-    color: var(--lake);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-  }
-  .day-date-badge .d-num { font-size: 1rem; font-weight: 700; }
-  .day-date-badge .d-mon { font-size: 0.55rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
-
-  .day-card.is-today .day-date-badge { background: var(--lake); color: #fff; }
-  .day-card.is-fete .day-date-badge  { background: #002395; color: #fff; }
-
-  .day-header-info { flex: 1; min-width: 0; }
-  .day-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .day-count {
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-top: 1px;
-  }
-  .day-count.has-items { color: var(--lake); }
-
-  .day-chevron {
-    flex-shrink: 0;
-    color: var(--muted);
-    transition: transform 0.22s;
-  }
-  .day-card.open .day-chevron { transform: rotate(180deg); color: var(--lake); }
-  .day-chevron svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-
-  .day-body {
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease, opacity 0.25s ease;
-    opacity: 0;
-  }
-  .day-card.open .day-body { max-height: 1200px; opacity: 1; }
-  .day-body-inner { padding: 12px 14px 14px; }
-
-  /* items inside a day */
-  .day-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    background: var(--sand);
-    border-radius: 9px;
-    margin-bottom: 6px;
-    font-size: 0.83rem;
-    color: var(--ink);
-  }
-  .day-item-icon { font-size: 1rem; flex-shrink: 0; }
-  .day-item-label { flex: 1; line-height: 1.3; }
-  /* day-item remove/edit buttons → .day-item-action class */
-
-  .day-empty {
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-style: italic;
-    padding: 4px 2px 8px;
-  }
-
-  .day-add-btn {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-top: 8px;
-    background: none;
-    border: 1.5px dashed var(--lake-light);
-    border-radius: 9px;
-    padding: 8px 12px;
-    font-size: 0.82rem;
-    color: var(--lake);
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .day-add-btn:hover { border-color: var(--lake); background: var(--lake-light); }
-  .day-add-btn:active { background: var(--lake-light); }
-
-  /* ─── ADD TO DAY MODAL ─── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(10,20,30,0.45);
-    z-index: 500;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-
-  .modal-sheet {
-    background: var(--white);
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 480px;
-    max-height: 82vh;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to   { transform: translateY(0);    opacity: 1; }
-  }
-
-  .modal-handle {
-    width: 36px; height: 4px;
-    background: #ddd;
-    border-radius: 2px;
-    margin: 10px auto 4px;
-    flex-shrink: 0;
-  }
-
-  .modal-title {
-    font-family: 'Fraunces', serif;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--ink);
-    padding: 8px 18px 4px;
-    flex-shrink: 0;
-  }
-  .modal-day-label {
-    font-size: 0.75rem;
-    color: var(--muted);
-    padding: 0 18px 10px;
-    flex-shrink: 0;
-  }
-
-  /* custom input row */
-  .modal-custom-row {
-    display: flex;
-    gap: 8px;
-    padding: 0 14px 12px;
-    flex-shrink: 0;
-    border-bottom: 1px solid #eee;
-  }
-  .modal-custom-input {
-    flex: 1;
-    font-family: inherit;
-    font-size: 0.85rem;
-    color: var(--ink);
-    background: var(--sand);
-    border: 1.5px solid var(--lake-light);
-    border-radius: 10px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .modal-custom-input::placeholder { color: #b0b8c1; }
-  .modal-custom-input:focus { border-color: var(--lake); }
-  .modal-custom-add {
-    flex-shrink: 0;
-    background: var(--lake);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 9px 14px;
-    font-family: inherit;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-    white-space: nowrap;
-  }
-  .modal-custom-add:hover { background: var(--lake-mid); }
-
-  /* search + list */
-  .modal-search {
-    flex-shrink: 0;
-    margin: 10px 14px 6px;
-    font-family: inherit;
-    font-size: 0.85rem;
-    color: var(--ink);
-    background: var(--sand);
-    border: 1.5px solid var(--lake-light);
-    border-radius: 10px;
-    padding: 8px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .modal-search::placeholder { color: #b0b8c1; }
-  .modal-search:focus { border-color: var(--lake); }
-
-  .modal-section-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    padding: 6px 16px 4px;
-    flex-shrink: 0;
-  }
-
-  .modal-list {
-    overflow-y: auto;
-    flex: 1;
-    padding: 0 10px 20px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .modal-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 8px;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: background 0.12s;
-    font-size: 0.85rem;
-    color: var(--ink);
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .modal-item:last-child { border-bottom: none; }
-  .modal-item:hover, .modal-item:active { background: var(--lake-light); }
-  .modal-item-icon { font-size: 1rem; flex-shrink: 0; }
-  .modal-item-text { flex: 1; }
-  .modal-item-name { font-weight: 600; }
-  .modal-item.already-added { opacity: 0.5; }
-
-  .modal-close {
-    position: absolute;
-    top: 14px; right: 16px;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    color: var(--muted);
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px;
-  }
-
-  /* ─── MENU BUTTON & DROPDOWN ─── */
-  .menu-btn {
-    position: absolute;
-    right: 14px; top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: #fff;
-    border-radius: 8px;
-    width: 34px; height: 34px;
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-  }
-  .menu-btn:hover { background: rgba(255,255,255,0.3); }
-
-  .menu-dropdown {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 200;
-    background: rgba(10,20,30,0.4);
-  }
-  .menu-dropdown.open { display: block; }
-  .menu-dropdown-inner {
-    position: absolute;
-    top: 0; right: 0;
-    width: 220px;
-    height: 100%;
-    background: var(--white);
-    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
-    overflow-y: auto;
-    padding-bottom: 30px;
-  }
-  .menu-heading {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    padding: 18px 20px 10px;
-    border-bottom: 1px solid var(--lake-light);
-  }
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 13px 20px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--ink);
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background 0.12s;
-  }
-  .menu-item:hover { background: var(--sand); }
-  .menu-item.active { color: var(--lake); font-weight: 600; }
-  .menu-item-icon { font-size: 1rem; }
-
-  /* ─── ITEM EDITOR MODAL ─── */
-  .edit-modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(10,20,30,0.45);
-    z-index: 500;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .edit-modal-overlay.open { display: flex; }
-  .edit-modal-sheet {
-    background: var(--white);
-    border-radius: 20px 20px 0 0;
-    width: 100%; max-width: 480px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 20px 18px 36px;
-    position: relative;
-    animation: slideUp 0.25s ease;
-  }
-  .edit-modal-handle {
-    width: 36px; height: 4px; background: #ddd;
-    border-radius: 2px; margin: 0 auto 16px;
-  }
-  .edit-modal-title {
-    font-family: 'Fraunces', serif;
-    font-size: 1.1rem; font-weight: 700;
-    color: var(--ink); margin-bottom: 16px;
-  }
-  .edit-field { margin-bottom: 12px; }
-  .edit-label {
-    font-size: 0.72rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--muted); margin-bottom: 5px; display: block;
-  }
-  .edit-input {
-    width: 100%; font-family: inherit; font-size: 0.88rem;
-    color: var(--ink); background: var(--sand);
-    border: 1.5px solid var(--lake-light);
-    border-radius: 10px; padding: 9px 12px;
-    outline: none; transition: border-color 0.15s;
-  }
-  .edit-input:focus { border-color: var(--lake); }
-  .edit-textarea {
-    width: 100%; min-height: 80px; font-family: inherit;
-    font-size: 0.88rem; color: var(--ink);
-    background: var(--sand); border: 1.5px solid var(--lake-light);
-    border-radius: 10px; padding: 9px 12px;
-    outline: none; resize: vertical;
-    transition: border-color 0.15s; line-height: 1.5;
-  }
-  .edit-textarea:focus { border-color: var(--lake); }
-  .edit-save-btn {
-    width: 100%; background: var(--lake); color: #fff;
-    border: none; border-radius: 10px; padding: 12px;
-    font-family: inherit; font-size: 0.9rem; font-weight: 600;
-    cursor: pointer; margin-top: 4px;
-    transition: background 0.15s;
-  }
-  .edit-save-btn:hover { background: var(--lake-mid); }
-  .edit-close {
-    position: absolute; top: 16px; right: 16px;
-    background: none; border: none; font-size: 1.4rem;
-    color: var(--muted); cursor: pointer; padding: 4px;
-  }
-
-  /* ─── TRASH SECTION ─── */
-  .trash-item {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--white); border-radius: 10px;
-    padding: 11px 14px; margin-bottom: 8px;
-    border-left: 3px solid #e5e7eb;
-  }
-  .trash-item-info { flex: 1; min-width: 0; }
-  .trash-item-name { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
-  .trash-item-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-  .trash-restore-btn {
-    flex-shrink: 0; background: var(--green); color: var(--green-ink);
-    border: none; border-radius: 8px; padding: 5px 10px;
-    font-size: 0.72rem; font-weight: 600; cursor: pointer;
-    font-family: inherit; transition: background 0.15s;
-  }
-  .trash-restore-btn:hover { background: #a7f3d0; }
-  .trash-empty { font-size: 0.82rem; color: var(--muted); font-style: italic; padding: 8px 2px; }
-
-  /* ─── ICON PICKER ─── */
-  .icon-picker-grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 5px;
-    margin-top: 6px;
-    max-height: 140px;
-    overflow-y: auto;
-  }
-  .icon-opt {
-    font-size: 1.3rem;
-    text-align: center;
-    padding: 5px 2px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: border-color 0.12s, background 0.12s;
-    user-select: none;
-  }
-  .icon-opt:hover { background: var(--lake-light); }
-  .icon-opt.selected { border-color: var(--lake); background: var(--lake-light); }
-  .icon-preview {
-    font-size: 1.8rem;
-    text-align: center;
-    margin-bottom: 6px;
-    min-height: 36px;
-  }
-
-  /* ─── DRAG & DROP ─── */
-  .drag-handle {
-    cursor: grab;
-    color: #ccc;
-    font-size: 1rem;
-    padding: 0 4px;
-    flex-shrink: 0;
-    user-select: none;
-    touch-action: none;
-  }
-  .drag-handle:active { cursor: grabbing; }
-  .sortable-ghost {
-    opacity: 0.35;
-    background: var(--lake-light) !important;
-    border-radius: 10px;
-  }
-  .sortable-chosen { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
-
-  /* ─── FOOTER ─── */
-  footer {
-    text-align: center;
-    font-size: 0.72rem;
-    color: var(--muted);
-    padding: 20px;
-    border-top: 1px solid #E5E7EB;
-  }
-</style>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-</head>
-<body>
-
-<header>
-  <span class="header-title">🦝 Annecy 🦝</span>
-  <div class="header-dates">July 9–16, 2026</div>
-  <button class="menu-btn" id="menu-btn" aria-label="All sections">☰</button>
-</header>
-
-<div id="menu-dropdown" class="menu-dropdown">
-  <div class="menu-dropdown-inner">
-    <div class="menu-heading">Sections</div>
-  </div>
-</div>
-
-<div id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-title">🦝 Annecy 🦝</div>
-  <div class="loading-sub">Loading your guide…</div>
-</div>
-
-<nav>
-  <a href="#days">📅 Days</a>
-  <a href="#fete">🇫🇷 14 Juillet</a>
-  <a href="#sights">🏛 Sights</a>
-  <a href="#hiking">🥾 Hiking</a>
-  <a href="#beaches">🏖 Beaches</a>
-  <a href="#boats">⛵ Boats</a>
-  <a href="#food">🍽 Eat</a>
-  <a href="#grocery">🛒 Shop</a>
-  <a href="#market">🧺 Market</a>
-  <a href="#activities">🎯 Do</a>
-  <a href="#tips">💡 Tips</a>
-  <a href="#pack">🎒 Pack</a>
-  <a href="#trash">🗑 Removed</a>
-</nav>
-
-<main>
-<div class="slides-viewport">
-<div class="slides-track" id="slides-track">
-  <section id="days">
-    <div class="section-head">
-      <span class="section-icon">📅</span>
-      <h2>Trip Days</h2>
-    </div>
-    <div id="days-list"></div>
-  </section>
-
-  <!-- ── 14 JUILLET ── -->
-  <section id="fete">
-    <div class="section-head">
-      <span class="section-icon">🇫🇷</span>
-      <h2>14 Juillet — Bastille Day</h2>
-    </div>
-
-    <div class="fete-banner">
-      <div class="fete-inner">
-        <h3>Fête Nationale in Annecy</h3>
-        <p>July 14th is France's biggest national holiday. Annecy celebrates with the full programme — expect crowds, festivity, and a spectacular setting over the lake.</p>
-      </div>
-    </div>
-
-    <div class="card fete">
-      <div class="card-top">
-        <span class="card-title">Fireworks over the Lake</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Lac+d%27Annecy+fireworks+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span><span class="tag tag-must">Don't Miss</span></div>
-      <p>The fireworks display over Lac d'Annecy is one of the most beautiful in France. Best viewing spots: Jardins de l'Europe, Pâquier, and the hillside above town. Arrive early (by 9pm) to get a lakeside spot — it fills up completely. Show typically starts around 10:30pm.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card fete">
-      <div class="card-top">
-        <span class="card-title">Military Parade — Old Town</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Vieille+Ville+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>A traditional morning parade through the old town with local bands, municipal guards, and civic associations. Starts around 10am. The narrow streets of the Vieille Ville make for a very atmospheric setting.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card fete">
-      <div class="card-top">
-        <span class="card-title">Bal Populaire (Street Dancing)</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Place+de+l%27Hotel+de+Ville+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Open-air dancing in the town squares and around the lake — a tradition on Bastille night. Live music, outdoor bars, and the whole town in celebration mode from the evening until after midnight.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card fete">
-      <div class="card-top">
-        <span class="card-title">Boat on the Lake for Fireworks</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Les+Marquisats+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Book far ahead</span><span class="tag tag-must">Special</span></div>
-      <p>Watching the 14 Juillet fireworks from a boat on the lake is extraordinary — reflected colours on the water with the mountains as backdrop. FAM BOAT and local operators run special evening cruises. These sell out weeks in advance — book immediately.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card fete">
-      <div class="card-top">
-        <span class="card-title">Lake Cruise Special — Compagnie des Bateaux</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Compagnie+des+Bateaux+du+Lac+d%27Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid ~€25–40</span></div>
-      <p>The official lake company runs a special Bastille Day evening cruise with on-board dinner option. Tickets include a prime position for the fireworks. Check their website for the 2025 programme — usually released a month in advance.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="tip">
-      <strong>⚠️ 14 Juillet tips:</strong> Most shops and some restaurants close on the 14th. Stock up on food the day before. Roads around the lake get extremely congested — arrive on foot or by bike. The morning of the 14th is a great time to hike (quieter trails, festive atmosphere in town when you return).
-    </div>
-
-    <div id="fete-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('fete')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── SIGHTS ── -->
-  <section id="sights">
-    <div class="section-head">
-      <span class="section-icon">🏛</span>
-      <h2>Must-See Sights</h2>
-    </div>
-
-    <div class="card sight">
-      <div class="card-top">
-        <span class="card-title">Vieille Ville (Old Town)</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Vieille+Ville+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span><span class="tag tag-must">Must See</span></div>
-      <p>Pastel-painted arcaded streets, canals, and flower-covered bridges. The heart of Annecy — magical at sunrise before the crowds arrive.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card sight">
-      <div class="card-top">
-        <span class="card-title">Palais de l'Île</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Palais+de+l%27Ile+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid ~€4</span></div>
-      <p>12th-century island fortress in the middle of the Thiou canal — Annecy's most photographed landmark. Best viewed from the bridges at golden hour.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card sight">
-      <div class="card-top">
-        <span class="card-title">Château d'Annecy</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Chateau+d%27Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid ~€6</span></div>
-      <p>Medieval castle overlooking the old town and lake. Now a regional museum of art and Alpine history. The terrace view alone is worth the entrance fee.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card sight">
-      <div class="card-top">
-        <span class="card-title">Jardins de l'Europe &amp; Pâquier</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Jardins+de+l%27Europe+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Large lakeside park perfect for an evening stroll. Swans, mountain views, and the best vantage point for sunsets over the lake.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card sight">
-      <div class="card-top">
-        <span class="card-title">Pont des Amours</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Pont+des+Amours+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Iconic white footbridge connecting the canal district to the lakeside. Beautiful views in both directions. Legend: couples who kiss here will be together forever.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card sight">
-      <div class="card-top">
-        <span class="card-title">Gorges du Fier</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Gorges+du+Fier+Lovagny+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid ~€6.50</span><span class="tag tag-duration">~1.5 hrs</span></div>
-      <p>Dramatic river gorge 10 km from Annecy with walkways suspended over rushing water. The labyrinthe de rochers (boulder maze) at the exit is a bonus. Bus accessible.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div id="sights-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('sights')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── HIKING ── -->
-  <section id="hiking">
-    <div class="section-head">
-      <span class="section-icon">🥾</span>
-      <h2>Hiking (no car needed)</h2>
-    </div>
-
-    <div class="info-box">Bus or boat shuttle connects all trailheads. Start early — trails get hot by midday in summer.</div>
-
-    <div class="card hike">
-      <div class="card-top">
-        <span class="card-title">Mont Veyrier / Mont Baron Loop</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Mont+Veyrier+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-diff">Medium–Hard</span><span class="tag tag-free">Free</span><span class="tag tag-duration">4–5 hrs</span></div>
-      <p>Walk or bus to the trailhead (1hr on foot from centre). Loop via Col des Sauts, Mont Veyrier, Mont Baron, and old cable car ruins. Panoramic lake views. Rocky sections — proper shoes and poles recommended.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card hike">
-      <div class="card-top">
-        <span class="card-title">Sentier de la Crête</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Sentier+de+la+Crete+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-diff">Easy–Moderate</span><span class="tag tag-free">Free</span><span class="tag tag-duration">2.5–3 hrs</span></div>
-      <p>Starts near Annecy train station. Loop through Massif des Bauges Regional Natural Park. Mostly shaded — ideal in summer heat. Several viewpoints over the lake.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card hike">
-      <div class="card-top">
-        <span class="card-title">Angon Waterfall (from Talloires)</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Cascade+d%27Angon+Talloires+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-diff">Easy</span><span class="tag tag-free">Free</span><span class="tag tag-duration">1–1.5 hrs</span></div>
-      <p>Bus or boat to Talloires. Short, shaded trail carved into rock leading to a spectacular waterfall. Can be slippery near the end — watch your step. Great for a half-day trip combined with a swim at Talloires beach.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card hike">
-      <div class="card-top">
-        <span class="card-title">Laudon Circuit (from Saint-Jorioz)</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Saint-Jorioz+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-diff">Moderate</span><span class="tag tag-free">Free</span><span class="tag tag-duration">3.5–4 hrs</span></div>
-      <p>Bus to Saint-Jorioz. Beautiful alpine pasture, forest, and mountain villages. One of the most scenic bus-accessible hikes around the lake.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="tip">
-      <strong>⏰ Tip:</strong> In peak summer, start at sunrise and aim to be off exposed trails by early afternoon. The shuttle boat connects villages so you're not limited to trails starting in Annecy.
-    </div>
-
-    <div id="hiking-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('hiking')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── BEACHES ── -->
-  <section id="beaches">
-    <div class="section-head">
-      <span class="section-icon">🏖</span>
-      <h2>Beaches</h2>
-    </div>
-
-    <div class="info-box">Water reaches 23–24°C in summer. All beaches reachable by bike or bus. Weekdays much quieter than weekends.</div>
-
-    <p class="sublabel">Near Town — Free</p>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Plage Impériale</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Plage+Imperiale+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free since 2022</span></div>
-      <p>Closest to Old Town. Diving boards, slide, sports fields, bar with terrace. Chic atmosphere.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Plage d'Albigny</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Plage+d%27Albigny+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Vast grassy beach in Annecy-le-Vieux. Volleyball, table tennis, kids play area, kayak/pedalo hire. Gently sloping sandy bottom.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Plage des Marquisats</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Plage+des+Marquisats+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Most natural of the city beaches. Shaded in mornings, gently sloping. Canoe, kayak, and rowing hire nearby at the sailing club.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <p class="sublabel">By Bus or Bike</p>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Plage d'Angon — Talloires</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Plage+d%27Angon+Talloires+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Shaded picnic spots, lifeguards in season. One of the most scenic spots on the lake. Quiet atmosphere.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Plage de Talloires</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Plage+de+Talloires+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free</span></div>
-      <p>Spacious lawn, children's pool, diving boards, volleyball. Nautical centre with paddleboard and kayak hire. Free parking.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Saint-Jorioz — Sandy Beach</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Plage+Saint-Jorioz+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid in summer ~€2.60</span></div>
-      <p>The only true sandy beach on the lake. Blue Flag certified. Diving boards, pontoons, paddling pool. Two small free beaches just north of the paid entrance offer the same water.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="tip">
-      <strong>🚲 Getting there:</strong> Vélonecy e-bikes are free for the first 30 min (app required, re-dock every 30 min). Buses run around the lake for ~€2.
-    </div>
-
-    <div id="beaches-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('beaches')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── BOATS ── -->
-  <section id="boats">
-    <div class="section-head">
-      <span class="section-icon">⛵</span>
-      <h2>Renting a Boat</h2>
-    </div>
-
-    <div class="card boat">
-      <div class="card-top">
-        <span class="card-title">GoBoat (electric) — Le Deck de Veyrier</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Le+Deck+de+Veyrier+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-nolic">No Licence</span></div>
-      <p>Up to 8 people. Central table — perfect for a picnic or apéritif on the water. Silent, zero emissions, swim ladder. 1.5, 2, or 3-hour slots. Book in advance in summer.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card boat">
-      <div class="card-top">
-        <span class="card-title">FAM BOAT — Les Marquisats</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Les+Marquisats+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-nolic">No Licence</span></div>
-      <p>Up to 6 people, departing from central Annecy. Fuel + briefing included. Bring a picnic, swim from the boat, explore freely. April–September. Free cancellation in bad weather.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card boat">
-      <div class="card-top">
-        <span class="card-title">Pedal Boats — all around the lake</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Lac+d%27Annecy+Annecy+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-nolic">No Licence</span></div>
-      <p>Available at Annecy-le-Vieux, Sévrier, Saint-Jorioz, Duingt, Talloires, and more. Some models have a slide. ID required as deposit. Open spring – end September.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="tip">
-      <strong>⚠️ Tip:</strong> Pedal boats at the Pâquier sell out fast in peak summer — book ahead or arrive early. All electric boat operators require a €1,000 deposit (credit card).
-    </div>
-
-    <div id="boats-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('boats')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── EAT & DRINK ── -->
-  <section id="food">
-    <div class="section-head">
-      <span class="section-icon">🍽</span>
-      <h2>Where to Eat &amp; Drink</h2>
-    </div>
-    <div id="food-list"></div>
-    <div class="pack-add-row" style="margin-top:14px;">
-      <input class="pack-add-input" id="food-input" type="text" placeholder="Add a place…" maxlength="60">
-      <select class="pack-cat-select" id="food-cat-select">
-        <option value="🍽 Savoyard">🍽 Savoyard</option>
-        <option value="☕ Café &amp; Sweets">☕ Café &amp; Sweets</option>
-        <option value="🧀 Provisions">🧀 Provisions</option>
-        <option value="🥖 Bakery">🥖 Bakery</option>
-        <option value="🍺 Bar">🍺 Bar</option>
-        <option value="✨ Other">✨ Other</option>
-      </select>
-      <button class="pack-add-btn" id="food-add-btn" aria-label="Add place">+</button>
-    </div>
-  </section>
-
-  <!-- ── GROCERY SPECIALTIES ── -->
-  <section id="grocery">
-    <div class="section-head">
-      <span class="section-icon">🛒</span>
-      <h2>Savoyard Specialties to Buy</h2>
-    </div>
-    <div class="info-box">Found in any supermarché or at the market. Great to bring home as gifts — or eat on the spot.</div>
-    <div id="grocery-list"></div>
-    <div class="pack-add-row" style="margin-top:12px;">
-      <input class="pack-add-input" id="grocery-input" type="text" placeholder="Add a specialty…" maxlength="60">
-      <button class="pack-add-btn" id="grocery-add-btn" aria-label="Add">+</button>
-    </div>
-    <div class="tip" style="margin-top:12px;">
-      <strong>📦 Taking cheese home?</strong> Vacuum-pack it at the shop. Reblochon and Beaufort travel well for 2–3 days unrefrigerated if vacuum-packed.
-    </div>
-  </section>
-
-  <!-- ── MARKET ── -->
-  <section id="market">
-    <div class="section-head">
-      <span class="section-icon">🧺</span>
-      <h2>Market</h2>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Old Town Market</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=March%C3%A9+Annecy+Vieille+Ville" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags">
-        <span class="day-pill">Tuesday</span>
-        <span class="day-pill">Friday</span>
-        <span class="day-pill">Sunday</span>
-      </div>
-      <p style="margin-top:10px;">Runs until 1:30pm. Takes over the old town with meats, cheeses, fresh produce, and street food. Highlights: potato pancakes, diot sausages, bakery goods. During your trip: Tue Jul 9, Fri Jul 11, Sun Jul 13, Fri Jul 16.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="tip">
-      <strong>🧀 Don't miss:</strong> Pierre Gay fromagerie for aged reblochon, beaufort, tomme de Savoie · Le Glacier des Alpes for Alpine ice cream · Boulangerie Aristide for sourdough on the canal.
-    </div>
-
-    <div id="market-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('market')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── ACTIVITIES ── -->
-  <section id="activities">
-    <div class="section-head">
-      <span class="section-icon">🎯</span>
-      <h2>Other Activities</h2>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Lake Cruise — Compagnie des Bateaux</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Compagnie+des+Bateaux+du+Lac+d%27Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid ~€15–25</span><span class="tag tag-duration">1–3 hrs</span></div>
-      <p>Official boat tours on the lake. From 1-hour panoramic loops to full-day circuits stopping at village piers. Doubles as transport between lake villages in summer.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Cycling the Lake Circuit (43 km)</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Lac+d%27Annecy+cycling+circuit" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free (bike hire needed)</span><span class="tag tag-duration">Full day</span></div>
-      <p>The full lake circuit is doable in a day. Mix of dedicated cycle paths and quiet roads. Stops at Duingt castle, Talloires bay, and village cafés. Rent e-bikes in town.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Duingt Castle &amp; Village</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Chateau+de+Duingt+France" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-free">Free (exterior)</span></div>
-      <p>A fairytale medieval castle on a tiny peninsula at the lake's narrowest point. Best viewed from the water or the opposite shore. The village behind it is quiet and lovely.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Stand-Up Paddleboarding</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=stand+up+paddle+Annecy+lake" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-paid">Paid ~€15/hr</span></div>
-      <p>Available from most beaches. The crystal-clear water makes SUP here especially stunning — you can see the bottom clearly in calm conditions. Lessons available for beginners.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Via Ferrata du Roc de Chère</span>
-        <div class="card-actions">
-          <a class="map-link" href="https://maps.google.com/?q=Via+Ferrata+Roc+de+Chere+Talloires+Annecy" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            Map
-          </a>
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-        </div>
-      </div>
-      <div class="tags"><span class="tag tag-diff">Experienced only</span><span class="tag tag-free">Free (gear not incl.)</span><span class="tag tag-duration">2–3 hrs</span></div>
-      <p>Rock-face climbing route above the lake near Talloires. Spectacular views over the water. Requires a harness and via ferrata set — hire available locally.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div id="activities-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('activities')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── TIPS ── -->
-  <section id="tips">
-    <div class="section-head">
-      <span class="section-icon">💡</span>
-      <h2>Planning Tips</h2>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Getting Around</span>
-        <button class="note-btn" onclick="toggleNote(this)">📝</button>
-      </div>
-      <p>Buses run all around the lake for ~€2. The Vélonecy e-bike scheme covers most city routes — free first 30 min, re-dock to reset. Boat shuttles connect villages in summer (check Compagnie des Bateaux schedule). A car is only needed for more remote trails.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Beat the Crowds</span>
-        <button class="note-btn" onclick="toggleNote(this)">📝</button>
-      </div>
-      <p>Old town and Palais de l'Île: visit before 9am or after 7pm. Beaches: arrive before 10am on weekends. Market: get there early for the best produce before the crowds (and the sun) peak.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-top">
-        <span class="card-title">Weather &amp; Mountains</span>
-        <button class="note-btn" onclick="toggleNote(this)">📝</button>
-      </div>
-      <p>Mountain weather can change quickly. On hikes, check the forecast the night before — afternoon thunderstorms are common in summer. The lake surface is calm most mornings, choppier in the afternoon wind.</p>
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>
-    </div>
-
-    <div class="tip">
-      <strong>📲 Useful apps:</strong> Vélonecy (e-bikes) · Compagnie des Bateaux (lake shuttles) · SIBRA (local buses) · IGNrando or Komoot (trails) · Google Maps offline download covers the whole area well.
-    </div>
-
-    <div id="tips-custom"></div>
-    <button class="day-add-btn" style="margin-top:10px" onclick="openSectionAdd('tips')">
-      <span>＋</span> Add item
-    </button>
-  </section>
-
-  <!-- ── PACK LIST ── -->
-  <section id="pack">
-    <div class="section-head">
-      <span class="section-icon">🎒</span>
-      <h2>What to Pack</h2>
-    </div>
-    <div class="pack-progress">
-      <span id="pack-count">0 / 0 packed</span>
-      <div class="progress-bar"><div class="progress-fill" id="pack-bar" style="width:0%"></div></div>
-    </div>
-    <div id="pack-list"></div>
-    <div class="pack-add-row">
-      <input class="pack-add-input" id="pack-input" type="text" placeholder="Add an item…" maxlength="50">
-      <select class="pack-cat-select" id="pack-cat-select"></select>
-      <button class="pack-add-btn" id="pack-add-btn" aria-label="Add item">+</button>
-    </div>
-  </section>
-
-  <!-- ── RECENTLY REMOVED ── -->
-  <section id="trash">
-    <div class="section-head">
-      <span class="section-icon">🗑</span>
-      <h2>Recently Removed</h2>
-    </div>
-    <div class="info-box">Items removed from any section are kept here for 30 days. Tap to restore.</div>
-    <div id="trash-list"></div>
-  </section>
-
-</div><!-- end slides-track -->
-</div><!-- end slides-viewport -->
-</main>
-
-<footer>
-  Annecy · July 9–16, 2026 · tap 📝 to add notes · tap Map to open in Google Maps
-</footer>
-
-<!-- ── ADD TO DAY MODAL ── -->
-<div class="modal-overlay" id="day-modal" onclick="handleModalOverlayClick(event)">
-  <div class="modal-sheet" style="position:relative;">
-    <button class="modal-close" onclick="closeModal()">×</button>
-    <div class="modal-handle"></div>
-    <div class="modal-title">Add to day</div>
-    <div class="modal-day-label" id="modal-day-label"></div>
-    <div class="modal-custom-row">
-      <input class="modal-custom-input" id="modal-custom-input" type="text" placeholder="Type a custom item…" maxlength="60">
-      <button class="modal-custom-add" id="modal-custom-add-btn">Add</button>
-    </div>
-    <input class="modal-search" id="modal-search" type="text" placeholder="Search guide items…">
-    <div class="modal-section-label">From the guide</div>
-    <div class="modal-list" id="modal-list"></div>
-  </div>
-</div>
-
-<!-- ── ITEM EDITOR MODAL ── -->
-<div class="edit-modal-overlay" id="edit-modal">
-  <div class="edit-modal-sheet">
-    <button class="edit-close" id="edit-modal-close">×</button>
-    <div class="edit-modal-handle"></div>
-    <div class="edit-modal-title">Edit item</div>
-    <div class="edit-field">
-      <label class="edit-label">Icon</label>
-      <div class="icon-preview" id="edit-icon-preview">📌</div>
-      <div class="icon-picker-grid" id="edit-icon-grid"></div>
-    </div>
-    <div class="edit-field">
-      <label class="edit-label">Name</label>
-      <input class="edit-input" id="edit-name" type="text" maxlength="80" placeholder="Item name">
-    </div>
-    <div class="edit-field">
-      <label class="edit-label">Description</label>
-      <input class="edit-input" id="edit-desc" type="text" maxlength="160" placeholder="Short description (optional)">
-    </div>
-    <div class="edit-field">
-      <label class="edit-label">Notes</label>
-      <textarea class="edit-textarea" id="edit-notes" placeholder="Add notes, details, tips…"></textarea>
-    </div>
-    <div class="edit-field">
-      <label class="edit-label">Google Maps link (optional)</label>
-      <input class="edit-input" id="edit-map" type="url" placeholder="https://maps.google.com/?q=…">
-    </div>
-    <button class="edit-save-btn" id="edit-save-btn">Save</button>
-  </div>
-</div>
-
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCt87vFA29sfRz73Zq7keQX-Z-8JqX-GqI",
-  authDomain: "vacation-planner-1b81b.firebaseapp.com",
-  projectId: "vacation-planner-1b81b",
-  storageBucket: "vacation-planner-1b81b.firebasestorage.app",
-  messagingSenderId: "203127956357",
-  appId: "1:203127956357:web:bbfe4a1a1e81e2c0165aec"
-};
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-// ── WRITE LOCK ──────────────────────────────────────────────────
-const _writeLock = {};
-function lockWrite(key,ms=2000){ _writeLock[key]=Date.now()+ms; }
-function isLocked(key){ return _writeLock[key]&&Date.now()<_writeLock[key]; }
-async function fbGet(id){ try{ const s=await getDoc(doc(db,'guide',id)); return s.exists()?s.data().value:null; }catch{ return null; } }
-async function fbSet(id,v){ lockWrite(id); try{ await setDoc(doc(db,'guide',id),{value:v}); }catch(e){ console.warn(e); } }
-function fbListen(id,cb){ onSnapshot(doc(db,'guide',id),s=>{ if(s.exists()&&!isLocked(id)) cb(s.data().value); }); }
-
-// ── CONSTANTS ────────────────────────────────────────────────────
-const MAP_SVG=`<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
-
-const SECTION_META={
-  fete:      {label:'14 Juillet',  icon:'🇫🇷', cardClass:'fete'},
-  sights:    {label:'Sights',      icon:'🏛',  cardClass:'sight'},
-  hiking:    {label:'Hiking',      icon:'🥾',  cardClass:'hike'},
-  beaches:   {label:'Beaches',     icon:'🏖',  cardClass:''},
-  boats:     {label:'Boats',       icon:'⛵',  cardClass:'boat'},
-  market:    {label:'Market',      icon:'🧺',  cardClass:''},
-  activities:{label:'Activities',  icon:'🎯',  cardClass:''},
-  tips:      {label:'Tips',        icon:'💡',  cardClass:''},
+import { useState, useEffect, useRef } from "react";
+
+// ─── Default preferences ────────────────────────────────────────────
+const DEFAULT_PREFS = {
+  transport: [],
+  accommodation: [],
+  dietary: [],
+  budget: "",
+  groupType: "",
+  mobility: "",
+  freetext: "",
 };
 
-const TRIP_DAYS=[
-  {date:'2026-07-09',name:'Thu, 9 Jul — Arrival Day'},
-  {date:'2026-07-10',name:'Fri, 10 Jul — Market Day 🧺'},
-  {date:'2026-07-11',name:'Sat, 11 Jul'},
-  {date:'2026-07-12',name:'Sun, 12 Jul — Market Day 🧺'},
-  {date:'2026-07-13',name:'Mon, 13 Jul'},
-  {date:'2026-07-14',name:'Tue, 14 Jul — 🇫🇷 Bastille Day'},
-  {date:'2026-07-15',name:'Wed, 15 Jul — Market Day 🧺'},
-  {date:'2026-07-16',name:'Thu, 16 Jul — Departure Day'},
+const PREF_OPTIONS = {
+  transport: [
+    { id: "no_car", label: "🚫🚗 No car rental" },
+    { id: "public_transit", label: "🚌 Public transit only" },
+    { id: "walking", label: "🚶 Walking-focused" },
+    { id: "cycling", label: "🚲 Cycling-friendly" },
+    { id: "no_flights", label: "🚫✈️ No domestic flights" },
+    { id: "taxi_ok", label: "🚕 Taxis/rideshare OK" },
+  ],
+  accommodation: [
+    { id: "hotel", label: "🏨 Hotels" },
+    { id: "airbnb", label: "🏠 Apartments/Airbnb" },
+    { id: "hostel", label: "🛏 Hostels OK" },
+    { id: "no_resort", label: "🚫 No all-inclusives" },
+    { id: "central", label: "📍 Must be central" },
+  ],
+  dietary: [
+    { id: "vegetarian", label: "🥦 Vegetarian" },
+    { id: "vegan", label: "🌱 Vegan" },
+    { id: "gluten_free", label: "🌾 Gluten-free" },
+    { id: "halal", label: "🕌 Halal" },
+    { id: "kosher", label: "✡️ Kosher" },
+    { id: "no_seafood", label: "🚫🐟 No seafood" },
+    { id: "allergies", label: "⚠️ Severe allergies" },
+  ],
+};
+
+// ─── Annecy seed data ───────────────────────────────────────────────
+const ANNECY_DEST = {
+  id: "dest_annecy_2026",
+  name: "Annecy, France",
+  dates: "July 9–16, 2026",
+  emoji: "🇫🇷",
+  createdAt: "2026-06-01T00:00:00.000Z",
+  notes: "Mobile-first vacation guide. Firebase Firestore for real-time sync. Published on GitHub Pages.",
+  sections: [
+    { id: "days", icon: "📅", label: "Days", type: "dynamic" },
+    { id: "fete", icon: "🇫🇷", label: "14 Juillet", type: "static" },
+    { id: "sights", icon: "🏛", label: "Sights", type: "static" },
+    { id: "hiking", icon: "🥾", label: "Hiking", type: "static" },
+    { id: "beaches", icon: "🏖", label: "Beaches", type: "static" },
+    { id: "boats", icon: "⛵", label: "Boats", type: "static" },
+    { id: "eat", icon: "🍽", label: "Eat & Drink", type: "dynamic" },
+    { id: "grocery", icon: "🛒", label: "Grocery", type: "dynamic" },
+    { id: "market", icon: "🧺", label: "Market", type: "static" },
+    { id: "activities", icon: "🎯", label: "Activities", type: "static" },
+    { id: "tips", icon: "💡", label: "Tips", type: "static" },
+    { id: "pack", icon: "🎒", label: "Pack", type: "dynamic" },
+  ],
+  sectionData: {
+    sights: [
+      { id: "s1", name: "Palais de l'Île", desc: "12th-century island prison, most photographed in Annecy", notes: "Visit at golden hour for the best photos. Free to walk around, fee to enter." },
+      { id: "s2", name: "Château d'Annecy", desc: "Medieval castle overlooking the old town and lake", notes: "€4.50 entry. Museum inside. Great views from the ramparts." },
+      { id: "s3", name: "Old Town (Vieille Ville)", desc: "Pastel arcaded streets along canals", notes: "Busiest on market days (Tue/Fri/Sun). Morning visits quieter." },
+      { id: "s4", name: "Jardins de l'Europe", desc: "Lakeside gardens with swans and mountain views", notes: "Free. Perfect for an evening stroll." },
+    ],
+    hiking: [
+      { id: "h1", name: "Mont Veyrier", desc: "3.5h round trip, panoramic lake views", notes: "Start from Veyrier-du-Lac. Moderate difficulty. Take water." },
+      { id: "h2", name: "La Tournette", desc: "Annecy's highest peak — strenuous day hike", notes: "Start early. Snow possible into July near the summit." },
+      { id: "h3", name: "Gorges du Fier", desc: "Easy canyon walkway 10km from Annecy", notes: "€6.50 entry. 45-min loop. Impressive even in low water." },
+      { id: "h4", name: "Semnoz Plateau", desc: "Drive or hike to the ridge above town", notes: "Reachable by car. Paragliding launch site. Epic 360° views." },
+    ],
+    beaches: [
+      { id: "b1", name: "Plage d'Albigny", desc: "Largest free beach, grass and shingle, north end of lake", notes: "Gets crowded by 11am in summer. Arrive early." },
+      { id: "b2", name: "Plage des Marquisats", desc: "Close to town, lido-style with diving boards", notes: "€5 entry for the lido section. Great for kids." },
+      { id: "b3", name: "Plage de Doussard", desc: "Quieter beach at the south end of the lake", notes: "Worth the 20-min drive. Much less crowded." },
+    ],
+    boats: [
+      { id: "bo1", name: "Compagnie des Bateaux du Lac d'Annecy", desc: "Scheduled boat tours around the full lake", notes: "Book online. 1h or 2h15 options. Departs from Jardins de l'Europe." },
+      { id: "bo2", name: "Pedalo / rowboat rental", desc: "Self-hire from the dock near Champ de Mars", notes: "~€15–20/hr. No reservation needed. Fun with kids." },
+      { id: "bo3", name: "Kayak / SUP rental", desc: "Available at several beaches", notes: "Albigny and Marquisats both have hire stands." },
+    ],
+    eat: [
+      { id: "e1", name: "Le Freti", desc: "Classic Savoyard — fondue, raclette, tartiflette", notes: "Book ahead in summer. Cosy cave-like room in the old town." },
+      { id: "e2", name: "Brasserie Saint-Maurice", desc: "Local institution, good for lunch with lake-view terrace", notes: "" },
+      { id: "e3", name: "L'Esquisse", desc: "One Michelin star. Tasting menus only.", notes: "Book weeks ahead. Lunch menu better value at ~€55pp." },
+      { id: "e4", name: "Café de la Bonbonnière", desc: "Best crêpes in old town, always a queue", notes: "Worth the wait. Try the Savoyard (reblochon + lardons)." },
+    ],
+    market: [
+      { id: "m1", name: "Old Town Market", desc: "Tue, Fri, Sun 7am–1pm — Annecy's main market", notes: "Huge. Fills the whole old town. Get there before 9am for parking." },
+      { id: "m2", name: "Organic Market", desc: "Saturday mornings at Paquier meadow", notes: "Smaller, artisan producers. Good for cheese and charcuterie." },
+    ],
+    activities: [
+      { id: "a1", name: "Paragliding from Planfait", desc: "Tandem flights with a qualified guide, 20–30 min in the air", notes: "Summum Parapente and Air et Sens are well reviewed. Book ahead." },
+      { id: "a2", name: "Bastille Day (14 Juillet)", desc: "Fireworks over the lake — July 14th", notes: "Arrive at the lake by 9pm for a good spot. Fireworks at 11pm." },
+      { id: "a3", name: "Annecy International Animation Festival", desc: "If your dates overlap — world-renowned festival", notes: "June dates only — but check programming at annecy.org." },
+    ],
+    tips: [
+      { id: "t1", name: "Getting around", desc: "Annecy old town is tiny and walkable. Rent bikes for the lakeside path.", notes: "Vélo'Annecy bike share is cheap. The lake loop is 37km total." },
+      { id: "t2", name: "Parking", desc: "Expensive and scarce in summer. Use Parking Courier on the edge of town.", notes: "Park once and walk everywhere. Don't move the car mid-day." },
+      { id: "t3", name: "Weather", desc: "July is hot (25–30°C). Afternoon thunderstorms are common.", notes: "Plan outdoor/lake activities for mornings. Museums for afternoons." },
+      { id: "t4", name: "Language", desc: "French only in most restaurants and shops.", notes: "Basic French phrases go a long way. Menus rarely have English." },
+    ],
+    fete: [
+      { id: "f1", name: "Fireworks — July 14th", desc: "Biggest display of the year over the lake", notes: "Paquier meadow and the Albigny beach are the best viewing spots. Very crowded." },
+      { id: "f2", name: "Bal des Pompiers", desc: "Firemen's ball — free street dancing on July 13th evening", notes: "Starts around 9pm near the fire station. Very local, very fun." },
+      { id: "f3", name: "Military parade", desc: "Morning of July 14th in the town centre", notes: "Starts 10am. Short parade through the main street." },
+    ],
+    grocery: [
+      { id: "g1", name: "Reblochon", desc: "The Savoyard cheese — buy at the market, not the supermarket", notes: "" },
+      { id: "g2", name: "Génépi", desc: "Local alpine liqueur", notes: "Good souvenir. Available at most caves à vins." },
+      { id: "g3", name: "Diots sausages", desc: "Smoked pork sausages, cook in white wine", notes: "Buy at the charcuterie in the market." },
+      { id: "g4", name: "Blueberries / raspberries", desc: "In season July — from the Sunday organic market", notes: "" },
+    ],
+    pack: [
+      { id: "p1", name: "Sunscreen SPF 50+", desc: "Lake reflection + altitude = intense sun", notes: "" },
+      { id: "p2", name: "Light rain jacket", desc: "Afternoon thunderstorms are likely", notes: "" },
+      { id: "p3", name: "Hiking shoes", desc: "Essential even for moderate trails", notes: "" },
+      { id: "p4", name: "Swimwear × 2", desc: "You'll be in the lake daily", notes: "" },
+      { id: "p5", name: "Reusable water bottle", desc: "Tap water is excellent. Fountains everywhere.", notes: "" },
+      { id: "p6", name: "European power adapter", desc: "Type E/F plug", notes: "" },
+      { id: "p7", name: "Cash (€)", desc: "Many market stalls and small restaurants cash only", notes: "" },
+      { id: "p8", name: "French phrasebook / app", desc: "Even basic phrases help", notes: "" },
+    ],
+  },
+};
+
+// ─── Default sections template ──────────────────────────────────────
+const DEFAULT_SECTIONS = [
+  { id: "days",       icon: "📅", label: "Days",        type: "dynamic" },
+  { id: "sights",     icon: "🏛",  label: "Sights",      type: "static"  },
+  { id: "eat",        icon: "🍽",  label: "Eat & Drink", type: "dynamic" },
+  { id: "hiking",     icon: "🥾", label: "Hiking",      type: "static"  },
+  { id: "beaches",    icon: "🏖",  label: "Beaches",     type: "static"  },
+  { id: "activities", icon: "🎯", label: "Activities",  type: "static"  },
+  { id: "tips",       icon: "💡", label: "Tips",        type: "static"  },
+  { id: "pack",       icon: "🎒", label: "Pack",        type: "dynamic" },
 ];
 
-// ── ICON PICKER ─────────────────────────────────────────────────
-const ICONS = [
-  // Nature & outdoors
-  '🏔','🌊','🌅','🌄','🗻','🌸','🌿','🌲','🌴','🍃','🌾','🦅','🦆','🐾','🦝','🐻','🦌','🌺','🌻','🌈',
-  // Activities
-  '🥾','🚴','🚶','🎿','🛶','🎣','🏊','🚣','🧗','🏄','🤿','⛷','🧘','🏋',
-  // Food & drink
-  '🍽','🍷','🍕','☕','🍦','🥐','🧀','🥗','🍺','🥂','🍰','🧁','🥩','🥘','🫕','🧆','🥪',
-  // Sights & places
-  '🏛','🏰','⛪','🗼','🎪','🎭','🛍','💈','🗽','🎡','🎢','🏟','🕌','⛩','🏯',
-  // Transport
-  '🚂','✈️','🚁','⛵','🛥','🚌','🚗','🚲','🛵','🛳',
-  // Essentials & misc
-  '📌','📍','⭐','❤️','🔥','✅','🎵','🛒','🧺','🎒','🗺','💡','🎯','📸','🎬','📖','💬','🗓','💊','🩹','🏥','💳','💰','🔑','🧲','📞','🌐','🔔','⚡','🎁','🎉','🎀','🏆','🥇','🎖','💎','🌙','☀️','❄️','🍀',
-];
-let _selectedIcon = '📌';
-
-function buildIconGrid(){
-  const grid = document.getElementById('edit-icon-grid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  ICONS.forEach(ic => {
-    const el = document.createElement('div');
-    el.className = 'icon-opt' + (ic === _selectedIcon ? ' selected' : '');
-    el.textContent = ic;
-    el.addEventListener('click', () => {
-      _selectedIcon = ic;
-      document.getElementById('edit-icon-preview').textContent = ic;
-      grid.querySelectorAll('.icon-opt').forEach(o => o.classList.toggle('selected', o.textContent === ic));
-    });
-    grid.appendChild(el);
-  });
-}
-
-// ── ACCORDION ───────────────────────────────────────────────────
-function initAccordionCard(card){
-  const top=card.querySelector('.card-top');
-  if(!top||top.dataset.ai) return; top.dataset.ai='1';
-  const titleEl=top.querySelector('.card-title');
-  if(titleEl&&!titleEl.closest('.card-title-wrap')){
-    const wrap=document.createElement('span'); wrap.className='card-title-wrap';
-    const dot=document.createElement('span'); dot.className='note-dot';
-    titleEl.parentNode.insertBefore(wrap,titleEl); wrap.appendChild(titleEl); wrap.appendChild(dot);
-  }
-  const acts=top.querySelector('.card-actions');
-  if(acts) top.removeChild(acts);
-  if(!top.querySelector('.card-chevron')){
-    const ch=document.createElement('span'); ch.className='card-chevron';
-    ch.innerHTML=`<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`; top.appendChild(ch);
-  }
-  const body=document.createElement('div'); body.className='card-body';
-  const inner=document.createElement('div'); inner.className='card-body-inner'; body.appendChild(inner);
-  const sibs=[]; let s=top.nextSibling; while(s){sibs.push(s);s=s.nextSibling;}
-  sibs.forEach(x=>inner.appendChild(x));
-  if(acts) inner.insertBefore(acts,inner.firstChild);
-  card.appendChild(body);
-  top.addEventListener('click',e=>{ if(!e.target.closest('a,button')) card.classList.toggle('open'); });
-}
-
-// ── DRAG & DROP helper ──────────────────────────────────────────
-function makeSortable(el, onEnd){
-  if(!el||!window.Sortable) return;
-  Sortable.create(el,{
-    handle:'.drag-handle',
-    animation:150,
-    ghostClass:'sortable-ghost',
-    chosenClass:'sortable-chosen',
-    onEnd
-  });
-}
-function dragHandle(){ return '<span class="drag-handle" title="Drag to reorder">⠿</span>'; }
-
-// ── MENU DROPDOWN ───────────────────────────────────────────────
-const NAV_SECTIONS=[
-  {id:'days',icon:'📅',label:'Days'},{id:'fete',icon:'🇫🇷',label:'14 Juillet'},
-  {id:'sights',icon:'🏛',label:'Sights'},{id:'hiking',icon:'🥾',label:'Hiking'},
-  {id:'beaches',icon:'🏖',label:'Beaches'},{id:'boats',icon:'⛵',label:'Boats'},
-  {id:'food',icon:'🍽',label:'Eat & Drink'},{id:'grocery',icon:'🛒',label:'Shop'},
-  {id:'market',icon:'🧺',label:'Market'},{id:'activities',icon:'🎯',label:'Activities'},
-  {id:'tips',icon:'💡',label:'Tips'},{id:'pack',icon:'🎒',label:'Pack'},
-  {id:'trash',icon:'🗑',label:'Recently Removed'},
-];
-(function(){
-  const btn=document.getElementById('menu-btn');
-  const dropdown=document.getElementById('menu-dropdown');
-  const inner=dropdown.querySelector('.menu-dropdown-inner');
-  NAV_SECTIONS.forEach((sec,i)=>{
-    const el=document.createElement('div'); el.className='menu-item'; el.dataset.idx=i;
-    el.innerHTML=`<span class="menu-item-icon">${sec.icon}</span><span>${sec.label}</span>`;
-    el.addEventListener('click',()=>{ goTo(i); closeMenuDropdown(); });
-    inner.appendChild(el);
-  });
-  btn.addEventListener('click',e=>{ e.stopPropagation(); dropdown.classList.toggle('open'); });
-  dropdown.addEventListener('click',e=>{ if(e.target===dropdown) closeMenuDropdown(); });
-  function closeMenuDropdown(){ dropdown.classList.remove('open'); }
-  window._closeMenuDropdown=closeMenuDropdown;
-  window._updateMenuActive=function(i){ inner.querySelectorAll('.menu-item').forEach((el,j)=>el.classList.toggle('active',j===i)); };
-})();
-
-// ── SWIPE NAV ───────────────────────────────────────────────────
-(function(){
-  const track=document.getElementById('slides-track');
-  const navLinks=Array.from(document.querySelectorAll('nav a'));
-  const sections=Array.from(document.querySelectorAll('#slides-track > section'));
-  let cur=0,tx0=0,ty0=0,tdx=0,dragging=false,locked=false;
-  window.goTo=function(i,anim=true){
-    i=Math.max(0,Math.min(sections.length-1,i)); cur=i;
-    if(!anim) track.style.transition='none';
-    track.style.transform=`translateX(-${i*100}%)`;
-    if(!anim) requestAnimationFrame(()=>{track.style.transition='';});
-    navLinks.forEach((a,j)=>a.classList.toggle('active',j===i));
-    navLinks[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-    if(window._updateMenuActive) window._updateMenuActive(i);
+function newDestination(name, dates, emoji, scaffoldData) {
+  return {
+    id: `dest_${Date.now()}`,
+    name,
+    dates,
+    emoji: emoji || "✈️",
+    createdAt: new Date().toISOString(),
+    sections: scaffoldData?.sections || DEFAULT_SECTIONS.map(s => ({ ...s })),
+    sectionData: scaffoldData?.sectionData || {},
+    notes: scaffoldData?.notes || "",
   };
-  navLinks.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();window.goTo(i);}));
-  const vp=document.querySelector('.slides-viewport');
-  vp.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx0=e.touches[0].clientX;ty0=e.touches[0].clientY;tdx=0;dragging=false;locked=false;},{passive:true});
-  vp.addEventListener('touchmove',e=>{
-    if(e.touches.length!==1)return;
-    const dx=e.touches[0].clientX-tx0,dy=e.touches[0].clientY-ty0;
-    if(!locked){if(Math.abs(dy)>Math.abs(dx)+4){locked=true;dragging=false;return;}if(Math.abs(dx)>6){locked=true;dragging=true;}}
-    if(!dragging)return; tdx=dx;
-    track.style.transition='none';
-    track.style.transform=`translateX(calc(${-cur*100}% + ${dx}px))`;
-  },{passive:true});
-  vp.addEventListener('touchend',()=>{
-    if(!dragging)return;
-    const th=vp.offsetWidth*0.2;
-    if(tdx<-th)window.goTo(cur+1); else if(tdx>th)window.goTo(cur-1); else window.goTo(cur);
-    dragging=false;
-  });
-  let md=false,mx0=0,mdx=0;
-  vp.addEventListener('mousedown',e=>{md=true;mx0=e.clientX;mdx=0;track.style.transition='none';});
-  window.addEventListener('mousemove',e=>{if(!md)return;mdx=e.clientX-mx0;track.style.transform=`translateX(calc(${-cur*100}% + ${mdx}px))`;});
-  window.addEventListener('mouseup',()=>{if(!md)return;md=false;const th=vp.offsetWidth*0.2;if(mdx<-th)window.goTo(cur+1);else if(mdx>th)window.goTo(cur-1);else window.goTo(cur);});
-  window.goTo(0,false);
-})();
-
-// ── TRASH ───────────────────────────────────────────────────────
-const THIRTY_DAYS=30*24*60*60*1000;
-let _trash=[];
-async function loadTrash(){ const v=await fbGet('trash'); _trash=(v||[]).filter(i=>Date.now()-i.removedAt<THIRTY_DAYS); }
-async function saveTrash(){ await fbSet('trash',_trash); }
-async function addToTrash(item,section){
-  _trash.unshift({...item,section,removedAt:Date.now()});
-  _trash=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
-  await saveTrash(); buildTrashUI();
-}
-async function restoreFromTrash(idx){
-  const item=_trash[idx]; if(!item) return;
-  _trash.splice(idx,1); await saveTrash();
-  if(item.section==='food'){ _foodItems.push({name:item.name,cat:item.cat||'✨ Other',desc:item.desc||'',tag:item.tag||'',tagClass:item.tagClass||'',mapUrl:item.mapUrl||'',notes:item.notes||'',icon:item.icon||'🍽'}); await saveFood(); buildFoodUI(); }
-  else if(item.section==='grocery'){ _groceryItems.push({emoji:item.emoji||item.icon||'🛒',name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''}); await saveGrocery(); buildGroceryUI(); }
-  else if(item.section==='pack'){ _packItems.push({label:item.name,cat:item.cat||'🎒 Essentials',checked:false,icon:item.icon||'📌'}); await savePack(); buildPackUI(); }
-  else if(item.section==='days'&&item.date){ await addDayItem(item.date,{name:item.name,icon:item.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''}); }
-  else if(SECTION_META[item.section]){ if(!_sectionItems[item.section])_sectionItems[item.section]=[]; _sectionItems[item.section].push({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'}); await saveSectionItems(); buildSectionCustomUI(item.section); }
-  buildTrashUI();
-}
-function buildTrashUI(){
-  const container=document.getElementById('trash-list'); container.innerHTML='';
-  const active=_trash.filter(i=>Date.now()-i.removedAt<THIRTY_DAYS);
-  if(!active.length){ container.innerHTML='<div class="trash-empty">No recently removed items.</div>'; return; }
-  active.forEach((item,idx)=>{
-    const daysLeft=Math.ceil((THIRTY_DAYS-(Date.now()-item.removedAt))/(24*60*60*1000));
-    let lbl=item.section;
-    if(item.section==='days'&&item.date){ const d=TRIP_DAYS.find(t=>t.date===item.date); lbl=d?d.name:item.date; }
-    else if(SECTION_META[item.section]) lbl=SECTION_META[item.section].label;
-    else if(item.section==='food') lbl='Eat & Drink';
-    else if(item.section==='grocery') lbl='Shop';
-    else if(item.section==='pack') lbl='Pack';
-    const row=document.createElement('div'); row.className='trash-item';
-    row.innerHTML=`<div class="trash-item-info">
-      <div class="trash-item-name">${item.icon||item.emoji||''} ${item.name}</div>
-      <div class="trash-item-meta">${lbl} · expires in ${daysLeft}d</div>
-    </div><button class="trash-restore-btn">Restore</button>`;
-    row.querySelector('.trash-restore-btn').addEventListener('click',()=>restoreFromTrash(idx));
-    container.appendChild(row);
-  });
 }
 
-// ── EDIT MODAL ──────────────────────────────────────────────────
-let _editCallback=null;
-function openEditModal({name='',desc='',notes='',mapUrl='',icon='📌'},onSave){
-  _editCallback=onSave;
-  _selectedIcon=icon||'📌';
-  document.getElementById('edit-icon-preview').textContent=_selectedIcon;
-  buildIconGrid();
-  document.getElementById('edit-name').value=name;
-  document.getElementById('edit-desc').value=desc;
-  document.getElementById('edit-notes').value=notes;
-  document.getElementById('edit-map').value=mapUrl;
-  document.getElementById('edit-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('edit-name').focus(),100);
-}
-function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); _editCallback=null; }
-document.getElementById('edit-modal-close').addEventListener('click',closeEditModal);
-document.getElementById('edit-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('edit-modal')) closeEditModal(); });
-document.getElementById('edit-save-btn').addEventListener('click',()=>{
-  if(!_editCallback) return;
-  _editCallback({
-    icon: _selectedIcon,
-    name: document.getElementById('edit-name').value.trim(),
-    desc: document.getElementById('edit-desc').value.trim(),
-    notes: document.getElementById('edit-notes').value.trim(),
-    mapUrl: document.getElementById('edit-map').value.trim(),
-  });
-  closeEditModal();
-});
+// ─── Palettes ────────────────────────────────────────────────────────
+const PALETTES = [
+  { bg: "#E8F4F8", accent: "#2B7A9E", text: "#1a3a4a" },
+  { bg: "#F0EBF8", accent: "#6B3FA0", text: "#2d1a45" },
+  { bg: "#FFF0E6", accent: "#C05C1A", text: "#3d1f0a" },
+  { bg: "#E6F7EE", accent: "#1A8C4E", text: "#0c3020" },
+  { bg: "#FDF0F0", accent: "#B52B2B", text: "#3d0a0a" },
+  { bg: "#F5F5E8", accent: "#7A6B1A", text: "#2a240a" },
+];
 
-// ── TRIP DAYS ───────────────────────────────────────────────────
-let _dayPlans={};
-async function loadDayPlans(){ const v=await fbGet('dayPlans'); _dayPlans=v||{}; }
-async function saveDayPlans(){ await fbSet('dayPlans',_dayPlans); }
+// ─── Storage helpers (defined after ANNECY_DEST so seed ref works) ──
+const loadDestinations = async () => {
+  try {
+    const r = await window.storage.get("destinations");
+    const dests = r ? JSON.parse(r.value) : [];
+    const hasAnnecy = dests.some(d => d.id === "dest_annecy_2026");
+    return hasAnnecy ? dests : [ANNECY_DEST, ...dests];
+  } catch { return [ANNECY_DEST]; }
+};
+const saveDestinations = async (dests) => {
+  try { await window.storage.set("destinations", JSON.stringify(dests)); } catch {}
+};
+const loadPreferences = async () => {
+  try { const r = await window.storage.get("travel_prefs"); return r ? JSON.parse(r.value) : DEFAULT_PREFS; }
+  catch { return DEFAULT_PREFS; }
+};
+const savePreferences = async (prefs) => {
+  try { await window.storage.set("travel_prefs", JSON.stringify(prefs)); } catch {}
+};
 
-function getGuideItems(){
-  const items=[],seen=new Set();
-  document.querySelectorAll('section:not(#days):not(#pack):not(#trash):not(#food):not(#grocery) .card-title').forEach(el=>{
-    const sec=el.closest('section'),icon=sec?.querySelector('.section-icon')?.textContent?.trim()||'',name=el.textContent.trim();
-    if(!name||seen.has(name))return; seen.add(name); items.push({name,icon});
-  });
-  return items;
-}
-let _activeDay=null;
+// ─── Shared styles ───────────────────────────────────────────────────
+const labelStyle = { display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#555", marginBottom: "0.3rem" };
+const inputStyle = {
+  width: "100%", padding: "0.65rem 0.85rem",
+  border: "1.5px solid #e0e0e0", borderRadius: "0.6rem",
+  fontSize: "0.95rem", color: "#111", background: "#fafafa",
+  outline: "none", boxSizing: "border-box", fontFamily: "inherit",
+};
+const btnPrimary = {
+  padding: "0.65rem 1.25rem", background: "#2B7A9E", color: "#fff",
+  border: "none", borderRadius: "0.65rem", fontWeight: 600,
+  cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit",
+};
+const btnSecondary = {
+  padding: "0.65rem 1.25rem", background: "#f0f0f0", color: "#333",
+  border: "none", borderRadius: "0.65rem", fontWeight: 500,
+  cursor: "pointer", fontSize: "0.9rem", fontFamily: "inherit",
+};
+const iconBtn = {
+  background: "#f5f5f5", border: "none", borderRadius: "0.4rem",
+  padding: "0.3rem 0.55rem", cursor: "pointer", fontSize: "0.9rem", color: "#555",
+};
 
-function buildDaysUI(){
-  const container=document.getElementById('days-list'); container.innerHTML='';
-  const today=new Date().toISOString().slice(0,10);
-  TRIP_DAYS.forEach(day=>{
-    const items=_dayPlans[day.date]||[];
-    const isFete=day.date==='2026-07-14',isToday=day.date===today;
-    const card=document.createElement('div'); card.className='day-card'+(isFete?' is-fete':'')+(isToday?' is-today':'');
-    card.dataset.date=day.date;
-    const mn=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    card.innerHTML=`<div class="day-header">
-      <div class="day-date-badge"><span class="d-num">${day.date.slice(8)}</span><span class="d-mon">${mn[+day.date.slice(5,7)]}</span></div>
-      <div class="day-header-info">
-        <div class="day-name">${day.name}</div>
-        <div class="day-count ${items.length?'has-items':''}">${items.length?items.length+' item'+(items.length>1?'s':'')+' planned':'Nothing planned yet'}</div>
+// ─── Modal wrapper ───────────────────────────────────────────────────
+function Modal({ onClose, children, wide }) {
+  return (
+    <div onClick={onClose} style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+      zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "1rem", overflowY: "auto",
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: "#fff", borderRadius: "1.25rem", padding: "1.75rem",
+        width: "100%", maxWidth: wide ? "560px" : "420px",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.2)", margin: "auto",
+      }}>
+        {children}
       </div>
-      <div class="day-chevron"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
     </div>
-    <div class="day-body"><div class="day-body-inner">
-      <div class="day-items-list"></div>
-      <button class="day-add-btn"><span>＋</span> Add activity or note</button>
-    </div></div>`;
-    card.querySelector('.day-header').addEventListener('click',e=>{ if(!e.target.closest('.day-add-btn')) card.classList.toggle('open'); });
-    card.querySelector('.day-add-btn').addEventListener('click',()=>openDayModal(day.date,day.name));
-    renderDayItems(card,day.date,items);
-    container.appendChild(card);
-  });
+  );
 }
 
-function renderDayItems(card,date,items){
-  const list=card.querySelector('.day-items-list'); list.innerHTML='';
-  if(!items.length){ list.innerHTML='<div class="day-empty">Tap + to start planning this day.</div>'; return; }
-  const snapshot=[...items]; // freeze order at render time for sortable
-  items.forEach((item,idx)=>{
-    const row=document.createElement('div'); row.className='day-item';
-    row.dataset.idx=String(idx);
-    row.style.cssText='flex-direction:column;align-items:flex-start;gap:4px;';
-    const href=item.mapUrl||'';
-    const mapBtn=href?`<a href="${href}" target="_blank" class="map-link" style="font-size:0.65rem;padding:3px 7px">${MAP_SVG} Map</a>`:'';
-    const topRow=document.createElement('div');
-    topRow.style.cssText='display:flex;align-items:center;gap:6px;width:100%';
-    topRow.innerHTML=`${dragHandle()}<span class="day-item-icon">${item.icon||'📌'}</span><span class="day-item-label" style="flex:1;font-weight:600">${item.name}</span>${mapBtn}<button class="day-item-action edit" title="Edit">✎</button><button class="day-item-action remove">×</button>`;
-    row.appendChild(topRow);
-    if(item.desc){ const d=document.createElement('div'); d.style.cssText='font-size:0.78rem;color:#555;padding-left:26px;line-height:1.4'; d.textContent=item.desc; row.appendChild(d); }
-    if(item.notes){ const n=document.createElement('div'); n.style.cssText='font-size:0.75rem;color:var(--muted);font-style:italic;padding-left:26px'; n.textContent='📝 '+item.notes; row.appendChild(n); }
-    topRow.querySelector('.day-item-action.remove').addEventListener('click',()=>removeDayItem(date,idx));
-    topRow.querySelector('.day-item-action.edit').addEventListener('click',()=>{
-      openEditModal({name:item.name,desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||'',icon:item.icon||'📌'},async({icon,name,desc,notes,mapUrl})=>{
-        if(!name) return;
-        _dayPlans[date][idx]={..._dayPlans[date][idx],icon,name,desc,notes,mapUrl};
-        await saveDayPlans(); buildDaysUI();
-        document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
+// ─── Preferences Panel ───────────────────────────────────────────────
+function PreferencesPanel({ prefs, onSave, onClose }) {
+  const [local, setLocal] = useState({ ...prefs });
+
+  function toggle(category, id) {
+    setLocal(p => {
+      const arr = p[category] || [];
+      return { ...p, [category]: arr.includes(id) ? arr.filter(x => x !== id) : [...arr, id] };
+    });
+  }
+
+  const chipActive = { background: "#2B7A9E", color: "#fff", border: "1.5px solid #2B7A9E" };
+  const chipInactive = { background: "#f5f5f5", color: "#444", border: "1.5px solid #e0e0e0" };
+
+  function ChipGroup({ label, category }) {
+    return (
+      <div style={{ marginBottom: "1.25rem" }}>
+        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>{label}</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+          {PREF_OPTIONS[category].map(opt => (
+            <button key={opt.id} onClick={() => toggle(category, opt.id)} style={{
+              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
+              cursor: "pointer", fontFamily: "inherit", fontWeight: 500,
+              ...(local[category]?.includes(opt.id) ? chipActive : chipInactive),
+            }}>{opt.label}</button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Modal onClose={onClose} wide>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+        <h2 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "#111" }}>⚙️ Travel Preferences</h2>
+        <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "1.3rem", cursor: "pointer", color: "#999", lineHeight: 1 }}>×</button>
+      </div>
+      <p style={{ margin: "0 0 1.25rem", fontSize: "0.85rem", color: "#666", lineHeight: 1.5 }}>
+        These preferences are passed to Claude when generating guide scaffolds for new destinations — so suggestions will respect your restrictions from the start.
+      </p>
+
+      <ChipGroup label="Transport" category="transport" />
+      <ChipGroup label="Accommodation" category="accommodation" />
+      <ChipGroup label="Dietary" category="dietary" />
+
+      <div style={{ marginBottom: "1.25rem" }}>
+        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>Budget level</div>
+        <div style={{ display: "flex", gap: "0.4rem" }}>
+          {["Budget 💰", "Mid-range 💰💰", "Luxury 💰💰💰"].map(b => (
+            <button key={b} onClick={() => setLocal(p => ({ ...p, budget: p.budget === b ? "" : b }))} style={{
+              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
+              cursor: "pointer", fontFamily: "inherit", fontWeight: 500, flex: 1,
+              ...(local.budget === b ? chipActive : chipInactive),
+            }}>{b}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: "1.25rem" }}>
+        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>Travelling as</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+          {["Solo 🧍", "Couple 👫", "Family with kids 👨‍👩‍👧", "Friends group 👯", "Seniors 👴"].map(g => (
+            <button key={g} onClick={() => setLocal(p => ({ ...p, groupType: p.groupType === g ? "" : g }))} style={{
+              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
+              cursor: "pointer", fontFamily: "inherit", fontWeight: 500,
+              ...(local.groupType === g ? chipActive : chipInactive),
+            }}>{g}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: "1.25rem" }}>
+        <div style={{ fontSize: "0.78rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.5rem" }}>Mobility / accessibility</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+          {["No restrictions", "Limited walking", "Wheelchair accessible", "No stairs"].map(m => (
+            <button key={m} onClick={() => setLocal(p => ({ ...p, mobility: p.mobility === m ? "" : m }))} style={{
+              padding: "0.35rem 0.75rem", borderRadius: "2rem", fontSize: "0.82rem",
+              cursor: "pointer", fontFamily: "inherit", fontWeight: 500,
+              ...(local.mobility === m ? chipActive : chipInactive),
+            }}>{m}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: "1.5rem" }}>
+        <label style={labelStyle}>Anything else Claude should know</label>
+        <textarea
+          value={local.freetext}
+          onChange={e => setLocal(p => ({ ...p, freetext: e.target.value }))}
+          rows={3}
+          placeholder="e.g. We travel with a baby. We avoid tourist traps. We love street food. We need wifi everywhere."
+          style={{ ...inputStyle, resize: "vertical" }}
+        />
+      </div>
+
+      <div style={{ display: "flex", gap: "0.75rem" }}>
+        <button onClick={onClose} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
+        <button onClick={() => { onSave(local); onClose(); }} style={{ ...btnPrimary, flex: 2 }}>Save preferences</button>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── New Destination modal with AI scaffold ──────────────────────────
+const EMOJIS = ["✈️","🌍","🏝","🗺","🎒","🏔","🌅","🛳","🌴","🏜","🌋","🗽","⛩","🏯","🎪","🏙","🌃","🗼","🎭","🏕"];
+
+function buildSystemPrompt(prefs) {
+  const restrictions = [];
+  if (prefs.transport?.length) restrictions.push("Transport restrictions: " + prefs.transport.map(id => PREF_OPTIONS.transport.find(o=>o.id===id)?.label).filter(Boolean).join(", "));
+  if (prefs.accommodation?.length) restrictions.push("Accommodation preferences: " + prefs.accommodation.map(id => PREF_OPTIONS.accommodation.find(o=>o.id===id)?.label).filter(Boolean).join(", "));
+  if (prefs.dietary?.length) restrictions.push("Dietary requirements: " + prefs.dietary.map(id => PREF_OPTIONS.dietary.find(o=>o.id===id)?.label).filter(Boolean).join(", "));
+  if (prefs.budget) restrictions.push("Budget: " + prefs.budget);
+  if (prefs.groupType) restrictions.push("Group type: " + prefs.groupType);
+  if (prefs.mobility) restrictions.push("Mobility/accessibility: " + prefs.mobility);
+  if (prefs.freetext) restrictions.push("Additional notes: " + prefs.freetext);
+
+  return `You are a travel guide generator. Your job is to create a structured vacation guide scaffold for a destination.
+
+${restrictions.length > 0 ? `IMPORTANT — USER TRAVEL PREFERENCES & RESTRICTIONS:\n${restrictions.join("\n")}\n\nAll suggestions MUST respect these restrictions. Never suggest car rentals if the user prefers no car rental. Tailor every recommendation to their context.` : "No specific travel restrictions set."}
+
+Respond ONLY with a valid JSON object — no markdown fences, no preamble, no explanation. The JSON must have this exact shape:
+{
+  "notes": "A 1–2 sentence description of the destination for the guide header",
+  "sections": [
+    { "id": "string", "icon": "emoji", "label": "string", "type": "static" }
+  ],
+  "sectionData": {
+    "sectionId": [
+      { "id": "string", "name": "string", "desc": "string", "notes": "string" }
+    ]
+  }
+}
+
+Rules:
+- Include 8–12 sections relevant to this destination. Always include: days (📅, dynamic), tips (💡), pack (🎒, dynamic). Add destination-appropriate sections like sights, hiking, beaches, skiing, food, etc.
+- For each section, include 3–6 items with a name, short desc (one sentence), and notes (practical tip or empty string).
+- Item ids must be unique strings like "s1", "h2", "t3" etc.
+- The "days" and "pack" sections should have type "dynamic". All others "static".
+- Tailor content to the destination. Be specific — real place names, real restaurants (if well-known), real trails. Not generic filler.
+- If dietary restrictions are set, food recommendations must reflect them.
+- If no car rental is set, all transport tips must focus on public transit, walking, cycling, etc.`;
+}
+
+function NewDestinationModal({ onSave, onClose, prefs }) {
+  const [name, setName] = useState("");
+  const [dates, setDates] = useState("");
+  const [emoji, setEmoji] = useState("✈️");
+  const [useAI, setUseAI] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState("");
+  const valid = name.trim().length > 0;
+
+  async function handleCreate() {
+    if (!valid) return;
+    if (!useAI) {
+      onSave(newDestination(name.trim(), dates.trim(), emoji));
+      return;
+    }
+    setGenerating(true);
+    setError("");
+    try {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          system: buildSystemPrompt(prefs),
+          messages: [{ role: "user", content: `Generate a vacation guide scaffold for: ${name.trim()}${dates.trim() ? ` (${dates.trim()})` : ""}` }],
+        }),
       });
-    });
-    list.appendChild(row);
-  });
-  // sortable — use data-idx into snapshot so name-matching can't drop items
-  makeSortable(list, async()=>{
-    const reordered=[...list.querySelectorAll('.day-item')]
-      .map(row=>snapshot[parseInt(row.dataset.idx,10)])
-      .filter(Boolean);
-    _dayPlans[date]=reordered;
-    await saveDayPlans();
-    buildDaysUI();
-    document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
-  });
-}
-async function removeDayItem(date,idx){
-  const items=_dayPlans[date]||[]; const removed=items[idx];
-  items.splice(idx,1); _dayPlans[date]=items; await saveDayPlans();
-  if(removed) await addToTrash({...removed,name:removed.name,icon:removed.icon||'📌',date},'days');
-  buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
-}
-async function addDayItem(date,item){
-  if(!_dayPlans[date]) _dayPlans[date]=[];
-  // always push — allow multiple items with same name, use _id to distinguish
-  _dayPlans[date].push({...item, _id: Date.now()+Math.random()});
-  await saveDayPlans();
-  buildDaysUI(); document.querySelector(`.day-card[data-date="${date}"]`)?.classList.add('open');
-}
+      const data = await resp.json();
+      const raw = data.content?.find(b => b.type === "text")?.text || "";
+      const clean = raw.replace(/```json|```/g, "").trim();
+      const scaffold = JSON.parse(clean);
+      onSave(newDestination(name.trim(), dates.trim(), emoji, scaffold));
+    } catch (e) {
+      setError("Couldn't generate AI scaffold — creating a blank guide instead.");
+      onSave(newDestination(name.trim(), dates.trim(), emoji));
+    }
+  }
 
-// ── DAY MODAL ───────────────────────────────────────────────────
-let _guideItems=[];
-function openDayModal(date,dayName){
-  _activeDay=date; _guideItems=getGuideItems();
-  document.getElementById('modal-day-label').textContent=dayName;
-  document.getElementById('modal-custom-input').value='';
-  document.getElementById('modal-search').value='';
-  renderModalList('');
-  document.getElementById('day-modal').classList.add('open');
-  setTimeout(()=>document.getElementById('modal-search').focus(),100);
-}
-window.closeModal=function(){ document.getElementById('day-modal').classList.remove('open'); _activeDay=null; };
-window.handleModalOverlayClick=function(e){ if(e.target===document.getElementById('day-modal')) window.closeModal(); };
-function renderModalList(q){
-  const existing=(_dayPlans[_activeDay]||[]).map(i=>i.name);
-  const list=document.getElementById('modal-list');
-  const filtered=_guideItems.filter(i=>!q||i.name.toLowerCase().includes(q.toLowerCase()));
-  list.innerHTML='';
-  if(!filtered.length){list.innerHTML='<div style="padding:14px 8px;font-size:0.82rem;color:var(--muted);">No matches.</div>';return;}
-  filtered.forEach(item=>{
-    const el=document.createElement('div'); el.className='modal-item'+(existing.includes(item.name)?' already-added':'');
-    el.innerHTML=`<span class="modal-item-icon">${item.icon}</span><div class="modal-item-text"><div class="modal-item-name">${item.name}</div></div>`;
-    el.addEventListener('click',()=>{ addDayItem(_activeDay,{name:item.name,icon:item.icon}); window.closeModal(); });
-    list.appendChild(el);
-  });
-}
-document.getElementById('modal-search').addEventListener('input',function(){ renderModalList(this.value); });
-async function addCustomItemToDay(){
-  const input=document.getElementById('modal-custom-input'),name=input.value.trim();
-  if(!name||!_activeDay) return;
-  const date=_activeDay; // capture before closeModal nulls it
-  window.closeModal(); input.value='';
-  openEditModal({name,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
-    if(!n) return;
-    await addDayItem(date,{name:n,icon,desc,notes,mapUrl});
-  });
-}
-document.getElementById('modal-custom-add-btn').addEventListener('click',addCustomItemToDay);
-document.getElementById('modal-custom-input').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomItemToDay();});
+  const hasPrefs = prefs && (
+    prefs.transport?.length || prefs.accommodation?.length || prefs.dietary?.length ||
+    prefs.budget || prefs.groupType || prefs.mobility || prefs.freetext
+  );
 
-// ── PACK ────────────────────────────────────────────────────────
-const DEFAULT_PACK=[
-  {label:"Hiking boots",cat:"👟 Footwear"},{label:"Sandals / flip-flops",cat:"👟 Footwear"},{label:"Light trainers",cat:"👟 Footwear"},
-  {label:"Swimsuit ×2",cat:"👙 Beach"},{label:"Beach towel",cat:"👙 Beach"},{label:"Waterproof dry bag",cat:"👙 Beach"},
-  {label:"Sunscreen SPF 50+",cat:"☀️ Sun"},{label:"Sunglasses",cat:"☀️ Sun"},{label:"Sun hat / cap",cat:"☀️ Sun"},
-  {label:"Light rain jacket",cat:"🏔 Mountain"},{label:"Trekking poles",cat:"🏔 Mountain"},{label:"Hiking socks ×3",cat:"🏔 Mountain"},{label:"Headlamp",cat:"🏔 Mountain"},
-  {label:"Reusable water bottle",cat:"🎒 Essentials"},{label:"Snacks / trail mix",cat:"🎒 Essentials"},{label:"Small backpack (daypack)",cat:"🎒 Essentials"},{label:"Portable charger",cat:"🎒 Essentials"},{label:"EU power adaptor",cat:"🎒 Essentials"},
-  {label:"Travel insurance docs",cat:"📋 Docs"},{label:"Passport / ID",cat:"📋 Docs"},{label:"Euros (cash)",cat:"📋 Docs"},
-  {label:"Blister plasters",cat:"💊 Health"},{label:"Ibuprofen / paracetamol",cat:"💊 Health"},{label:"Insect repellent",cat:"💊 Health"},
-  {label:"Light dinner outfit",cat:"👗 Clothes"},{label:"T-shirts ×4",cat:"👗 Clothes"},{label:"Shorts / light trousers",cat:"👗 Clothes"},
-  {label:"Picnic blanket",cat:"🧺 Picnic"},{label:"Reusable bag / tote",cat:"🧺 Picnic"},
-];
-let _packItems=[];
-async function loadPack(){ const v=await fbGet('packItems'); _packItems=v||DEFAULT_PACK.map(i=>({...i,checked:false})); }
-async function savePack(){ await fbSet('packItems',_packItems); }
-function getCats(items){ const s=new Set(),c=[]; items.forEach(i=>{if(!s.has(i.cat)){s.add(i.cat);c.push(i.cat);}}); return c; }
-function buildPackUI(){
-  const container=document.getElementById('pack-list'); container.innerHTML='';
-  getCats(_packItems).forEach(cat=>{
-    const group=document.createElement('div'); group.className='pack-category';
-    const lbl=document.createElement('div'); lbl.className='pack-cat-label'; lbl.textContent=cat; group.appendChild(lbl);
-    const grid=document.createElement('div'); grid.className='pack-grid';
-    const catItems=_packItems.filter(it=>it.cat===cat);
-    catItems.forEach(item=>{
-      const idx=_packItems.indexOf(item);
-      const el=document.createElement('div'); el.className='pack-item'+(item.checked?' checked':'');
-      const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=!!item.checked;
-      cb.addEventListener('change',async()=>{ _packItems[idx].checked=cb.checked; await savePack(); el.classList.toggle('checked',cb.checked); updatePackProgress(); });
-      const lbl2=document.createElement('span'); lbl2.className='pack-label';
-      lbl2.textContent=(item.icon?item.icon+' ':'')+item.label;
-      lbl2.addEventListener('click',()=>cb.click());
-      const editBtn=document.createElement('button'); editBtn.className='pack-delete'; editBtn.innerHTML=dragHandle()+'✎'; editBtn.style.color='var(--lake)'; editBtn.title='Edit';
-      editBtn.addEventListener('click',e=>{ e.stopPropagation();
-        openEditModal({name:item.label,icon:item.icon||'📌',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,notes,mapUrl})=>{
-          if(name){ _packItems[idx]={..._packItems[idx],label:name,icon,notes,mapUrl}; savePack(); buildPackUI(); }
-        });
-      });
-      const del=document.createElement('button'); del.className='pack-delete'; del.innerHTML='×';
-      del.addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({name:item.label,icon:item.icon||'📌',cat:item.cat,notes:item.notes||'',mapUrl:item.mapUrl||''},'pack'); _packItems.splice(idx,1); await savePack(); buildPackUI(); });
-      el.appendChild(cb); el.appendChild(lbl2); el.appendChild(editBtn); el.appendChild(del); grid.appendChild(el);
-    });
-    group.appendChild(grid); container.appendChild(group);
-    makeSortable(grid,async()=>{
-      const els=[...grid.querySelectorAll('.pack-item')];
-      const reordered=els.map(el=>{ const t=el.querySelector('.pack-label')?.textContent||''; return _packItems.find(it=>(it.icon?it.icon+' ':'')+it.label===t)||null; }).filter(Boolean);
-      const rest=_packItems.filter(it=>it.cat!==cat);
-      _packItems=[...rest,...reordered];
-      await savePack();
-    });
-  });
-  updatePackProgress();
-  const sel=document.getElementById('pack-cat-select'); const cur=sel.value; sel.innerHTML='';
-  getCats(_packItems).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
-  if(cur&&[...sel.options].some(o=>o.value===cur)) sel.value=cur;
-}
-function updatePackProgress(){
-  const total=_packItems.length,done=_packItems.filter(i=>i.checked).length;
-  document.getElementById('pack-count').textContent=`${done} / ${total} packed`;
-  document.getElementById('pack-bar').style.width=total?`${(done/total)*100}%`:'0%';
-}
-async function addPackItem(){
-  const input=document.getElementById('pack-input'),sel=document.getElementById('pack-cat-select'),label=input.value.trim();
-  if(!label){input.focus();return;}
-  input.value='';
-  openEditModal({name:label,icon:'📌',desc:'',notes:'',mapUrl:''},async({icon,name,notes,mapUrl})=>{
-    if(!name) return;
-    _packItems.push({label:name,cat:sel.value,checked:false,icon,notes,mapUrl}); await savePack(); buildPackUI();
-  });
-  input.focus();
-}
-document.getElementById('pack-add-btn').addEventListener('click',addPackItem);
-document.getElementById('pack-input').addEventListener('keydown',e=>{if(e.key==='Enter')addPackItem();});
+  return (
+    <Modal onClose={onClose} wide>
+      <h2 style={{ margin: "0 0 1.25rem", fontSize: "1.2rem", fontWeight: 800, color: "#111" }}>
+        Add a destination
+      </h2>
 
-// ── FOOD ────────────────────────────────────────────────────────
-const DEFAULT_FOOD=[
-  {name:'Le Freti',cat:'🍽 Savoyard',desc:'Fondue, raclette, and tartiflette in a charming timber interior. Book ahead.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Le+Freti+Annecy+France',icon:'🍽'},
-  {name:'La Cuisine des Amis',cat:'🍽 Savoyard',desc:'Canal-side terrace. Local fish (perch, char), Savoyard meat dishes.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=La+Cuisine+des+Amis+Annecy',icon:'🍽'},
-  {name:'Brasserie des Européens',cat:'🍽 Savoyard',desc:'Classic French brasserie on the lakefront. Moules-frites, steak, local wine.',tag:'€€',tagClass:'tag-price',mapUrl:'https://maps.google.com/?q=Brasserie+des+Europeens+Annecy',icon:'🍽'},
-  {name:'Le Glacier des Alpes',cat:'☕ Café & Sweets',desc:'Alpine ice cream — génépi, mountain honey, wild blueberry.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Le+Glacier+des+Alpes+Annecy',icon:'🍦'},
-  {name:'Boulangerie Aristide',cat:'🥖 Bakery',desc:'Excellent sourdough on the canal. Arrive early.',tag:'Must Try',tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Boulangerie+Aristide+Annecy',icon:'🥐'},
-  {name:'Pierre Gay — Fromagerie',cat:'🧀 Provisions',desc:'Aged reblochon, beaufort, tomme de Savoie. Best cheesemonger in Annecy.',tag:"Don't Miss",tagClass:'tag-must',mapUrl:'https://maps.google.com/?q=Pierre+Gay+Fromagerie+Annecy',icon:'🧀'},
-  {name:'Old Town Market (Fri / Sun)',cat:'🍽 Savoyard',desc:'Potato pancakes, diot sausages, baked goods. Until 1:30pm.',tag:'Free entry',tagClass:'tag-free',mapUrl:'https://maps.google.com/?q=March%C3%A9+Annecy+Old+Town',icon:'🧺'},
-];
-let _foodItems=[];
-async function loadFood(){ const v=await fbGet('foodItems'); _foodItems=v||DEFAULT_FOOD.map(i=>({...i})); }
-async function saveFood(){ await fbSet('foodItems',_foodItems); }
-function buildFoodUI(){
-  const container=document.getElementById('food-list'); container.innerHTML='';
-  const cats=[],map={};
-  _foodItems.forEach(item=>{ if(!map[item.cat]){map[item.cat]=[];cats.push(item.cat);} map[item.cat].push(item); });
-  cats.forEach(cat=>{
-    const lbl=document.createElement('p'); lbl.className='sublabel'; lbl.textContent=cat; container.appendChild(lbl);
-    const catContainer=document.createElement('div'); catContainer.dataset.cat=cat; container.appendChild(catContainer);
-    const catItems=map[cat];
-    const catSnapshot=[...catItems]; // freeze for this category's sortable
-    catItems.forEach((item,catIdx)=>{
-      const idx=_foodItems.indexOf(item);
-      const card=document.createElement('div'); card.className='card food';
-      card.dataset.idx=String(catIdx); // index into catSnapshot
-      const href=item.mapUrl||(item.mapQ?`https://maps.google.com/?q=${item.mapQ}`:`https://maps.google.com/?q=${encodeURIComponent(item.name+' Annecy')}`);
-      card.innerHTML=`
-        <div class="card-top">
-          <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||'🍽'}</span>
-          <span class="card-title">${item.name}</span>
-          <div class="card-actions">
-            ${dragHandle()}
-            <a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>
-            <button class="note-btn" onclick="toggleNote(this)">📝</button>
-            <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
-            <button data-action="del" class="pack-delete" title="Remove">×</button>
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={labelStyle}>Icon</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.4rem" }}>
+          {EMOJIS.map(e => (
+            <button key={e} onClick={() => setEmoji(e)} style={{
+              fontSize: "1.35rem", padding: "0.3rem 0.4rem",
+              border: emoji === e ? "2px solid #2B7A9E" : "2px solid transparent",
+              borderRadius: "0.5rem", background: emoji === e ? "#E8F4F8" : "#f5f5f5",
+              cursor: "pointer", lineHeight: 1,
+            }}>{e}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <label style={labelStyle}>Destination name *</label>
+        <input autoFocus value={name} onChange={e => setName(e.target.value)}
+          placeholder="e.g. Lisbon, Portugal"
+          style={inputStyle}
+          onKeyDown={e => e.key === "Enter" && valid && !generating && handleCreate()}
+        />
+      </div>
+
+      <div style={{ marginBottom: "1.25rem" }}>
+        <label style={labelStyle}>Trip dates <span style={{ fontWeight: 400, color: "#888" }}>(optional)</span></label>
+        <input value={dates} onChange={e => setDates(e.target.value)}
+          placeholder="e.g. Aug 3–10, 2026" style={inputStyle} />
+      </div>
+
+      {/* AI scaffold toggle */}
+      <div style={{
+        background: "#F7F9FC", border: "1.5px solid #dce8f0", borderRadius: "0.85rem",
+        padding: "1rem 1.1rem", marginBottom: "1.25rem",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#1a3a4a" }}>✨ Generate guide with AI</div>
+          <button
+            onClick={() => setUseAI(v => !v)}
+            style={{
+              width: "42px", height: "24px", borderRadius: "12px", border: "none",
+              background: useAI ? "#2B7A9E" : "#ccc", cursor: "pointer", position: "relative",
+              transition: "background 0.2s",
+            }}
+          >
+            <span style={{
+              position: "absolute", top: "3px", left: useAI ? "20px" : "3px",
+              width: "18px", height: "18px", borderRadius: "50%", background: "#fff",
+              transition: "left 0.2s", display: "block",
+            }} />
+          </button>
+        </div>
+        <p style={{ margin: 0, fontSize: "0.8rem", color: "#666", lineHeight: 1.45 }}>
+          {useAI
+            ? hasPrefs
+              ? "Claude will scaffold sections and suggestions tailored to your saved travel preferences."
+              : "Claude will scaffold sections and starter suggestions for this destination. Set travel preferences to personalise results."
+            : "A blank guide with default sections will be created."
+          }
+        </p>
+        {hasPrefs && useAI && (
+          <div style={{ marginTop: "0.6rem", display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+            {[...(prefs.transport||[]), ...(prefs.dietary||[])].slice(0,4).map(id => {
+              const opt = [...PREF_OPTIONS.transport, ...PREF_OPTIONS.dietary].find(o => o.id === id);
+              return opt ? <span key={id} style={{ fontSize: "0.75rem", background: "#E8F4F8", color: "#2B7A9E", borderRadius: "2rem", padding: "0.2rem 0.55rem", fontWeight: 500 }}>{opt.label}</span> : null;
+            })}
+            {prefs.groupType && <span style={{ fontSize: "0.75rem", background: "#E8F4F8", color: "#2B7A9E", borderRadius: "2rem", padding: "0.2rem 0.55rem", fontWeight: 500 }}>{prefs.groupType}</span>}
+            {prefs.budget && <span style={{ fontSize: "0.75rem", background: "#E8F4F8", color: "#2B7A9E", borderRadius: "2rem", padding: "0.2rem 0.55rem", fontWeight: 500 }}>{prefs.budget}</span>}
           </div>
-        </div>
-        ${item.tag?`<div class="tags"><span class="tag ${item.tagClass||'tag-price'}">${item.tag}</span></div>`:''}
-        ${item.desc?`<p>${item.desc}</p>`:''}
-        ${item.notes?`<p style="font-style:italic;color:var(--muted);margin-top:6px;font-size:0.8rem;">📝 ${item.notes}</p>`:''}
-        <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
-      card.querySelector('[data-action="edit"]').addEventListener('click',e=>{ e.stopPropagation();
-        openEditModal({name:item.name,icon:item.icon||'🍽',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
-          if(name){ _foodItems[idx]={..._foodItems[idx],icon,name,desc,notes,mapUrl}; saveFood(); buildFoodUI(); }
-        });
-      });
-      card.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item},'food'); _foodItems.splice(idx,1); await saveFood(); buildFoodUI(); });
-      catContainer.appendChild(card); initAccordionCard(card); initNoteCard(card);
-    });
-    makeSortable(catContainer,async()=>{
-      const reordered=[...catContainer.querySelectorAll('.card[data-idx]')]
-        .map(card=>catSnapshot[parseInt(card.dataset.idx,10)])
-        .filter(Boolean);
-      const rest=_foodItems.filter(it=>it.cat!==cat);
-      _foodItems=[...rest,...reordered];
-      await saveFood();
-    });
-  });
-}
-async function addFoodItem(){
-  const input=document.getElementById('food-input'),sel=document.getElementById('food-cat-select'),name=input.value.trim();
-  if(!name){input.focus();return;}
-  input.value='';
-  openEditModal({name,icon:'🍽',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
-    if(!n) return;
-    _foodItems.push({name:n,cat:sel.value,desc,tag:'',tagClass:'',mapUrl,notes,icon}); await saveFood(); buildFoodUI();
-  });
-  input.focus();
-}
-document.getElementById('food-add-btn').addEventListener('click',addFoodItem);
-document.getElementById('food-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFoodItem();});
-
-// ── GROCERY ─────────────────────────────────────────────────────
-const DEFAULT_GROCERY=[
-  {emoji:'🧀',name:'Reblochon de Savoie AOP',desc:'Creamy, nutty. Buy vacuum-packed. Essential for tartiflette.',notes:'',mapUrl:''},
-  {emoji:'🧀',name:'Beaufort AOP',desc:'Firm mountain cheese — the "Prince of Gruyères."',notes:'',mapUrl:''},
-  {emoji:'🧀',name:'Tomme de Savoie',desc:'Mild semi-firm cheese, grey rind. Very affordable.',notes:'',mapUrl:''},
-  {emoji:'🍷',name:'Vin de Savoie (Apremont, Chignin)',desc:'Light Alpine white wines. Pairs with cheese and fish.',notes:'',mapUrl:''},
-  {emoji:'🫙',name:'Génépi',desc:'Herbal Alpine liqueur. Small bottles travel well.',notes:'',mapUrl:''},
-  {emoji:'🍯',name:'Miel de Savoie (Mountain Honey)',desc:'Floral, complex honey. Sold in small jars at the market.',notes:'',mapUrl:''},
-  {emoji:'🥩',name:'Diots de Savoie',desc:'Traditional Savoyard pork sausages.',notes:'',mapUrl:''},
-  {emoji:'🌰',name:'Crozets de Savoie',desc:'Tiny buckwheat pasta squares. Cook gratin-style.',notes:'',mapUrl:''},
-  {emoji:'🍫',name:'Chocolat des Alpes',desc:'Alpine herb chocolates.',notes:'',mapUrl:''},
-  {emoji:'🧂',name:"Sel de l'Alpe / Herbes de Savoie",desc:'Local spice blends. Compact souvenirs.',notes:'',mapUrl:''},
-];
-let _groceryItems=[];
-async function loadGrocery(){ const v=await fbGet('groceryItems'); _groceryItems=v||DEFAULT_GROCERY.map(i=>({...i})); }
-async function saveGrocery(){ await fbSet('groceryItems',_groceryItems); }
-function buildGroceryUI(){
-  const container=document.getElementById('grocery-list'); container.innerHTML='';
-  const snapshot=[..._groceryItems];
-  _groceryItems.forEach((item,idx)=>{
-    const row=document.createElement('div'); row.className='grocery-item';
-    row.dataset.idx=String(idx);
-    const mapPart=item.mapUrl?`<a href="${item.mapUrl}" target="_blank" class="map-link" style="margin-top:4px;display:inline-flex">${MAP_SVG} Map</a>`:'';
-    const notesPart=item.notes?`<div class="grocery-desc" style="font-style:italic;margin-top:2px;">📝 ${item.notes}</div>`:'';
-    row.innerHTML=`${dragHandle()}<span class="grocery-emoji">${item.emoji||'🛒'}</span>
-      <div style="flex:1;min-width:0">
-        <div class="grocery-name">${item.name}</div>
-        ${item.desc?`<div class="grocery-desc">${item.desc}</div>`:''}
-        ${notesPart}${mapPart}
+        )}
       </div>
-      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-        <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
-        <button data-action="del" class="pack-delete" title="Remove">×</button>
-      </div>`;
-    row.querySelector('[data-action="edit"]').addEventListener('click',async e=>{ e.stopPropagation();
-      openEditModal({name:item.name,icon:item.emoji||'🛒',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
-        if(name){ _groceryItems[idx]={..._groceryItems[idx],emoji:icon,name,desc,notes,mapUrl}; saveGrocery(); buildGroceryUI(); }
-      });
-    });
-    row.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation(); await addToTrash({...item,icon:item.emoji||'🛒'},'grocery'); _groceryItems.splice(idx,1); await saveGrocery(); buildGroceryUI(); });
-    container.appendChild(row);
-  });
-  makeSortable(container,async()=>{
-    const reordered=[...container.querySelectorAll('.grocery-item[data-idx]')]
-      .map(row=>snapshot[parseInt(row.dataset.idx,10)])
-      .filter(Boolean);
-    _groceryItems=reordered; await saveGrocery();
-  });
-}
-async function addGroceryItem(){
-  const input=document.getElementById('grocery-input'),name=input.value.trim();
-  if(!name){input.focus();return;}
-  input.value='';
-  openEditModal({name,icon:'🛒',desc:'',notes:'',mapUrl:''},async({icon,name:n,desc,notes,mapUrl})=>{
-    if(!n) return;
-    _groceryItems.push({emoji:icon,name:n,desc,notes,mapUrl}); await saveGrocery(); buildGroceryUI();
-  });
-  input.focus();
-}
-document.getElementById('grocery-add-btn').addEventListener('click',addGroceryItem);
-document.getElementById('grocery-input').addEventListener('keydown',e=>{if(e.key==='Enter')addGroceryItem();});
 
-// ── SECTION CUSTOM ITEMS ────────────────────────────────────────
-let _sectionItems={};
-async function loadSectionItems(){ const v=await fbGet('sectionItems'); _sectionItems=v||{}; }
-async function saveSectionItems(){ await fbSet('sectionItems',_sectionItems); }
+      {error && <p style={{ margin: "0 0 0.75rem", fontSize: "0.82rem", color: "#C05C1A" }}>{error}</p>}
 
-function buildSectionCustomUI(sid){
-  const container=document.getElementById(sid+'-custom'); if(!container) return;
-  container.innerHTML='';
-  const items=_sectionItems[sid]||[];
-  const meta=SECTION_META[sid]||{icon:'📌',cardClass:''};
-  const snapshot=[...items]; // freeze for sortable
-  items.forEach((item,idx)=>{
-    const card=document.createElement('div');
-    card.className='card '+meta.cardClass;
-    card.dataset.idx=String(idx); // stable index into snapshot
-    const href=item.mapUrl||'';
-    const mapBtn=href?`<a class="map-link" href="${href}" target="_blank">${MAP_SVG} Map</a>`:'';
-    card.innerHTML=`
-      <div class="card-top">
-        <span style="font-size:1.1rem;flex-shrink:0;margin-right:4px">${item.icon||meta.icon||'📌'}</span>
-        <span class="card-title">${item.name}</span>
-        <div class="card-actions">
-          ${dragHandle()}
-          ${mapBtn}
-          <button class="note-btn" onclick="toggleNote(this)">📝</button>
-          <button data-action="edit" class="pack-delete" style="color:var(--lake)" title="Edit">✎</button>
-          <button data-action="del" class="pack-delete" title="Remove">×</button>
+      <div style={{ display: "flex", gap: "0.75rem" }}>
+        <button onClick={onClose} style={{ ...btnSecondary, flex: 1 }} disabled={generating}>Cancel</button>
+        <button disabled={!valid || generating} onClick={handleCreate}
+          style={{ ...btnPrimary, flex: 2, opacity: valid && !generating ? 1 : 0.6, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+          {generating ? <><span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⟳</span> Generating…</> : useAI ? "✨ Create with AI" : "Create blank guide"}
+        </button>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── Edit item form ──────────────────────────────────────────────────
+function EditItemForm({ initial, palette, onSave, onCancel, isNew }) {
+  const [form, setForm] = useState({ name: initial.name || "", desc: initial.desc || "", notes: initial.notes || "" });
+  const valid = form.name.trim().length > 0;
+  return (
+    <div>
+      <input autoFocus value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+        placeholder="Name *" style={{ ...inputStyle, marginBottom: "0.5rem" }} />
+      <input value={form.desc} onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}
+        placeholder="Short description" style={{ ...inputStyle, marginBottom: "0.5rem" }} />
+      <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+        placeholder="Notes (optional)" rows={2} style={{ ...inputStyle, resize: "vertical", marginBottom: "0.75rem" }} />
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <button onClick={onCancel} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
+        <button disabled={!valid} onClick={() => onSave(form)} style={{ ...btnPrimary, flex: 2, opacity: valid ? 1 : 0.5 }}>
+          {isNew ? "Add" : "Save"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Section view ────────────────────────────────────────────────────
+function SectionView({ section, palette, dest, onUpdate }) {
+  const [items, setItems] = useState(() => (dest.sectionData || {})[section.id] || []);
+  const [adding, setAdding] = useState(false);
+  const [newItem] = useState({ name: "", desc: "", notes: "" });
+  const [editId, setEditId] = useState(null);
+
+  function persist(newItems) {
+    const sectionData = { ...(dest.sectionData || {}), [section.id]: newItems };
+    onUpdate({ ...dest, sectionData });
+  }
+
+  function addItem(form) {
+    if (!form.name.trim()) return;
+    const next = [...items, { ...form, id: `item_${Date.now()}` }];
+    setItems(next); persist(next); setAdding(false);
+  }
+  function removeItem(id) {
+    const next = items.filter(i => i.id !== id);
+    setItems(next); persist(next);
+  }
+  function saveEdit(id, updates) {
+    const next = items.map(i => i.id === id ? { ...i, ...updates } : i);
+    setItems(next); persist(next); setEditId(null);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+        <span style={{ fontSize: "1.75rem" }}>{section.icon}</span>
+        <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 800, color: palette.text }}>{section.label}</h2>
+      </div>
+      {items.length === 0 && !adding && (
+        <div style={{ background: "#fff", borderRadius: "1rem", padding: "2rem", textAlign: "center", color: "#aaa", fontSize: "0.9rem", marginBottom: "1rem" }}>
+          No items yet. Add one below.
+        </div>
+      )}
+      {items.map(item => (
+        <div key={item.id} style={{ background: "#fff", borderRadius: "1rem", padding: "1rem 1.25rem", marginBottom: "0.75rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+          {editId === item.id ? (
+            <EditItemForm initial={item} palette={palette} onSave={u => saveEdit(item.id, u)} onCancel={() => setEditId(null)} />
+          ) : (
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, color: "#111", marginBottom: "0.2rem" }}>{item.name}</div>
+                {item.desc && <div style={{ fontSize: "0.85rem", color: "#555" }}>{item.desc}</div>}
+                {item.notes && <div style={{ fontSize: "0.8rem", color: "#888", fontStyle: "italic", marginTop: "0.25rem" }}>{item.notes}</div>}
+              </div>
+              <div style={{ display: "flex", gap: "0.4rem", flexShrink: 0 }}>
+                <button onClick={() => setEditId(item.id)} style={iconBtn}>✎</button>
+                <button onClick={() => removeItem(item.id)} style={{ ...iconBtn, color: "#C0392B" }}>×</button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+      {adding ? (
+        <div style={{ background: "#fff", borderRadius: "1rem", padding: "1.25rem", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: "0.75rem" }}>
+          <EditItemForm initial={newItem} palette={palette} onSave={addItem} onCancel={() => setAdding(false)} isNew />
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)} style={{
+          width: "100%", padding: "0.85rem", border: `2px dashed ${palette.accent}55`,
+          borderRadius: "1rem", background: "transparent", color: palette.accent,
+          cursor: "pointer", fontSize: "0.9rem", fontWeight: 600,
+        }}>＋ Add item</button>
+      )}
+    </div>
+  );
+}
+
+// ─── Destination view ────────────────────────────────────────────────
+function DestinationView({ dest, palette, onBack, onUpdate, onDelete }) {
+  const [activeSection, setActiveSection] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editNotes, setEditNotes] = useState(false);
+  const [notes, setNotes] = useState(dest.notes || "");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function h(e) { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); }
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const section = dest.sections.find(s => s.id === activeSection);
+
+  return (
+    <div style={{ minHeight: "100vh", background: palette.bg, fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      {/* Header */}
+      <div style={{ background: palette.accent, color: "#fff", padding: "1rem 1.25rem", display: "flex", alignItems: "center", gap: "1rem", position: "sticky", top: 0, zIndex: 100 }}>
+        <button onClick={onBack} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.75rem", cursor: "pointer", fontSize: "0.9rem" }}>← Back</button>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: "1.2rem", fontWeight: 700 }}>{dest.emoji} {dest.name}</div>
+          {dest.dates && <div style={{ fontSize: "0.8rem", opacity: 0.8 }}>{dest.dates}</div>}
+        </div>
+        <div style={{ position: "relative" }} ref={menuRef}>
+          <button onClick={() => setMenuOpen(v => !v)} style={{ background: "rgba(255,255,255,0.2)", border: "none", color: "#fff", borderRadius: "0.5rem", padding: "0.4rem 0.75rem", cursor: "pointer", fontSize: "1rem" }}>☰</button>
+          {menuOpen && (
+            <div style={{ position: "absolute", right: 0, top: "calc(100% + 0.5rem)", background: "#fff", borderRadius: "0.75rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", minWidth: "210px", overflow: "hidden", zIndex: 300 }}>
+              <div style={{ padding: "0.5rem 0.75rem", fontSize: "0.7rem", fontWeight: 700, color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>Sections</div>
+              <button onClick={() => { setActiveSection(null); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", padding: "0.6rem 1rem", border: "none", background: activeSection === null ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.9rem", color: activeSection === null ? palette.accent : "#222", fontWeight: activeSection === null ? 600 : 400 }}>
+                🏠 Overview
+              </button>
+              {dest.sections.map(s => (
+                <button key={s.id} onClick={() => { setActiveSection(s.id); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", padding: "0.6rem 1rem", border: "none", background: activeSection === s.id ? palette.bg : "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.9rem", color: activeSection === s.id ? palette.accent : "#222", fontWeight: activeSection === s.id ? 600 : 400 }}>
+                  <span>{s.icon}</span> {s.label}
+                </button>
+              ))}
+              <div style={{ height: "1px", background: "#eee", margin: "0.25rem 0" }} />
+              <button onClick={() => { setConfirmDelete(true); setMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", padding: "0.6rem 1rem", border: "none", background: "#fff", cursor: "pointer", textAlign: "left", fontSize: "0.9rem", color: "#C0392B" }}>
+                🗑 Delete destination
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      ${item.desc?`<p>${item.desc}</p>`:''}
-      ${item.notes?`<p style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:5px;">📝 ${item.notes}</p>`:''}
-      <div class="card-note"><textarea placeholder="Add a note..."></textarea><div class="note-saved">✓ Saved</div></div>`;
-    card.querySelector('[data-action="edit"]').addEventListener('click',e=>{ e.stopPropagation();
-      openEditModal({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},({icon,name,desc,notes,mapUrl})=>{
-        if(!name) return;
-        _sectionItems[sid][idx]={...item,icon,name,desc,notes,mapUrl};
-        saveSectionItems(); buildSectionCustomUI(sid);
-      });
+
+      {/* Tab bar */}
+      <div style={{ display: "flex", overflowX: "auto", gap: "0.4rem", padding: "0.6rem 1rem", background: "#fff", borderBottom: "1px solid #eee", scrollbarWidth: "none" }}>
+        <button onClick={() => setActiveSection(null)} style={{ flexShrink: 0, padding: "0.35rem 0.8rem", borderRadius: "2rem", border: "none", background: activeSection === null ? palette.accent : "#f0f0f0", color: activeSection === null ? "#fff" : "#444", fontWeight: activeSection === null ? 600 : 400, cursor: "pointer", fontSize: "0.82rem", whiteSpace: "nowrap" }}>🏠 Overview</button>
+        {dest.sections.map(s => (
+          <button key={s.id} onClick={() => setActiveSection(s.id)} style={{ flexShrink: 0, padding: "0.35rem 0.8rem", borderRadius: "2rem", border: "none", background: activeSection === s.id ? palette.accent : "#f0f0f0", color: activeSection === s.id ? "#fff" : "#444", fontWeight: activeSection === s.id ? 600 : 400, cursor: "pointer", fontSize: "0.82rem", whiteSpace: "nowrap" }}>
+            {s.icon} {s.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ padding: "1.25rem", maxWidth: "680px", margin: "0 auto" }}>
+        {!activeSection ? (
+          <div>
+            <div style={{ background: "#fff", borderRadius: "1.25rem", padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", marginBottom: "1rem" }}>
+              <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>{dest.emoji}</div>
+              <h1 style={{ margin: "0 0 0.25rem", fontSize: "1.75rem", fontWeight: 800, color: palette.text }}>{dest.name}</h1>
+              {dest.dates && <p style={{ margin: "0 0 1rem", color: "#666", fontSize: "0.95rem" }}>{dest.dates}</p>}
+              <p style={{ margin: 0, color: "#888", fontSize: "0.9rem" }}>Select a section above or from the ☰ menu to start planning.</p>
+            </div>
+            <div style={{ background: "#fff", borderRadius: "1.25rem", padding: "1.5rem", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: palette.text }}>📝 Trip notes</h2>
+                {!editNotes && <button onClick={() => setEditNotes(true)} style={{ ...btnSecondary, padding: "0.3rem 0.7rem", fontSize: "0.8rem" }}>Edit</button>}
+              </div>
+              {editNotes ? (
+                <>
+                  <textarea autoFocus value={notes} onChange={e => setNotes(e.target.value)} rows={5} placeholder="Add any notes about this trip…" style={{ ...inputStyle, resize: "vertical" }} />
+                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
+                    <button onClick={() => { setNotes(dest.notes || ""); setEditNotes(false); }} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
+                    <button onClick={() => { onUpdate({ ...dest, notes }); setEditNotes(false); }} style={{ ...btnPrimary, flex: 2 }}>Save</button>
+                  </div>
+                </>
+              ) : (
+                <p style={{ margin: 0, color: notes ? "#333" : "#bbb", fontSize: "0.9rem", whiteSpace: "pre-wrap" }}>{notes || "No notes yet. Tap Edit to add some."}</p>
+              )}
+            </div>
+          </div>
+        ) : section ? (
+          <SectionView section={section} palette={palette} dest={dest} onUpdate={onUpdate} />
+        ) : null}
+      </div>
+
+      {confirmDelete && (
+        <Modal onClose={() => setConfirmDelete(false)}>
+          <h2 style={{ margin: "0 0 0.75rem", fontSize: "1.1rem" }}>Delete {dest.emoji} {dest.name}?</h2>
+          <p style={{ margin: "0 0 1.5rem", color: "#666", fontSize: "0.9rem" }}>This will permanently remove this destination. This cannot be undone.</p>
+          <div style={{ display: "flex", gap: "0.75rem" }}>
+            <button onClick={() => setConfirmDelete(false)} style={{ ...btnSecondary, flex: 1 }}>Cancel</button>
+            <button onClick={onDelete} style={{ ...btnPrimary, flex: 1, background: "#C0392B" }}>Delete</button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── Home screen ─────────────────────────────────────────────────────
+function Home({ destinations, prefs, onCreate, onOpen, onOpenPrefs }) {
+  const [showNew, setShowNew] = useState(false);
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#F7F8FA", fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      <div style={{ background: "#fff", borderBottom: "1px solid #eee", padding: "1.1rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontSize: "1.35rem", fontWeight: 800, color: "#111" }}>✈️ Vacation Guides</div>
+          <div style={{ fontSize: "0.78rem", color: "#888" }}>{destinations.length === 0 ? "No trips yet" : `${destinations.length} destination${destinations.length !== 1 ? "s" : ""}`}</div>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button onClick={onOpenPrefs} style={{ ...btnSecondary, padding: "0.5rem 0.75rem", fontSize: "0.85rem" }} title="Travel preferences">⚙️ Preferences</button>
+          <button onClick={() => setShowNew(true)} style={{ ...btnPrimary, padding: "0.5rem 0.9rem", fontSize: "0.85rem" }}>＋ New destination</button>
+        </div>
+      </div>
+
+      <div style={{ padding: "1.25rem", maxWidth: "720px", margin: "0 auto" }}>
+        {/* Preferences hint */}
+        {(() => {
+          const hasPrefs = prefs && (prefs.transport?.length || prefs.dietary?.length || prefs.groupType || prefs.budget || prefs.freetext);
+          if (!hasPrefs) return (
+            <div onClick={onOpenPrefs} style={{ background: "#EDF6FB", border: "1.5px dashed #9BC8DC", borderRadius: "1rem", padding: "0.85rem 1.1rem", marginBottom: "1.1rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+              <span style={{ fontSize: "1.3rem" }}>⚙️</span>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: "0.88rem", color: "#2B7A9E" }}>Set travel preferences</div>
+                <div style={{ fontSize: "0.78rem", color: "#5a9ab5" }}>Tell Claude about restrictions like no car rental, dietary needs, or budget — guides will be tailored from the start.</div>
+              </div>
+            </div>
+          );
+          return null;
+        })()}
+
+        {destinations.length === 0 ? (
+          <div style={{ background: "#fff", borderRadius: "1.5rem", padding: "3rem 2rem", textAlign: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: "3rem", marginBottom: "0.75rem" }}>🗺</div>
+            <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.2rem", fontWeight: 700, color: "#111" }}>No trips yet</h2>
+            <p style={{ margin: "0 0 1.5rem", color: "#888", fontSize: "0.9rem" }}>Add your first destination to start planning.</p>
+            <button onClick={() => setShowNew(true)} style={btnPrimary}>＋ Add destination</button>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gap: "0.85rem" }}>
+            {destinations.map((dest, i) => {
+              const pal = PALETTES[i % PALETTES.length];
+              return (
+                <button key={dest.id} onClick={() => onOpen(dest.id)} style={{ display: "flex", alignItems: "center", gap: "1.1rem", background: "#fff", borderRadius: "1.15rem", padding: "1.1rem 1.25rem", boxShadow: "0 2px 10px rgba(0,0,0,0.07)", border: "2px solid transparent", cursor: "pointer", textAlign: "left", transition: "border-color 0.15s, box-shadow 0.15s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = pal.accent; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.12)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "transparent"; e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.07)"; }}>
+                  <div style={{ width: "3.25rem", height: "3.25rem", borderRadius: "0.85rem", background: pal.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.65rem", flexShrink: 0 }}>{dest.emoji}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "1rem", color: "#111", marginBottom: "0.15rem" }}>{dest.name}</div>
+                    {dest.dates && <div style={{ fontSize: "0.8rem", color: "#888" }}>{dest.dates}</div>}
+                    <div style={{ fontSize: "0.75rem", color: "#bbb", marginTop: "0.15rem" }}>{dest.sections.length} sections</div>
+                  </div>
+                  <div style={{ color: pal.accent, fontSize: "1.1rem", flexShrink: 0 }}>›</div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {showNew && <NewDestinationModal prefs={prefs} onSave={d => { onCreate(d); setShowNew(false); }} onClose={() => setShowNew(false)} />}
+    </div>
+  );
+}
+
+// ─── App root ────────────────────────────────────────────────────────
+export default function App() {
+  const [destinations, setDestinations] = useState(null);
+  const [prefs, setPrefs] = useState(null);
+  const [activeId, setActiveId] = useState(null);
+  const [showPrefs, setShowPrefs] = useState(false);
+
+  useEffect(() => {
+    Promise.all([loadDestinations(), loadPreferences()]).then(([dests, p]) => {
+      setDestinations(dests);
+      setPrefs(p);
     });
-    card.querySelector('[data-action="del"]').addEventListener('click',async e=>{ e.stopPropagation();
-      await addToTrash({name:item.name,icon:item.icon||meta.icon||'📌',desc:item.desc||'',notes:item.notes||'',mapUrl:item.mapUrl||''},sid);
-      _sectionItems[sid].splice(idx,1); await saveSectionItems(); buildSectionCustomUI(sid);
-    });
-    container.appendChild(card);
-    initAccordionCard(card);
-    initNoteCard(card);
-  });
-  // Reorder using data-idx into snapshot — never match by name
-  makeSortable(container,async()=>{
-    const reordered=[...container.querySelectorAll('.card[data-idx]')]
-      .map(card=>snapshot[parseInt(card.dataset.idx,10)])
-      .filter(Boolean);
-    _sectionItems[sid]=reordered;
-    await saveSectionItems();
-  });
-}
-function buildAllSectionCustomUI(){ Object.keys(SECTION_META).forEach(sid=>buildSectionCustomUI(sid)); }
-window.openSectionAdd=function(sid){
-  const meta=SECTION_META[sid]||{icon:'📌'};
-  openEditModal({name:'',icon:meta.icon,desc:'',notes:'',mapUrl:''},async({icon,name,desc,notes,mapUrl})=>{
-    if(!name) return;
-    if(!_sectionItems[sid]) _sectionItems[sid]=[];
-    // add unique _id so items are always distinguishable
-    _sectionItems[sid].push({name,icon,desc:desc||'',notes:notes||'',mapUrl:mapUrl||'',_id:Date.now()+Math.random()});
-    await saveSectionItems(); buildSectionCustomUI(sid);
-  });
-};
+  }, []);
 
-// ── NOTES ───────────────────────────────────────────────────────
-let _notes={};
-async function loadNotesFb(){ const v=await fbGet('notes'); _notes=v||{}; }
-async function saveNotesFb(){ await fbSet('notes',_notes); }
-window.toggleNote=function(btn){
-  const card=btn.closest('.card');
-  if(card&&!card.classList.contains('open')) card.classList.add('open');
-  const noteDiv=btn.closest('.card-body-inner,.card')?.querySelector('.card-note');
-  if(!noteDiv) return;
-  noteDiv.classList.toggle('open');
-  if(noteDiv.classList.contains('open')) noteDiv.querySelector('textarea')?.focus();
-};
-function initNoteCard(card){
-  const titleEl=card.querySelector('.card-title');
-  const key=titleEl?'note_'+titleEl.textContent.trim():null; if(!key) return;
-  const ta=card.querySelector('textarea'); if(!ta) return;
-  const dot=card.querySelector('.note-dot');
-  if(_notes[key]){ ta.value=_notes[key]; card.querySelector('.note-btn')?.classList.add('has-note'); dot?.classList.add('visible'); }
-  let timer;
-  ta.addEventListener('input',()=>{
-    _notes[key]=ta.value;
-    const has=ta.value.trim().length>0;
-    card.querySelector('.note-btn')?.classList.toggle('has-note',has);
-    dot?.classList.toggle('visible',has);
-    const saved=card.querySelector('.note-saved');
-    if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1500);}
-    clearTimeout(timer); timer=setTimeout(()=>saveNotesFb(),800);
-  });
-}
-function initAllNotes(){ document.querySelectorAll('.card').forEach(card=>initNoteCard(card)); }
+  useEffect(() => { if (destinations !== null) saveDestinations(destinations); }, [destinations]);
+  useEffect(() => { if (prefs !== null) savePreferences(prefs); }, [prefs]);
 
-// ── REAL-TIME LISTENERS ─────────────────────────────────────────
-fbListen('dayPlans',v=>{ _dayPlans=v||{}; buildDaysUI(); });
-fbListen('packItems',v=>{ if(v){_packItems=v; buildPackUI();} });
-fbListen('foodItems',v=>{ if(v){_foodItems=v; buildFoodUI();} });
-fbListen('groceryItems',v=>{ if(v){_groceryItems=v; buildGroceryUI();} });
-fbListen('trash',v=>{ if(v){_trash=v; buildTrashUI();} });
-fbListen('sectionItems',v=>{ if(v){_sectionItems=v; buildAllSectionCustomUI();} });
-fbListen('notes',v=>{ if(v){_notes=v; initAllNotes();} });
+  if (destinations === null || prefs === null) {
+    return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "system-ui", color: "#888" }}>Loading…</div>;
+  }
 
-// ── INIT ────────────────────────────────────────────────────────
-async function init(){
-  try{ await Promise.all([loadDayPlans(),loadPack(),loadFood(),loadGrocery(),loadNotesFb(),loadTrash(),loadSectionItems()]); }
-  catch(e){ console.warn('Firebase load error',e); }
-  document.querySelectorAll('.card').forEach(initAccordionCard);
-  buildDaysUI(); buildPackUI(); buildFoodUI(); buildGroceryUI(); buildTrashUI(); buildAllSectionCustomUI(); initAllNotes();
-  const overlay=document.getElementById('loading-overlay');
-  overlay.classList.add('done'); setTimeout(()=>overlay.remove(),500);
+  const activeDest = destinations.find(d => d.id === activeId);
+  const activeIdx = destinations.findIndex(d => d.id === activeId);
+
+  if (activeDest) {
+    const palette = PALETTES[activeIdx % PALETTES.length];
+    return (
+      <>
+        <DestinationView dest={activeDest} palette={palette} onBack={() => setActiveId(null)}
+          onUpdate={u => setDestinations(prev => prev.map(d => d.id === u.id ? u : d))}
+          onDelete={() => { setDestinations(prev => prev.filter(d => d.id !== activeDest.id)); setActiveId(null); }} />
+        {showPrefs && <PreferencesPanel prefs={prefs} onSave={p => { setPrefs(p); }} onClose={() => setShowPrefs(false)} />}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Home destinations={destinations} prefs={prefs}
+        onCreate={d => { setDestinations(prev => [...prev, d]); setActiveId(d.id); }}
+        onOpen={setActiveId}
+        onOpenPrefs={() => setShowPrefs(true)} />
+      {showPrefs && <PreferencesPanel prefs={prefs} onSave={p => { setPrefs(p); setShowPrefs(false); }} onClose={() => setShowPrefs(false)} />}
+    </>
+  );
 }
-init();
-</script>
-</body>
-</html>
