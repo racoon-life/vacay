@@ -1443,6 +1443,11 @@
       <textarea class="settings-textarea" id="settings-freetext" placeholder="e.g. we have a dog, traveling with elderly parents, avoid tourist traps, interested in local art…"></textarea>
     </div>
 
+    <div class="settings-field" style="margin-top:4px;padding-top:16px;border-top:1px solid var(--lake-light);">
+      <label class="settings-label">🔑 Anthropic API Key</label>
+      <input class="settings-textarea" id="settings-apikey" type="password" placeholder="sk-ant-…" style="min-height:unset;height:44px;resize:none;font-family:monospace;font-size:0.82rem;" autocomplete="off">
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:5px;line-height:1.5;">Your key is stored locally and never sent anywhere except the Anthropic API. Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--lake)">console.anthropic.com</a>.</div>
+    </div>
     <button class="settings-save-btn" id="settings-save-btn">Save Preferences</button>
     <div class="settings-saved-msg" id="settings-saved-msg">✓ Preferences saved</div>
   </div>
@@ -2990,6 +2995,10 @@ let _prefs = { chips: [], freetext: '' };
 async function loadPrefs() {
   const v = await fbGet(SETTINGS_KEY);
   if (v) _prefs = v;
+  // API key stored in localStorage only (not Firebase)
+  const storedKey = localStorage.getItem('anthropic_api_key') || '';
+  const keyInput = document.getElementById('settings-apikey');
+  if (keyInput) keyInput.value = storedKey;
   applyPrefsToUI();
 }
 async function savePrefs() {
@@ -2997,6 +3006,11 @@ async function savePrefs() {
   const freetext = document.getElementById('settings-freetext').value.trim();
   _prefs = { chips, freetext };
   await fbSet(SETTINGS_KEY, _prefs);
+  // Save API key to localStorage
+  const keyInput = document.getElementById('settings-apikey');
+  if (keyInput && keyInput.value.trim()) {
+    localStorage.setItem('anthropic_api_key', keyInput.value.trim());
+  }
 }
 function applyPrefsToUI() {
   document.querySelectorAll('.settings-chip').forEach(chip => {
@@ -3111,11 +3125,21 @@ Return ONLY valid JSON (no markdown, no code fences) with this structure:
 
 Include 4-6 items per section. Make tips practical and specific. Grocery list should be local specialties worth bringing home.`;
 
+  const apiKey = localStorage.getItem('anthropic_api_key') || '';
+  if (!apiKey) {
+    status.textContent = '⚠️ Please add your Anthropic API key in ⚙️ Settings first.';
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    label.textContent = 'Generate Guide with AI';
+    return;
+  }
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-api-key': localStorage.getItem('anthropic_api_key') || '',
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
