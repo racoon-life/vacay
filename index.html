@@ -1377,7 +1377,7 @@
       <div id="settings-preview-bar" style="display:none;background:var(--lake-light);border-radius:8px;padding:8px 12px;font-size:0.78rem;color:var(--lake);margin-bottom:10px;line-height:1.5;"></div>
       <button class="add-dest-generate-btn" id="generate-guide-btn">
         <span class="btn-spinner"></span>
-        <span class="btn-label">Generate Guide with AI</span>
+        <span class="btn-label">📋 Copy Prompt</span>
       </button>
       <div id="generate-status" style="font-size:0.78rem;color:var(--muted);text-align:center;margin-top:8px;min-height:18px;"></div>
     </div>
@@ -1443,11 +1443,6 @@
       <textarea class="settings-textarea" id="settings-freetext" placeholder="e.g. we have a dog, traveling with elderly parents, avoid tourist traps, interested in local art…"></textarea>
     </div>
 
-    <div class="settings-field" style="margin-top:4px;padding-top:16px;border-top:1px solid var(--lake-light);">
-      <label class="settings-label">🔑 Anthropic API Key</label>
-      <input class="settings-textarea" id="settings-apikey" type="password" placeholder="sk-ant-…" style="min-height:unset;height:44px;resize:none;font-family:monospace;font-size:0.82rem;" autocomplete="off">
-      <div style="font-size:0.72rem;color:var(--muted);margin-top:5px;line-height:1.5;">Your key is stored locally and never sent anywhere except the Anthropic API. Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--lake)">console.anthropic.com</a>.</div>
-    </div>
     <button class="settings-save-btn" id="settings-save-btn">Save Preferences</button>
     <div class="settings-saved-msg" id="settings-saved-msg">✓ Preferences saved</div>
   </div>
@@ -2995,10 +2990,12 @@ let _prefs = { chips: [], freetext: '' };
 async function loadPrefs() {
   const v = await fbGet(SETTINGS_KEY);
   if (v) _prefs = v;
-  // API key stored in localStorage only (not Firebase)
-  const storedKey = localStorage.getItem('anthropic_api_key') || '';
+  // Load API key from Firebase
+  const storedKey = await fbGet('apiKey') || '';
   const keyInput = document.getElementById('settings-apikey');
   if (keyInput) keyInput.value = storedKey;
+  const formKey = document.getElementById('form-apikey');
+  if (formKey && storedKey) formKey.value = storedKey;
   applyPrefsToUI();
 }
 async function savePrefs() {
@@ -3006,10 +3003,10 @@ async function savePrefs() {
   const freetext = document.getElementById('settings-freetext').value.trim();
   _prefs = { chips, freetext };
   await fbSet(SETTINGS_KEY, _prefs);
-  // Save API key to localStorage
+  // Save API key to Firebase
   const keyInput = document.getElementById('settings-apikey');
   if (keyInput && keyInput.value.trim()) {
-    localStorage.setItem('anthropic_api_key', keyInput.value.trim());
+    await fbSet('apiKey', keyInput.value.trim());
   }
 }
 function applyPrefsToUI() {
@@ -3088,119 +3085,71 @@ function updateSettingsPreviewBar() {
 
 // ── AI GUIDE GENERATOR ──────────────────────────────────────────
 document.getElementById('generate-guide-btn').addEventListener('click', async () => {
-  const dest = document.getElementById('new-dest-name').value.trim();
-  const from = document.getElementById('new-dest-from').value;
-  const to   = document.getElementById('new-dest-to').value;
+  const dest  = document.getElementById('new-dest-name').value.trim();
+  const from  = document.getElementById('new-dest-from').value;
+  const to    = document.getElementById('new-dest-to').value;
   const notes = document.getElementById('new-dest-notes').value.trim();
   if (!dest) { document.getElementById('new-dest-name').focus(); return; }
 
-  const btn   = document.getElementById('generate-guide-btn');
-  const label = btn.querySelector('.btn-label');
+  const dateStr    = (from && to) ? `${from} to ${to}` : (from || to || 'dates TBD');
+  const prefsBlock = buildPrefsPrompt();
+
+  const prompt =
+`Generate a vacation guide for: ${dest} (${dateStr})${notes ? ' · ' + notes : ''}${prefsBlock}
+
+Reply with a complete, self-contained HTML file — no explanation, just the code block. Use this exact design system:
+- Fonts: Fraunces (headings) + DM Sans (body) from Google Fonts
+- CSS variables: --lake:#2A6D9E  --lake-mid:#4A8FBB  --lake-light:#C8E2F4  --alpine:#3D5448  --sand:#F5F0E8  --warm:#E8DFD0  --ink:#181A1C  --muted:#6B7280  --accent:#C47B3A  --white:#FFFFFF
+- Max-width 480px centered, background var(--sand)
+- Sticky horizontal scrollable nav tabs (same style as below)
+- Cards with border-left accent, accordion expand/collapse on tap, chevron indicator
+- Tag pills: tag-free (green), tag-paid (amber), tag-must (red), tag-duration (green), tag-diff (violet)
+- Tip boxes (.tip) with warm orange border
+- A loading overlay that fades out on load
+
+Sections to include (skip any that don't apply):
+📅 Days — skeleton day cards for each day of the trip, user can plan into them
+🏛 Sights — top attractions, each with desc, tags, Google Maps link
+🥾 Hiking — trails/walks with difficulty tag and map link
+🍽 Food — restaurants/cafes/street food with category and map link  
+🎯 Activities — things to do beyond sights
+💡 Tips — practical advice (transport, money, language, weather, customs)
+🛒 Grocery/Souvenirs — local products worth buying to take home
+🗑 Removed — empty trash section
+
+Each card: name, 2–3 sentence description, relevant tags, Google Maps link as: https://maps.google.com/?q=URLENCODED_PLACE_NAME
+
+Make it fully offline-capable once saved. No external JS dependencies except Google Fonts.`;
+
   const status = document.getElementById('generate-status');
-  btn.classList.add('loading');
-  btn.disabled = true;
-  label.textContent = 'Generating…';
-  status.textContent = 'Asking Claude to build your guide…';
-
-  const dateStr = (from && to) ? `${from} to ${to}` : (from || to || 'dates TBD');
-  const prefsPrompt = buildPrefsPrompt();
-
-  const prompt = `You are a travel guide expert. Generate a comprehensive vacation guide scaffold for: ${dest} (${dateStr}).${notes ? ' Trip context: ' + notes : ''}${prefsPrompt}
-
-Return ONLY valid JSON (no markdown, no code fences) with this structure:
-{
-  "destination": "City Name",
-  "emoji": "one emoji representing the destination",
-  "dates": "human-readable date range",
-  "sections": {
-    "sights": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "tag":"free|paid|must-see", "mapQuery":"google maps search string"}],
-    "hiking": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "tag":"easy|moderate|hard", "mapQuery":"..."}],
-    "food": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "category":"restaurant|cafe|bar|street food", "mapQuery":"..."}],
-    "activities": [{"name":"...", "icon":"emoji", "desc":"2-3 sentences", "mapQuery":"..."}],
-    "tips": [{"name":"...", "icon":"emoji", "desc":"practical tip 1-2 sentences"}]
-  },
-  "grocery": [{"emoji":"emoji", "name":"local product", "desc":"why buy it"}],
-  "days": ["label for day 1", "label for day 2"]
-}
-
-Include 4-6 items per section. Make tips practical and specific. Grocery list should be local specialties worth bringing home.`;
-
-  const apiKey = localStorage.getItem('anthropic_api_key') || '';
-  if (!apiKey) {
-    status.textContent = '⚠️ Please add your Anthropic API key in ⚙️ Settings first.';
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    label.textContent = 'Generate Guide with AI';
-    return;
-  }
+  const btn    = document.getElementById('generate-guide-btn');
+  const label  = btn.querySelector('.btn-label');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': localStorage.getItem('anthropic_api_key') || '',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 3000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody?.error?.message || 'HTTP ' + res.status);
-    }
-    const data = await res.json();
-    const text = data.content?.find(b => b.type === 'text')?.text || '';
-    let guide;
-    try {
-      guide = JSON.parse(text.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      throw new Error('Could not parse response');
-    }
-
-    status.textContent = 'Guide ready! Building HTML…';
-
-    // Build a minimal new guide HTML based on the scaffold
-    const newHtml = buildGuideHtml(guide);
-    const blob = new Blob([newHtml], { type: 'text/html' });
-    const url  = URL.createObjectURL(blob);
-
-    // Add destination card to home screen
-    const list = document.getElementById('destinations-list');
-    const card = document.createElement('div');
-    card.className = 'destination-card';
-    card.innerHTML = `<span class="destination-card-icon">${guide.emoji||'🗺'}</span>
-      <div class="destination-card-info">
-        <div class="destination-card-name">${guide.destination}</div>
-        <div class="destination-card-dates">${guide.dates||dateStr}</div>
-      </div>
-      <span class="destination-card-arrow">↓ Download</span>`;
-    card.addEventListener('click', () => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = guide.destination.toLowerCase().replace(/\s+/g,'-') + '-guide.html';
-      a.click();
-    });
-    list.appendChild(card);
-
-    status.textContent = '✓ Done! Scroll up to download your new guide.';
-    document.getElementById('new-dest-name').value = '';
-    document.getElementById('new-dest-from').value = '';
-    document.getElementById('new-dest-to').value = '';
-    document.getElementById('new-dest-notes').value = '';
+    await navigator.clipboard.writeText(prompt);
+    label.textContent = '✅ Copied!';
+    btn.style.background = 'var(--alpine)';
+    status.innerHTML = 'Prompt copied! Open <a href="https://claude.ai" target="_blank" style="color:var(--lake);font-weight:600;">claude.ai</a> in a new tab, paste &amp; send — Claude will reply with your guide.';
+    setTimeout(() => {
+      label.textContent = '📋 Copy Prompt';
+      btn.style.background = '';
+    }, 2500);
   } catch(err) {
-    status.textContent = '⚠️ ' + (err.message || 'Something went wrong. Please try again.');
-    console.error(err);
-  } finally {
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    label.textContent = 'Generate Guide with AI';
+    // Fallback: show the prompt in a textarea for manual copy
+    status.innerHTML = '';
+    const box = document.createElement('textarea');
+    box.value = prompt;
+    box.style.cssText = 'width:100%;height:120px;font-size:0.75rem;border-radius:8px;border:1.5px solid var(--lake-light);padding:8px;font-family:inherit;margin-top:6px;resize:none;background:var(--sand);';
+    box.readOnly = true;
+    status.appendChild(box);
+    box.select();
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:0.72rem;color:var(--muted);margin-top:4px;';
+    note.textContent = 'Select all & copy, then paste into claude.ai';
+    status.appendChild(note);
   }
 });
+
 
 function buildGuideHtml(g) {
   const sectionHtml = (items, cardClass) => items.map(item => `
