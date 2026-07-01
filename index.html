@@ -466,6 +466,11 @@
     text-decoration: line-through;
     color: var(--muted);
   }
+  /* To-Do category: green accent */
+  .pack-category[data-cat="✅ To-Do"] .pack-item { border-left: 3px solid var(--green-ink); }
+  .pack-category[data-cat="✅ To-Do"] .pack-item input[type="checkbox"] { accent-color: var(--green-ink); }
+  /* Other category: warm amber accent */
+  .pack-category[data-cat="🗂 Other"] .pack-item { border-left: 3px solid var(--accent); }
   .pack-delete {
     flex-shrink: 0;
     min-width: 34px;
@@ -2654,6 +2659,8 @@ const DEFAULT_PACK=[
   {label:"Blister plasters",cat:"💊 Health"},{label:"Ibuprofen / paracetamol",cat:"💊 Health"},{label:"Insect repellent",cat:"💊 Health"},
   {label:"Light dinner outfit",cat:"👗 Clothes"},{label:"T-shirts ×4",cat:"👗 Clothes"},{label:"Shorts / light trousers",cat:"👗 Clothes"},
   {label:"Picnic blanket",cat:"🧺 Picnic"},{label:"Reusable bag / tote",cat:"🧺 Picnic"},
+  {label:"Book restaurant for Bastille night",cat:"✅ To-Do"},{label:"Download offline maps (Google Maps)",cat:"✅ To-Do"},{label:"Check boat/ferry schedules",cat:"✅ To-Do"},{label:"Reserve bike rental",cat:"✅ To-Do"},{label:"Check weather forecast",cat:"✅ To-Do"},
+  {label:"Custom item",cat:"🗂 Other"},
 ];
 let _packItems=[];
 async function loadPack(){ const v=await fbGet('packItems'); _packItems=v||DEFAULT_PACK.map(i=>({...i,checked:false})); }
@@ -2661,8 +2668,10 @@ async function savePack(){ await fbSet('packItems',_packItems); }
 function getCats(items){ const s=new Set(),c=[]; items.forEach(i=>{if(!s.has(i.cat)){s.add(i.cat);c.push(i.cat);}}); return c; }
 function buildPackUI(){
   const container=document.getElementById('pack-list'); container.innerHTML='';
-  getCats(_packItems).forEach(cat=>{
-    const group=document.createElement('div'); group.className='pack-category';
+  const FIXED_CATS_UI=['✅ To-Do','🗂 Other'];
+  const allCatsUI=[...new Set([...getCats(_packItems),...FIXED_CATS_UI])];
+  allCatsUI.forEach(cat=>{
+    const group=document.createElement('div'); group.className='pack-category'; group.dataset.cat=cat;
     const lbl=document.createElement('div'); lbl.className='pack-cat-label'; lbl.textContent=cat; group.appendChild(lbl);
     const grid=document.createElement('div'); grid.className='pack-grid';
     const catItems=_packItems.filter(it=>it.cat===cat);
@@ -2695,7 +2704,9 @@ function buildPackUI(){
   });
   updatePackProgress();
   const sel=document.getElementById('pack-cat-select'); const cur=sel.value; sel.innerHTML='';
-  getCats(_packItems).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+  const FIXED_CATS=['✅ To-Do','🗂 Other'];
+  const allCats=[...new Set([...getCats(_packItems),...FIXED_CATS])];
+  allCats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
   if(cur&&[...sel.options].some(o=>o.value===cur)) sel.value=cur;
 }
 function updatePackProgress(){
